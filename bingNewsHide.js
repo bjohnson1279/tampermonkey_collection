@@ -13,7 +13,7 @@
 
     // Your code here...
     const newsCards = document.querySelectorAll('.news-card');
-    const filterSources = ['BGR on MSN.com']; // Sources to remove
+    const filterSources = []; // Sources to remove
     newsCards.forEach(card => {
         const source = card.querySelector('.source');
         filterSources.forEach(src => {
