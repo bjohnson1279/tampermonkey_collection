@@ -10,8 +10,6 @@
 
 (function() {
     'use strict';
-
-    // Your code here...
     const container = document.querySelector('#commentsContainer');
     const config = { attributes: true, childList: true, subtree: true };
 
@@ -21,7 +19,8 @@
             const allComments = cList.querySelectorAll('.CommentsList__item');
             allComments.forEach(comment => {
                 const username = comment.querySelector('.CommentsList__userName').innerText;
-                // Add usernames to the array below to block
+
+                // Add usernames to the array below to hide their comments
                 if ([].includes(username)) {
                     console.log(`User ${username} comment removed`);
                     comment.style.display = 'none';
