@@ -26,7 +26,7 @@
             let itemDate = null;
             listInline.forEach(listItem => {
                 itemDate = listItem.innerText;
-                itemDate = itemDate.replace(new RegExp("ABC|CBS|FOX|NBC|\(US\)", "gi"), "");
+                itemDate = itemDate.replace(new RegExp("ABC|CBS|FOX|NBC|PBS|History|H2|\(US\)|A\&E", "gi"), "");
                 itemDate = itemDate.trim();
 
                 try {
