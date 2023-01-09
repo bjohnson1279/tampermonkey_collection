@@ -13,12 +13,35 @@
     'use strict';
 
     const scoreCards = document.querySelectorAll(".spl-card");
+    console.log({ scoreCards });
     scoreCards.forEach(card => {
         card.style.display = "block";
     });
 
-    const hiddenRows = document.querySelectorAll(".b_hide");
-    hiddenRows.forEach(row => {
-        row.style.display = "table-row";
-    });
+    const schedule = document.querySelector(".spl-schedule");
+    console.log({ schedule });
+    if (schedule) {
+        const scheduleHiddenRows = schedule.querySelectorAll(".b_hide");
+        scheduleHiddenRows.forEach(row => {
+            row.style.display = "table-row";
+        });
+    }
+
+    const standings = document.querySelector(".spl-standingTbl");
+    console.log({ standings });
+    if (standings) {
+        const standingsHiddenRows = standings.querySelectorAll(".b_hide");
+        standingsHiddenRows.forEach(row => {
+            row.style.display = "table-row";
+        });
+    }
+
+    const filContent = document.querySelector(".tfil-content");
+    console.log({ filContent });
+    if (filContent) {
+        const contentHiddenRows = filContent.querySelectorAll(".b_hide");
+        contentHiddenRows.forEach(row => {
+            row.style.display = "table-row";
+        });
+    }
 })();
