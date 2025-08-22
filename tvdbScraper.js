@@ -12,37 +12,36 @@
 (function() {
     'use strict';
 
-    let episodesData = [];
+    const episodesData = [];
     const episodeListContainers = document.querySelectorAll(".list-group");
+
     episodeListContainers.forEach(season => {
         const episodes = season.querySelectorAll(".list-group-item");
         episodes.forEach(ep => {
             const heading = ep.querySelector(".list-group-item-heading");
             const epLabel = heading.querySelector(".episode-label").innerText;
-            const matches = epLabel.match(/\d+/g);
-            const epTitle = heading.querySelector("a").innerText;
+            const matches = epLabel.match(/\d+/g) || [];
+            const epTitle = heading.querySelector("a").innerText || "";
+            const itemText = ep.querySelector(".list-group-item-text")?.innerText || "";
 
+            let itemDate = "";
             const listInline = ep.querySelectorAll(".list-inline");
-            let itemDate = null;
-            listInline.forEach(listItem => {
-                itemDate = listItem.innerText;
-                itemDate = itemDate.replace(new RegExp("ABC|CBS|FOX|NBC|PBS|History|H2|\(US\)|A\&E", "gi"), "");
-                itemDate = itemDate.trim();
 
+            listInline.forEach(listItem => {
+                let dateText = listItem.innerText.replace(/ABC|CBS|FOX|NBC|PBS|History|H2|\(US\)|A&E/gi, "").trim();
                 try {
-                    itemDate = new Date(itemDate).toISOString().split("T")[0];
-                } catch(e) {
+                    itemDate = new Date(dateText).toISOString().split("T")[0];
+                } catch (e) {
                     itemDate = "";
                 }
             });
 
-            const itemText = ep.querySelector(".list-group-item-text");
             const episode = {
-                season: matches[0],
-                episode: matches[1],
+                season: matches[0] || "",
+                episode: matches[1] || "",
                 title: epTitle,
                 release: itemDate,
-                description: itemText.innerText
+                description: itemText
             };
 
             episodesData.push(episode);

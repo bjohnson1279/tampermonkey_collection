@@ -1,77 +1,43 @@
 // ==UserScript==
 // @name     Search Blacklist
-// @version  1
+// @version  1.1
+// @description Blacklist search terms to redirect back to search home page. Refactored for modern JS.
 // @grant    none
 // ==/UserScript==
 
-// Blacklisting search terms to redirect back to search home page
+(function() {
+    'use strict';
 
-// Credit - https://www.w3docs.com/snippets/javascript/how-to-get-query-string-values-in-javascript.html
-const getQueryParams = (url) => {
-  let qParams = {};
-  // create a binding tag to use a property called search
-  let anchor = document.createElement('a');
-  // assign the href URL of the anchor tag
-  anchor.href = url;
-  // search property returns URL query string
-  let qStrings = anchor.search.substring(1);
-  let params = qStrings.split('&');
-  for (let i = 0; i < params.length; i++) {
-    let pair = params[i].split('=');
-      qParams[pair[0]] = decodeURIComponent(pair[1]);
-    }
-    return qParams;
-};
+    const blacklist = ['asdf']; // Add terms to blacklist here
 
-const href = window.location.href;
-const params = getQueryParams(href);
-let blacklist = ['asdf'];
+    const searchEngines = {
+        'bing.com': { queryParam: 'q', url: 'https://www.bing.com' },
+        'google.com': { queryParam: 'q', url: 'https://www.google.com' },
+        'duckduckgo.com': { queryParam: 'q', url: 'https://duckduckgo.com' },
+        'yahoo.com': { queryParam: 'p', url: 'https://www.yahoo.com' }
+    };
 
-console.log({ href });
-console.log({ params });
+    const href = window.location.href;
+    const params = new URLSearchParams(window.location.search);
 
-if (href.includes('bing.com')) {
-  console.log('Bing');
-  if (params.q) {
-    const bSearch = params.q.replaceAll('+', ' ');
-    console.log({ bSearch });
-    const bResults = blacklist.filter(phrase => bSearch.includes(phrase));
-    console.log({ bResults });
-    if (bResults.length > 0) {
-      	window.location.href = 'https://www.bing.com';
+    for (const domain in searchEngines) {
+        if (href.includes(domain)) {
+            console.log(`Search engine detected: ${domain}`);
+            const engine = searchEngines[domain];
+            const query = params.get(engine.queryParam);
+
+            if (query) {
+                const searchQuery = query.replaceAll('+', ' ');
+                console.log(`Search query: "${searchQuery}"`);
+
+                const isBlacklisted = blacklist.some(phrase => searchQuery.includes(phrase));
+
+                if (isBlacklisted) {
+                    console.log("Query contains a blacklisted phrase. Redirecting...");
+                    window.location.href = engine.url;
+                }
+            }
+            break; // Found the matching search engine, no need to check others
+        }
     }
-  }
-} else if (href.includes('google.com')) {
-  console.log('Google');
-  if (params.q) {
-    const gSearch = params.q.replaceAll('+', ' ');
-    console.log({ gSearch });
-    const gResults = blacklist.filter(phrase => gSearch.includes(phrase));
-    console.log({ gResults });
-    if (gResults.length > 0) {
-      	window.location.href = 'https://www.google.com';
-    }
-  }
-} else if (href.includes('duckduckgo.com')) {
-  console.log('DuckDuckGo');
-  if (params.q) {
-    const dSearch = params.q.replaceAll('+', ' ');
-    console.log({ dSearch });
-    const dResults = blacklist.filter(phrase => dSearch.includes(phrase));
-    console.log({ dResults });
-    if (dResults.length > 0) {
-      window.location.href = 'https://duckduckgo.com';
-    }
-  }
-} else if (href.includes('yahoo.com')) {
-  console.log('Yahoo.com');
-  if (params.p) {
-    const ySearch = params.p.replaceAll('+', ' ');
-    console.log({ ySearch });
-    const yResults = blacklist.filter(phrase => ySearch.includes(phrase));
-    console.log({ yResults });
-    if (yResults.length > 0) {
-    	window.location.href = 'https://www.yahoo.com';
-    }
-  }
-}
+})();
