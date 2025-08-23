@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+  <rect width="16" height="16" rx="2.4" fill="#673AB7" />
+  <text x="50%" y="9.6" 
+        font-family="Arial, sans-serif" 
+        font-size="6" 
+        font-weight="bold" 
+        fill="#FFFFFF" 
+        text-anchor="middle" 
+        dominant-baseline="middle">
+    SB
+  </text>
+</svg>

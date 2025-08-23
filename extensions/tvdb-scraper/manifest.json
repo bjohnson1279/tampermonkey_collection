@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "TVDB Scraper",
+  "version": "0.1.0",
+  "description": "Parse TV show data from TVDB",
+  "author": "Brent Johnson",
+  "icons": {
+    "16": "icons/icon-16.svg",
+    "48": "icons/icon-48.svg",
+    "128": "icons/icon-128.svg"
+  },
+  "action": {
+    "default_icon": {
+      "16": "icons/icon-16.svg",
+      "48": "icons/icon-48.svg",
+      "128": "icons/icon-128.svg"
+    },
+    "default_title": "TVDB Scraper",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://thetvdb.com/series/*/allseasons/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://thetvdb.com/series/*/allseasons/*"
+  ]
+}

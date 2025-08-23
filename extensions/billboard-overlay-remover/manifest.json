@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "Billboard Overlay Remover",
+  "version": "0.1.0",
+  "description": "Remove overlays from Billboard charts",
+  "author": "Brent Johnson",
+  "icons": {
+    "16": "icons/icon-16.svg",
+    "48": "icons/icon-48.svg",
+    "128": "icons/icon-128.svg"
+  },
+  "action": {
+    "default_icon": {
+      "16": "icons/icon-16.svg",
+      "48": "icons/icon-48.svg",
+      "128": "icons/icon-128.svg"
+    },
+    "default_title": "Billboard Overlay Remover",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.billboard.com/charts/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://www.billboard.com/charts/*"
+  ]
+}

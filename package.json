@@ -6,17 +6,31 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "generate:extensions": "node scripts/generate-extensions.js",
+    "generate:icons": "node scripts/generate-icons.js",
+    "generate:all": "npm run build && npm run generate:extensions && npm run generate:icons",
+    "postinstall": "npm run generate:all"
   },
   "keywords": ["tampermonkey", "userscript", "typescript"],
-  "author": "",
+  "author": "Brent Johnson",
   "license": "MIT",
   "devDependencies": {
+    "@types/chrome": "^0.0.246",
     "@types/greasemonkey": "^4.0.5",
     "@types/node": "^20.11.0",
     "husky": "^9.0.0",
     "lint-staged": "^15.0.0",
     "prettier": "^3.0.0",
     "typescript": "^5.0.0"
+  },
+  "optionalDependencies": {
+    "canvas": "^2.11.2"
+  },
+  "resolutions": {
+    "canvas": "2.11.2"
+  },
+  "config": {
+    "optional": "false"
   }
 }
