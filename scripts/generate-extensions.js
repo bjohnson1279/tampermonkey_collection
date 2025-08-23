@@ -11,6 +11,13 @@ const extensions = [
     contentScript: 'bingAdBlocker.js'
   },
   {
+    name: 'Bing Quiz Clicker',
+    id: 'bing-quiz-clicker',
+    description: 'Automatically click through Bing Entertainment Quiz',
+    matches: ['https://www.bing.com/search?*'],
+    contentScript: 'bingQuizClicker.js'
+  },
+  {
     name: 'TVDB Scraper',
     id: 'tvdb-scraper',
     description: 'Parse TV show data from TVDB',

@@ -8,7 +8,8 @@ const extensionIds = [
   'ksl-comments-blacklist',
   'ksl-sponsored-remover',
   'search-blacklist',
-  'billboard-overlay-remover'
+  'billboard-overlay-remover',
+  'bing-quiz-clicker'
 ];
 
 // Colors for different extensions

@@ -1,28 +1,30 @@
 {
-  "name": "tampermonkey-scripts",
+  "name": "tampermonkey-collection",
   "version": "1.0.0",
-  "description": "TypeScript Tampermonkey scripts",
+  "description": "Collection of Tampermonkey scripts",
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "watch": "tsc --watch",
-    "prepare": "husky install",
+    "build:watch": "tsc --watch",
     "generate:extensions": "node scripts/generate-extensions.js",
     "generate:icons": "node scripts/generate-icons.js",
+    "prepare": "husky install",
     "generate:all": "npm run build && npm run generate:extensions && npm run generate:icons",
     "postinstall": "npm run generate:all"
   },
-  "keywords": ["tampermonkey", "userscript", "typescript"],
+  "keywords": ["tampermonkey", "userscripts", "browser-extensions"],
   "author": "Brent Johnson",
   "license": "MIT",
   "devDependencies": {
-    "@types/chrome": "^0.0.246",
     "@types/greasemonkey": "^4.0.5",
-    "@types/node": "^20.11.0",
-    "husky": "^9.0.0",
+    "@types/node": "^20.11.19",
+    "husky": "^9.0.10",
+    "typescript": "^5.3.3",
     "lint-staged": "^15.0.0",
-    "prettier": "^3.0.0",
-    "typescript": "^5.0.0"
+    "prettier": "^3.0.0"
+  },
+  "dependencies": {
+    "canvas": "^2.11.2"
   },
   "optionalDependencies": {
     "canvas": "^2.11.2"
