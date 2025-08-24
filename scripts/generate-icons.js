@@ -4,6 +4,7 @@ const path = require('path');
 // Extension IDs to generate icons for
 const extensionIds = [
   'bing-ad-blocker',
+  'youtube-ad-remover',
   'tvdb-scraper',
   'ksl-comments-blacklist',
   'ksl-sponsored-remover',

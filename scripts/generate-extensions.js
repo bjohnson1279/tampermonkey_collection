@@ -11,6 +11,13 @@ const extensions = [
     contentScript: 'bingAdBlocker.js'
   },
   {
+    name: 'YouTube Ad Remover',
+    id: 'youtube-ad-remover',
+    description: 'Remove ads from YouTube',
+    matches: ['https://www.youtube.com/*'],
+    contentScript: 'youtubeAdRemover.js'
+  },
+  {
     name: 'Bing Quiz Clicker',
     id: 'bing-quiz-clicker',
     description: 'Automatically click through Bing Entertainment Quiz',

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
-  <rect width="128" height="128" rx="19.2" fill="#FBBC05" />
+  <rect width="128" height="128" rx="19.2" fill="#EA4335" />
   <text x="50%" y="76.8" 
         font-family="Arial, sans-serif" 
         font-size="51" 
@@ -8,6 +8,6 @@
         fill="#FFFFFF" 
         text-anchor="middle" 
         dominant-baseline="middle">
-    TS
+    YA
   </text>
 </svg>
