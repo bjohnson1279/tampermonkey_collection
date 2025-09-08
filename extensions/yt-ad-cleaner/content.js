@@ -75,7 +75,9 @@
         if (!video)
             return;
         if (document.querySelector('.ad-showing')) {
-            video.currentTime = video.duration;
+            if (Number.isFinite(video.duration)) {
+                video.currentTime = video.duration;
+            }
         }
         const skipBtn = document.querySelector('.ytp-ad-skip-button');
         if (skipBtn)
