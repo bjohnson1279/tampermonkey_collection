@@ -11,6 +11,13 @@ const extensions = [
     contentScript: 'bingAdBlocker.js'
   },
   {
+    name: 'YouTube Total Ad Cleaner + Persistent Toggle + Hotkey',
+    id: 'yt-ad-cleaner',
+    description: 'Block and skip YouTube ads',
+    matches: ['https://www.youtube.com/*'],
+    contentScript: 'ytAdBlock2.js'
+  },
+  {
     name: 'YouTube Ad Remover',
     id: 'youtube-ad-remover',
     description: 'Remove ads from YouTube',
