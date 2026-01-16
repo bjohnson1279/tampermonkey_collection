@@ -24,13 +24,13 @@
     "prettier": "^3.0.0"
   },
   "dependencies": {
-    "canvas": "^2.11.2"
+    "canvas": "^3.2.1"
   },
   "optionalDependencies": {
-    "canvas": "^2.11.2"
+    "canvas": "^3.2.1"
   },
   "resolutions": {
-    "canvas": "2.11.2"
+    "canvas": "3.2.1"
   },
   "config": {
     "optional": "false"
