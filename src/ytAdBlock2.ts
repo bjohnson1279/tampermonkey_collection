@@ -15,7 +15,15 @@
     //----------------------------------------
     // Persistent state
     //----------------------------------------
-    let enabled: boolean = JSON.parse(localStorage.getItem("ytAdblockEnabled") || "true") ?? true;
+    let enabled: boolean = true;
+    try {
+        const stored = localStorage.getItem("ytAdblockEnabled");
+        if (stored !== null) {
+            enabled = JSON.parse(stored) ?? true;
+        }
+    } catch (e) {
+        console.warn("Failed to parse ytAdblockEnabled from localStorage", e);
+    }
 
     function saveState(): void {
         localStorage.setItem("ytAdblockEnabled", JSON.stringify(enabled));
