@@ -33,7 +33,6 @@
                 const isBlacklisted = blacklist.some(phrase => searchQuery.includes(phrase));
 
                 if (isBlacklisted) {
-                    console.log("Query contains a blacklisted phrase. Redirecting...");
                     window.location.href = engine.url;
                 }
             }
