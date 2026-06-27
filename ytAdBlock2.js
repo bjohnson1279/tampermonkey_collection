@@ -41,7 +41,6 @@
     window.fetch = async (...args) => {
         const url = args[0]?.toString() || "";
         if (shouldBlock(url)) {
-            console.log("Blocked fetch:", url);
             return new Response("", { status: 204 });
         }
         return origFetch(...args);
@@ -51,7 +50,6 @@
     const origOpen = XMLHttpRequest.prototype.open;
     XMLHttpRequest.prototype.open = function(method, url, ...rest) {
         if (shouldBlock(url)) {
-            console.log("Blocked XHR:", url);
             this.abort();
             return;
         }
