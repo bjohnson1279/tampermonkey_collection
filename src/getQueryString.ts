@@ -18,8 +18,13 @@ export const getQueryParams = (urlString: string): QueryParams => {
     try {
         const urlObj = new URL(urlString);
         const params = new URLSearchParams(urlObj.search);
-        const result: QueryParams = Object.fromEntries(params.entries());
-        
+        const result: QueryParams = {};
+
+        // Convert URLSearchParams to a plain object
+        for (const [key, value] of params.entries()) {
+            result[key] = value;
+        }
+
         return result;
     } catch (error) {
         console.error('Error parsing URL:', error);
