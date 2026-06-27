@@ -31,7 +31,6 @@
 
     // Expand standings section
     const standings = document.querySelector<HTMLElement>(".spl-standingTbl");
-    console.log('Standings section:', standings ? 'found' : 'not found');
     if (standings) {
         const standingsHiddenRows = standings.querySelectorAll<HTMLElement>(".b_hide");
         standingsHiddenRows.forEach((row: HTMLElement): void => {
