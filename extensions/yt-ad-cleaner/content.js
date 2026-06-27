@@ -27,7 +27,6 @@
     window.fetch = (async (...args) => {
         const url = args[0]?.toString() || "";
         if (shouldBlock(url)) {
-            console.log("Blocked fetch:", url);
             return new Response("", { status: 204 });
         }
         return origFetch(...args);
