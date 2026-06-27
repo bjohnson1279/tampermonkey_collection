@@ -20,7 +20,6 @@ class YouTubeAdRemover {
     }
 
     private initialize(): void {
-        console.log('YouTube Ad Remover initialized');
         this.startWatching();
     }
 

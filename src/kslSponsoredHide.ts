@@ -19,7 +19,6 @@ interface SponsoredElement extends HTMLElement {
     // Function to remove sponsored content
     const removeSponsoredContent = (): void => {
         const sponsoredElements = document.querySelectorAll<SponsoredElement>('.sponsored');
-        console.log(`Found ${sponsoredElements.length} sponsored elements`);
 
         sponsoredElements.forEach((sponsored: SponsoredElement): void => {
             // Try to find the closest parent container to remove
@@ -59,7 +58,6 @@ interface SponsoredElement extends HTMLElement {
     try {
         const observer = new MutationObserver(handleMutations);
         observer.observe(loadMoreContainer, config);
-        console.log('MutationObserver started');
     } catch (error) {
         console.error('Error initializing mutation observer:', error);
     }

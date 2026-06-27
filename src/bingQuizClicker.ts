@@ -30,7 +30,6 @@ class BingQuizClicker {
     }
 
     private initialize(): void {
-        console.log('Bing Quiz Clicker initialized');
         this.startWatching();
     }
 
