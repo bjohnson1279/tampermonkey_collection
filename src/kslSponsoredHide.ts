@@ -58,7 +58,6 @@ interface SponsoredElement extends HTMLElement {
     try {
         const observer = new MutationObserver(handleMutations);
         observer.observe(loadMoreContainer, config);
-        console.log('MutationObserver started');
     } catch (error) {
         console.error('Error initializing mutation observer:', error);
     }
