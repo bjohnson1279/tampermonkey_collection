@@ -31,6 +31,3 @@ const getQueryParams = (urlString: string): QueryParams => {
         return {};
     }
 };
-
-// Log the current URL's query parameters to the console
-console.log('Query parameters:', getQueryParams(window.location.href));
