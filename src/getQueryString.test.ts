@@ -12,6 +12,16 @@ describe('getQueryParams', () => {
         expect(getQueryParams(url)).toEqual({ foo: 'bar', baz: 'qux' });
     });
 
+    // Security cases
+    it('should prevent prototype pollution', () => {
+        const url = 'https://example.com/page?__proto__=polluted&constructor=polluted&prototype=polluted&normal=true';
+        const params = getQueryParams(url) as any;
+
+        expect(params).toEqual({ normal: 'true' });
+        expect(params.__proto__).toBeUndefined();
+        expect(({} as any).polluted).toBeUndefined();
+    });
+
     // Edge cases
     it('should return empty object for empty query string', () => {
         const url = 'https://example.com/page?';

@@ -18,17 +18,21 @@ export const getQueryParams = (urlString: string): QueryParams => {
     try {
         const urlObj = new URL(urlString);
         const params = new URLSearchParams(urlObj.search);
-        const result: QueryParams = {};
+        const result: QueryParams = Object.create(null);
 
         // Convert URLSearchParams to a plain object
         for (const [key, value] of params.entries()) {
+            // 🛡️ Sentinel: Prevent Prototype Pollution
+            if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+                continue;
+            }
             result[key] = value;
         }
 
         return result;
     } catch (error) {
         console.error('Error parsing URL:', error);
-        return {};
+        return Object.create(null);
     }
 };
 
