@@ -8,7 +8,6 @@ class YouTubeAdRemover {
         this.initialize();
     }
     initialize() {
-        console.log('YouTube Ad Remover initialized');
         this.startWatching();
     }
     startWatching() {
@@ -27,9 +26,9 @@ class YouTubeAdRemover {
             };
             this.observer = new MutationObserver(callback);
             const config = {
-                attributes: true,
+                attributes: false,
                 childList: true,
-                subtree: true
+                subtree: true,
             };
             this.observer.observe(targetNode, config);
             this.removeAds();
