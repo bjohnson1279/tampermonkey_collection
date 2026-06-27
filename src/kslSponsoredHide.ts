@@ -19,7 +19,6 @@ interface SponsoredElement extends HTMLElement {
     // Function to remove sponsored content
     const removeSponsoredContent = (): void => {
         const sponsoredElements = document.querySelectorAll<SponsoredElement>('.sponsored');
-        console.log(`Found ${sponsoredElements.length} sponsored elements`);
 
         sponsoredElements.forEach((sponsored: SponsoredElement): void => {
             // Try to find the closest parent container to remove
