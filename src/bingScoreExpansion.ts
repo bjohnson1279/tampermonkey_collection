@@ -13,35 +13,35 @@
     'use strict';
 
     // Show all score cards
-    const scoreCards = document.querySelectorAll<HTMLElement>(".spl-card");
+    const scoreCards = document.querySelectorAll<HTMLElement>('.spl-card');
     scoreCards.forEach((card: HTMLElement): void => {
-        card.style.display = "block";
+        card.style.display = 'block';
     });
 
     // Expand schedule section
-    const schedule = document.querySelector<HTMLElement>(".spl-schedule");
+    const schedule = document.querySelector<HTMLElement>('.spl-schedule');
     if (schedule) {
-        const scheduleHiddenRows = schedule.querySelectorAll<HTMLElement>(".b_hide");
+        const scheduleHiddenRows = schedule.querySelectorAll<HTMLElement>('.b_hide');
         scheduleHiddenRows.forEach((row: HTMLElement): void => {
-            row.style.display = "table-row";
+            row.style.display = 'table-row';
         });
     }
 
     // Expand standings section
-    const standings = document.querySelector<HTMLElement>(".spl-standingTbl");
+    const standings = document.querySelector<HTMLElement>('.spl-standingTbl');
     if (standings) {
-        const standingsHiddenRows = standings.querySelectorAll<HTMLElement>(".b_hide");
+        const standingsHiddenRows = standings.querySelectorAll<HTMLElement>('.b_hide');
         standingsHiddenRows.forEach((row: HTMLElement): void => {
-            row.style.display = "table-row";
+            row.style.display = 'table-row';
         });
     }
 
     // Expand filter content section
-    const filContent = document.querySelector<HTMLElement>(".tfil-content");
+    const filContent = document.querySelector<HTMLElement>('.tfil-content');
     if (filContent) {
-        const contentHiddenRows = filContent.querySelectorAll<HTMLElement>(".b_hide");
+        const contentHiddenRows = filContent.querySelectorAll<HTMLElement>('.b_hide');
         contentHiddenRows.forEach((row: HTMLElement): void => {
-            row.style.display = "table-row";
+            row.style.display = 'table-row';
         });
     }
 })();
