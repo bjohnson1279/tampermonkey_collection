@@ -7,7 +7,6 @@
         sponsoredElements.forEach((sponsored) => {
             const sponsoredContainer = sponsored.closest('.queue, .queue_story');
             if (sponsoredContainer) {
-                console.log('Removing sponsored content');
                 sponsoredContainer.remove();
             }
         });
