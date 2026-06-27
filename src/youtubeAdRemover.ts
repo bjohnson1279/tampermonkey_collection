@@ -37,7 +37,7 @@ class YouTubeAdRemover {
             const callback: MutationCallback = (mutationsList, observer) => {
                 for (const mutation of mutationsList) {
                     if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-                        this.removeAds();
+                        this.removeAds(mutation.addedNodes);
                     }
                 }
             };
@@ -61,24 +61,42 @@ class YouTubeAdRemover {
         }, this.INITIAL_DELAY_MS);
     }
 
-    private removeAds(): void {
-        // Find all video items
-        const videoItems = document.querySelectorAll('ytd-rich-item-renderer, ytd-video-renderer');
-        
-        videoItems.forEach((videoItem) => {
-            // Find the content div that might contain ads
-            const contentDiv = videoItem.querySelector('#content, #dismissible');
-            if (!contentDiv) return;
+    private processVideoItem(videoItem: Element): void {
+        // Find the content div that might contain ads
+        const contentDiv = videoItem.querySelector('#content, #dismissible');
+        if (!contentDiv) return;
 
-            // Check for ad elements
-            const adItem = contentDiv.querySelector(this.AD_SELECTOR);
-            if (adItem) {
-                console.log('Removing ad:', adItem);
-                adItem.remove();
-                contentDiv.remove();
-                videoItem.remove();
-            }
-        });
+        // Check for ad elements
+        const adItem = contentDiv.querySelector(this.AD_SELECTOR);
+        if (adItem) {
+            console.log('Removing ad:', adItem);
+            adItem.remove();
+            contentDiv.remove();
+            videoItem.remove();
+        }
+    }
+
+    private removeAds(addedNodes?: NodeList | Node[]): void {
+        if (!addedNodes) {
+            // Fallback for initial check or if no specific nodes are provided
+            // Find all video items
+            const videoItems = document.querySelectorAll('ytd-rich-item-renderer, ytd-video-renderer');
+            videoItems.forEach((videoItem) => this.processVideoItem(videoItem));
+        } else {
+            // Process only the added nodes to improve performance
+            addedNodes.forEach((node) => {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    const element = node as Element;
+
+                    if (element.matches('ytd-rich-item-renderer, ytd-video-renderer')) {
+                        this.processVideoItem(element);
+                    } else {
+                        const videoItems = element.querySelectorAll('ytd-rich-item-renderer, ytd-video-renderer');
+                        videoItems.forEach((videoItem) => this.processVideoItem(videoItem));
+                    }
+                }
+            });
+        }
     }
 
     public destroy(): void {
