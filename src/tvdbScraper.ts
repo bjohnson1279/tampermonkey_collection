@@ -69,6 +69,4 @@ interface Episode {
             episodesData.push(episode);
         });
     });
-
-    console.log(JSON.stringify(episodesData, null, 2));
 })();
