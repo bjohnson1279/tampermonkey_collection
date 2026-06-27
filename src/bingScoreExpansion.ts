@@ -14,7 +14,6 @@
 
     // Show all score cards
     const scoreCards = document.querySelectorAll<HTMLElement>(".spl-card");
-    console.log('Score cards found:', scoreCards.length);
     scoreCards.forEach((card: HTMLElement): void => {
         card.style.display = "block";
     });
