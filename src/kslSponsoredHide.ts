@@ -24,7 +24,6 @@ interface SponsoredElement extends HTMLElement {
             // Try to find the closest parent container to remove
             const sponsoredContainer = sponsored.closest('.queue, .queue_story');
             if (sponsoredContainer) {
-                console.log('Removing sponsored content');
                 sponsoredContainer.remove();
             }
         });
@@ -43,7 +42,7 @@ interface SponsoredElement extends HTMLElement {
     const config: MutationObserverInit = {
         attributes: false,
         childList: true,
-        subtree: true
+        subtree: true,
     };
 
     const handleMutations: MutationCallback = (mutationsList: MutationRecord[]): void => {
