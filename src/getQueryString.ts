@@ -5,7 +5,7 @@
 // @grant    none
 // ==/UserScript==
 
-interface QueryParams {
+export interface QueryParams {
     [key: string]: string;
 }
 
@@ -14,7 +14,7 @@ interface QueryParams {
  * @param urlString The URL string to parse
  * @returns An object containing the query parameters
  */
-const getQueryParams = (urlString: string): QueryParams => {
+export const getQueryParams = (urlString: string): QueryParams => {
     try {
         const urlObj = new URL(urlString);
         const params = new URLSearchParams(urlObj.search);
@@ -33,4 +33,6 @@ const getQueryParams = (urlString: string): QueryParams => {
 };
 
 // Log the current URL's query parameters to the console
-console.log('Query parameters:', getQueryParams(window.location.href));
+if (typeof window !== 'undefined') {
+    console.log('Query parameters:', getQueryParams(window.location.href));
+}

@@ -4,6 +4,7 @@
   "description": "Collection of Tampermonkey scripts",
   "main": "index.js",
   "scripts": {
+    "test": "jest",
     "build": "tsc",
     "build:watch": "tsc --watch",
     "generate:extensions": "node scripts/generate-extensions.js",
@@ -12,19 +13,23 @@
     "generate:all": "npm run build && npm run generate:extensions && npm run generate:icons",
     "postinstall": "npm run generate:all"
   },
-  "keywords": ["tampermonkey", "userscripts", "browser-extensions"],
+  "keywords": [
+    "tampermonkey",
+    "userscripts",
+    "browser-extensions"
+  ],
   "author": "Brent Johnson",
   "license": "MIT",
   "devDependencies": {
     "@types/greasemonkey": "^4.0.5",
+    "@types/jest": "^30.0.0",
     "@types/node": "^20.11.19",
     "husky": "^9.0.10",
-    "typescript": "^5.3.3",
+    "jest": "^30.4.2",
     "lint-staged": "^15.0.0",
-    "prettier": "^3.0.0"
-  },
-  "dependencies": {
-    "canvas": "^3.2.1"
+    "prettier": "^3.0.0",
+    "ts-jest": "^29.4.11",
+    "typescript": "^5.3.3"
   },
   "optionalDependencies": {
     "canvas": "^3.2.1"
