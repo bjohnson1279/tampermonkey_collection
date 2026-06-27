@@ -15,7 +15,13 @@
     //----------------------------------------
     // Persistent state
     //----------------------------------------
-    let enabled: boolean = JSON.parse(localStorage.getItem("ytAdblockEnabled") || "true") ?? true;
+    let enabled: boolean = true;
+    try {
+        enabled = JSON.parse(localStorage.getItem("ytAdblockEnabled") || "true") ?? true;
+    } catch (e) {
+        console.warn("Invalid ytAdblockEnabled state in localStorage, defaulting to true");
+        enabled = true;
+    }
 
     function saveState(): void {
         localStorage.setItem("ytAdblockEnabled", JSON.stringify(enabled));
@@ -52,7 +58,6 @@
     const origOpen = XMLHttpRequest.prototype.open;
     XMLHttpRequest.prototype.open = function(this: XMLHttpRequest, method: string, url: string, async?: boolean, username?: string | null, password?: string | null): void {
         if (shouldBlock(url)) {
-            console.log("Blocked XHR:", url);
         this.abort();
         return;
         }
@@ -84,20 +89,46 @@
         'ytd-companion-slot-renderer'
     ];
 
-    function removeAds(): void {
+    const combinedAdSelector = adSelectors.join(',');
+
+    const adObserver = new MutationObserver((mutations) => {
         if (!enabled) return;
+        mutations.forEach((mutation) => {
+            mutation.addedNodes.forEach((node) => {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    const el = node as HTMLElement;
+                    if (el.matches && el.matches(combinedAdSelector)) {
+                        el.remove();
+                    } else if (el.querySelectorAll) {
+                        el.querySelectorAll(combinedAdSelector).forEach(e => e.remove());
 
-        adSelectors.forEach(sel => {
-            document.querySelectorAll(sel).forEach(el => el.remove());
-        });
-
-        // Remove "Promoted" sidebar/homepage videos
-        document.querySelectorAll('#dismissible ytd-badge-supported-renderer')
-            .forEach(badge => {
-                if ((badge as HTMLElement).innerText.toLowerCase().includes("promoted")) {
-                    badge.closest('ytd-video-renderer,ytd-compact-video-renderer')?.remove();
+                        // Remove "Promoted" sidebar/homepage videos
+                        el.querySelectorAll('#dismissible ytd-badge-supported-renderer').forEach(badge => {
+                            if ((badge as HTMLElement).innerText.toLowerCase().includes("promoted")) {
+                                badge.closest('ytd-video-renderer,ytd-compact-video-renderer')?.remove();
+                            }
+                        });
+                    }
                 }
             });
+        });
+    });
+
+    // Initial scan to remove ads already in the DOM before observer kicks in
+    function removeInitialAds(): void {
+        if (!enabled) return;
+        document.querySelectorAll(combinedAdSelector).forEach(el => el.remove());
+        document.querySelectorAll('#dismissible ytd-badge-supported-renderer').forEach(badge => {
+            if ((badge as HTMLElement).innerText.toLowerCase().includes("promoted")) {
+                badge.closest('ytd-video-renderer,ytd-compact-video-renderer')?.remove();
+            }
+        });
+    }
+
+    removeInitialAds();
+
+    if (document.documentElement) {
+        adObserver.observe(document.documentElement, { childList: true, subtree: true });
     }
 
     //----------------------------------------
@@ -180,7 +211,6 @@
     //----------------------------------------
     setInterval(() => {
         addToggleButton();
-        removeAds();
         skipVideoAds();
     }, 500);
 
