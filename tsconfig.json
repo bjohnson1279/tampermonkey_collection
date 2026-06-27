@@ -9,7 +9,7 @@
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
     "rootDir": "./src",
-    "types": ["@types/greasemonkey", "@types/node"],
+    "types": ["@types/greasemonkey", "@types/node", "jest"],
     "declaration": true,
     "removeComments": true,
     "sourceMap": true,
