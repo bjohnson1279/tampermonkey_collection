@@ -43,7 +43,6 @@ class YouTubeAdRemover {
                 return;
             const adItem = contentDiv.querySelector(this.AD_SELECTOR);
             if (adItem) {
-                console.log('Removing ad:', adItem);
                 adItem.remove();
                 contentDiv.remove();
                 videoItem.remove();
