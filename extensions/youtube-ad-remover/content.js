@@ -8,7 +8,6 @@ class YouTubeAdRemover {
         this.initialize();
     }
     initialize() {
-        console.log('YouTube Ad Remover initialized');
         this.startWatching();
     }
     startWatching() {
@@ -35,7 +34,6 @@ class YouTubeAdRemover {
             this.removeAds();
         }, this.INITIAL_DELAY_MS);
     }
-<<<<<<< HEAD
     processVideoItem(videoItem) {
         const contentDiv = videoItem.querySelector('#content, #dismissible');
         if (!contentDiv)

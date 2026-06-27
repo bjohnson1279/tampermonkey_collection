@@ -16,7 +16,6 @@
     });
     const chartOverlay = document.querySelector('.chart-piano-overlay__attachment-point');
     if (!chartOverlay) {
-        console.log('Chart overlay not found');
         return;
     }
     const config = {

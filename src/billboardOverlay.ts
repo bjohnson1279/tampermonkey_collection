@@ -36,7 +36,6 @@ interface ExtendedHTMLElement extends HTMLElement {
     // Set up mutation observer for the chart overlay
     const chartOverlay = document.querySelector<HTMLElement>('.chart-piano-overlay__attachment-point');
     if (!chartOverlay) {
-        console.log('Chart overlay not found');
         return;
     }
 

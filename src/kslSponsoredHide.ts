@@ -35,7 +35,6 @@ interface SponsoredElement extends HTMLElement {
     // Set up mutation observer to handle dynamically loaded content
     const loadMoreContainer = document.querySelector<HTMLElement>('#loadMoreBtnContainer');
     if (!loadMoreContainer) {
-        console.log('Load more container not found');
         return;
     }
 
