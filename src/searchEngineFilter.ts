@@ -53,7 +53,6 @@ interface SearchEngines {
                 );
 
                 if (isBlacklisted) {
-                    console.log("Query contains a blacklisted phrase. Redirecting...");
                     window.location.href = engine.url;
                 }
             }

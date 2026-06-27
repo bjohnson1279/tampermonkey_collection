@@ -1,7 +1,14 @@
 "use strict";
 (function () {
     'use strict';
-    let enabled = JSON.parse(localStorage.getItem("ytAdblockEnabled") || "true") ?? true;
+    let enabled = true;
+    try {
+        enabled = JSON.parse(localStorage.getItem("ytAdblockEnabled") || "true") ?? true;
+    }
+    catch (e) {
+        console.warn("Invalid ytAdblockEnabled state in localStorage, defaulting to true");
+        enabled = true;
+    }
     function saveState() {
         localStorage.setItem("ytAdblockEnabled", JSON.stringify(enabled));
     }
@@ -20,7 +27,6 @@
     window.fetch = (async (...args) => {
         const url = args[0]?.toString() || "";
         if (shouldBlock(url)) {
-            console.log("Blocked fetch:", url);
             return new Response("", { status: 204 });
         }
         return origFetch(...args);
@@ -28,7 +34,6 @@
     const origOpen = XMLHttpRequest.prototype.open;
     XMLHttpRequest.prototype.open = function (method, url, async, username, password) {
         if (shouldBlock(url)) {
-            console.log("Blocked XHR:", url);
             this.abort();
             return;
         }
