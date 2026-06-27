@@ -3,7 +3,6 @@
     'use strict';
     const container = document.querySelector('#commentsContainer');
     if (!container) {
-        console.log('Comments container not found');
         return;
     }
     const config = {

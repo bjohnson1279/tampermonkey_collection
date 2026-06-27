@@ -17,7 +17,6 @@ interface CommentElement extends Element {
 
     const container = document.querySelector<HTMLElement>('#commentsContainer');
     if (!container) {
-        console.log('Comments container not found');
         return;
     }
 

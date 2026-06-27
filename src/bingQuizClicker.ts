@@ -30,7 +30,6 @@ class BingQuizClicker {
     }
 
     private initialize(): void {
-        console.log('Bing Quiz Clicker initialized');
         this.startWatching();
     }
 
@@ -61,7 +60,6 @@ class BingQuizClicker {
 
         // Handle next button if no correct answers found
         if (elements.nextButton) {
-            console.log('Clicking next button');
             this.safeClick(elements.nextButton);
         }
     }
