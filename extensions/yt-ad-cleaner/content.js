@@ -1,7 +1,14 @@
 "use strict";
 (function () {
     'use strict';
-    let enabled = JSON.parse(localStorage.getItem("ytAdblockEnabled") || "true") ?? true;
+    let enabled = true;
+    try {
+        enabled = JSON.parse(localStorage.getItem("ytAdblockEnabled") || "true") ?? true;
+    }
+    catch (e) {
+        console.warn("Invalid ytAdblockEnabled state in localStorage, defaulting to true");
+        enabled = true;
+    }
     function saveState() {
         localStorage.setItem("ytAdblockEnabled", JSON.stringify(enabled));
     }
