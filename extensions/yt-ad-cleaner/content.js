@@ -28,7 +28,6 @@
     const origOpen = XMLHttpRequest.prototype.open;
     XMLHttpRequest.prototype.open = function (method, url, async, username, password) {
         if (shouldBlock(url)) {
-            console.log("Blocked XHR:", url);
             this.abort();
             return;
         }
