@@ -57,8 +57,8 @@
     const origOpen = XMLHttpRequest.prototype.open;
     XMLHttpRequest.prototype.open = function(this: XMLHttpRequest, method: string, url: string, async?: boolean, username?: string | null, password?: string | null): void {
         if (shouldBlock(url)) {
-        this.abort();
-        return;
+            this.abort();
+            return;
         }
         return origOpen.apply(this, [method, url, async ?? true, username, password]);
     };
