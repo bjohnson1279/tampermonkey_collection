@@ -21,7 +21,8 @@
     document.querySelectorAll('.ad_clarity').forEach(ad => ad.remove());
 
     const chartOverlay = document.querySelector('.chart-piano-overlay__attachment-point');
-    const config = { attributes: true, childList: true, subtree: true };
+    // ⚡ Bolt: Disable attributes to prevent unnecessary callbacks on every attribute change
+    const config = { attributes: false, childList: true, subtree: true };
     const callback = (mutationsList, observer) => {
         mutationsList.forEach(mutation => {
             mutation.target.remove();
