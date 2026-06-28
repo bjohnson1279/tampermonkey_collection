@@ -8,47 +8,47 @@
 // @grant        none
 // ==/UserScript==
 
-(function() {
+(function () {
     'use strict';
 
     //----------------------------------------
     // Persistent state
     //----------------------------------------
-    let enabled = JSON.parse(localStorage.getItem("ytAdblockEnabled")) ?? true;
+    let enabled = JSON.parse(localStorage.getItem('ytAdblockEnabled')) ?? true;
 
     function saveState() {
-        localStorage.setItem("ytAdblockEnabled", JSON.stringify(enabled));
+        localStorage.setItem('ytAdblockEnabled', JSON.stringify(enabled));
     }
 
     //----------------------------------------
     // Block ad/tracking requests
     //----------------------------------------
     const blockedPatterns = [
-        "doubleclick.net",
-        "youtube.com/api/stats/ads",
-        "youtube.com/api/stats/atr",
-        "youtube.com/get_midroll",
-        "youtube.com/pagead",
-        "ytimg.com/ads/",
+        'doubleclick.net',
+        'youtube.com/api/stats/ads',
+        'youtube.com/api/stats/atr',
+        'youtube.com/get_midroll',
+        'youtube.com/pagead',
+        'ytimg.com/ads/',
     ];
 
     function shouldBlock(url) {
-        return enabled && blockedPatterns.some(pattern => url.includes(pattern));
+        return enabled && blockedPatterns.some((pattern) => url.includes(pattern));
     }
 
     // Patch fetch()
     const origFetch = window.fetch;
     window.fetch = async (...args) => {
-        const url = args[0]?.toString() || "";
+        const url = args[0]?.toString() || '';
         if (shouldBlock(url)) {
-            return new Response("", { status: 204 });
+            return new Response('', { status: 204 });
         }
         return origFetch(...args);
     };
 
     // Patch XMLHttpRequest
     const origOpen = XMLHttpRequest.prototype.open;
-    XMLHttpRequest.prototype.open = function(method, url, ...rest) {
+    XMLHttpRequest.prototype.open = function (method, url, ...rest) {
         if (shouldBlock(url)) {
             this.abort();
             return;
@@ -78,23 +78,22 @@
         'ytd-video-masthead-ad-primary-video-renderer',
         'ytd-banner-promo-renderer',
         'ytd-carousel-ad-renderer',
-        'ytd-companion-slot-renderer'
+        'ytd-companion-slot-renderer',
     ];
 
     function removeAds() {
         if (!enabled) return;
 
-        adSelectors.forEach(sel => {
-            document.querySelectorAll(sel).forEach(el => el.remove());
+        adSelectors.forEach((sel) => {
+            document.querySelectorAll(sel).forEach((el) => el.remove());
         });
 
         // Remove "Promoted" sidebar/homepage videos
-        document.querySelectorAll('#dismissible ytd-badge-supported-renderer')
-            .forEach(badge => {
-                if (badge.innerText.toLowerCase().includes("promoted")) {
-                    badge.closest('ytd-video-renderer,ytd-compact-video-renderer')?.remove();
-                }
-            });
+        document.querySelectorAll('#dismissible ytd-badge-supported-renderer').forEach((badge) => {
+            if (badge.innerText.toLowerCase().includes('promoted')) {
+                badge.closest('ytd-video-renderer,ytd-compact-video-renderer')?.remove();
+            }
+        });
     }
 
     //----------------------------------------
@@ -124,8 +123,11 @@
         if (!logo) return;
 
         const btn = document.createElement('button');
-        btn.id = "adblock-toggle";
-        btn.textContent = `AdBlock: ${enabled ? "ON" : "OFF"}`;
+        btn.id = 'adblock-toggle';
+        btn.textContent = `AdBlock: ${enabled ? 'ON' : 'OFF'}`;
+        btn.setAttribute('aria-label', `Toggle AdBlock (Currently ${enabled ? 'ON' : 'OFF'})`);
+        btn.setAttribute('aria-pressed', enabled.toString());
+        btn.setAttribute('title', 'Toggle AdBlock (Shift+A)');
         styleButton(btn);
 
         btn.addEventListener('click', toggleAdblock);
@@ -137,7 +139,7 @@
             margin-left: 12px;
             padding: 4px 8px;
             font-size: 12px;
-            background: ${enabled ? "#cc0000" : "#444"};
+            background: ${enabled ? '#cc0000' : '#444'};
             color: white;
             border: none;
             border-radius: 4px;
@@ -154,11 +156,13 @@
 
         const btn = document.querySelector('#adblock-toggle');
         if (btn) {
-            btn.textContent = `AdBlock: ${enabled ? "ON" : "OFF"}`;
+            btn.textContent = `AdBlock: ${enabled ? 'ON' : 'OFF'}`;
+            btn.setAttribute('aria-label', `Toggle AdBlock (Currently ${enabled ? 'ON' : 'OFF'})`);
+            btn.setAttribute('aria-pressed', enabled.toString());
             styleButton(btn);
         }
 
-        console.log(`YouTube AdBlock is now ${enabled ? "ENABLED" : "DISABLED"}`);
+        console.log(`YouTube AdBlock is now ${enabled ? 'ENABLED' : 'DISABLED'}`);
     }
 
     //----------------------------------------
@@ -178,5 +182,4 @@
         removeAds();
         skipVideoAds();
     }, 500);
-
 })();
