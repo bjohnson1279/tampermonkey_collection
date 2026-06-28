@@ -19,7 +19,6 @@
     });
 
     const schedule = document.querySelector(".spl-schedule");
-    console.log({ schedule });
     if (schedule) {
         const scheduleHiddenRows = schedule.querySelectorAll(".b_hide");
         scheduleHiddenRows.forEach(row => {
