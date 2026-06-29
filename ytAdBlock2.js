@@ -39,7 +39,13 @@
     // Patch fetch()
     const origFetch = window.fetch;
     window.fetch = async (...args) => {
-        const url = args[0]?.toString() || '';
+        const req = args[0];
+        const url =
+            req instanceof Request
+                ? req.url
+                : req instanceof URL
+                  ? req.href
+                  : req?.toString() || '';
         if (shouldBlock(url)) {
             return new Response('', { status: 204 });
         }
@@ -49,7 +55,8 @@
     // Patch XMLHttpRequest
     const origOpen = XMLHttpRequest.prototype.open;
     XMLHttpRequest.prototype.open = function (method, url, ...rest) {
-        if (shouldBlock(url)) {
+        const urlStr = url instanceof URL ? url.href : url?.toString() || '';
+        if (shouldBlock(urlStr)) {
             this.abort();
             return;
         }

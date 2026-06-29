@@ -46,7 +46,13 @@
     // Patch fetch()
     const origFetch = window.fetch;
     window.fetch = (async (...args: Parameters<typeof window.fetch>): Promise<Response> => {
-        const url: string = args[0]?.toString() || '';
+        const req = args[0];
+        const url: string =
+            req instanceof Request
+                ? req.url
+                : req instanceof URL
+                  ? req.href
+                  : req?.toString() || '';
         if (shouldBlock(url)) {
             return new Response('', { status: 204 });
         }
@@ -58,16 +64,17 @@
     XMLHttpRequest.prototype.open = function (
         this: XMLHttpRequest,
         method: string,
-        url: string,
+        url: string | URL,
         async?: boolean,
         username?: string | null,
         password?: string | null
     ): void {
-        if (shouldBlock(url)) {
+        const urlStr = url instanceof URL ? url.href : url?.toString() || '';
+        if (shouldBlock(urlStr)) {
             this.abort();
             return;
         }
-        return origOpen.apply(this, [method, url, async ?? true, username, password]);
+        return origOpen.apply(this, [method, url as string, async ?? true, username, password]);
     };
 
     //----------------------------------------
