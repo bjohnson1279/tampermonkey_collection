@@ -119,7 +119,7 @@
                         el.querySelectorAll('#dismissible ytd-badge-supported-renderer').forEach(
                             (badge) => {
                                 if (
-                                    (badge as HTMLElement).innerText
+                                    ((badge as HTMLElement).textContent || '')
                                         .toLowerCase()
                                         .includes('promoted')
                                 ) {
@@ -140,7 +140,7 @@
         if (!enabled) return;
         document.querySelectorAll(combinedAdSelector).forEach((el) => el.remove());
         document.querySelectorAll('#dismissible ytd-badge-supported-renderer').forEach((badge) => {
-            if ((badge as HTMLElement).innerText.toLowerCase().includes('promoted')) {
+            if (((badge as HTMLElement).textContent || '').toLowerCase().includes('promoted')) {
                 badge.closest('ytd-video-renderer,ytd-compact-video-renderer')?.remove();
             }
         });
