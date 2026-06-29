@@ -179,9 +179,17 @@
         btn.setAttribute('aria-label', `Toggle AdBlock (Currently ${enabled ? 'ON' : 'OFF'})`);
         btn.setAttribute('aria-pressed', enabled.toString());
         btn.setAttribute('title', 'Toggle AdBlock (Shift+A)');
+        btn.setAttribute('aria-keyshortcuts', 'Shift+A');
         styleButton(btn);
 
         btn.addEventListener('click', toggleAdblock);
+
+        // Add hover and focus styles for accessibility
+        btn.addEventListener('mouseover', () => (btn.style.opacity = '0.8'));
+        btn.addEventListener('mouseout', () => (btn.style.opacity = '1'));
+        btn.addEventListener('focus', () => (btn.style.outline = '2px solid white'));
+        btn.addEventListener('blur', () => (btn.style.outline = 'none'));
+
         logo.parentElement?.insertBefore(btn, logo.nextSibling);
     }
 
@@ -195,6 +203,8 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            transition: opacity 0.2s, outline 0.2s;
+            outline: none;
         `;
     }
 
