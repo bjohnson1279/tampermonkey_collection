@@ -90,7 +90,7 @@
 
         // Remove "Promoted" sidebar/homepage videos
         document.querySelectorAll('#dismissible ytd-badge-supported-renderer').forEach((badge) => {
-            if (badge.innerText.toLowerCase().includes('promoted')) {
+            if ((badge.textContent || '').toLowerCase().includes('promoted')) {
                 badge.closest('ytd-video-renderer,ytd-compact-video-renderer')?.remove();
             }
         });
