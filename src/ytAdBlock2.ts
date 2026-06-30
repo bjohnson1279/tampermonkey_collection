@@ -47,11 +47,16 @@
     const origFetch = window.fetch;
     window.fetch = (async (...args: Parameters<typeof window.fetch>): Promise<Response> => {
         const req = args[0];
+        // 🛡️ Sentinel: Use duck typing for Request/URL objects to prevent cross-realm (iframe) adblock evasion
+        // where `instanceof` fails and `.toString()` returns "[object Request]"
         const url: string =
-            req instanceof Request
-                ? req.url
-                : req instanceof URL
-                  ? req.href
+            req && typeof req === 'object' && 'url' in req && typeof (req as any).url === 'string'
+                ? (req as any).url
+                : req &&
+                    typeof req === 'object' &&
+                    'href' in req &&
+                    typeof (req as any).href === 'string'
+                  ? (req as any).href
                   : req?.toString() || '';
         if (shouldBlock(url)) {
             return new Response('', { status: 204 });
@@ -69,7 +74,11 @@
         username?: string | null,
         password?: string | null
     ): void {
-        const urlStr = url instanceof URL ? url.href : url?.toString() || '';
+        // 🛡️ Sentinel: Use duck typing for URL objects to prevent cross-realm adblock evasion
+        const urlStr =
+            url && typeof url === 'object' && 'href' in url && typeof (url as any).href === 'string'
+                ? (url as any).href
+                : url?.toString() || '';
         if (shouldBlock(urlStr)) {
             this.abort();
             return;
