@@ -17,9 +17,12 @@
     //----------------------------------------
     let enabled: boolean = true;
     try {
-        enabled = JSON.parse(localStorage.getItem('ytAdblockEnabled') || 'true') ?? true;
+        const stored = localStorage.getItem('ytAdblockEnabled');
+        if (stored !== null) {
+            enabled = JSON.parse(stored) ?? true;
+        }
     } catch (e) {
-        console.warn('Invalid ytAdblockEnabled state in localStorage, defaulting to true');
+        console.warn('Failed to parse ytAdblockEnabled from localStorage', e);
         enabled = true;
     }
 
@@ -47,11 +50,16 @@
     const origFetch = window.fetch;
     window.fetch = (async (...args: Parameters<typeof window.fetch>): Promise<Response> => {
         const req = args[0];
+        // 🛡️ Sentinel: Use duck typing for Request/URL objects to prevent cross-realm (iframe) adblock evasion
+        // where `instanceof` fails and `.toString()` returns "[object Request]"
         const url: string =
-            req instanceof Request
-                ? req.url
-                : req instanceof URL
-                  ? req.href
+            req && typeof req === 'object' && 'url' in req && typeof (req as any).url === 'string'
+                ? (req as any).url
+                : req &&
+                    typeof req === 'object' &&
+                    'href' in req &&
+                    typeof (req as any).href === 'string'
+                  ? (req as any).href
                   : req?.toString() || '';
         if (shouldBlock(url)) {
             return new Response('', { status: 204 });
@@ -69,7 +77,11 @@
         username?: string | null,
         password?: string | null
     ): void {
-        const urlStr = url instanceof URL ? url.href : url?.toString() || '';
+        // 🛡️ Sentinel: Use duck typing for URL objects to prevent cross-realm adblock evasion
+        const urlStr =
+            url && typeof url === 'object' && 'href' in url && typeof (url as any).href === 'string'
+                ? (url as any).href
+                : url?.toString() || '';
         if (shouldBlock(urlStr)) {
             this.abort();
             return;
@@ -188,32 +200,43 @@
         btn.setAttribute('aria-pressed', enabled.toString());
         btn.setAttribute('title', 'Toggle AdBlock (Shift+A)');
         btn.setAttribute('aria-keyshortcuts', 'Shift+A');
-        styleButton(btn);
+        btn.setAttribute('aria-live', 'polite');
+        styleButtonStatic(btn);
+        styleButtonDynamic(btn);
 
         btn.addEventListener('click', toggleAdblock);
 
         // Add hover and focus styles for accessibility
         btn.addEventListener('mouseover', () => (btn.style.opacity = '0.8'));
         btn.addEventListener('mouseout', () => (btn.style.opacity = '1'));
-        btn.addEventListener('focus', () => (btn.style.outline = '2px solid white'));
-        btn.addEventListener('blur', () => (btn.style.outline = 'none'));
+        btn.addEventListener('focus', () => {
+            btn.style.outline = '2px solid currentColor';
+            btn.style.outlineOffset = '2px';
+        });
+        btn.addEventListener('blur', () => {
+            btn.style.outline = 'none';
+            btn.style.outlineOffset = '0px';
+        });
 
         logo.parentElement?.insertBefore(btn, logo.nextSibling);
     }
 
-    function styleButton(btn: HTMLButtonElement): void {
+    function styleButtonStatic(btn: HTMLButtonElement): void {
         btn.style.cssText = `
             margin-left: 12px;
             padding: 4px 8px;
             font-size: 12px;
-            background: ${enabled ? '#cc0000' : '#444'};
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            transition: opacity 0.2s, outline 0.2s;
+            transition: opacity 0.2s, outline 0.2s, background-color 0.2s;
             outline: none;
         `;
+    }
+
+    function styleButtonDynamic(btn: HTMLButtonElement): void {
+        btn.style.backgroundColor = enabled ? '#cc0000' : '#444';
     }
 
     //----------------------------------------
@@ -228,7 +251,7 @@
             btn.textContent = `AdBlock: ${enabled ? 'ON' : 'OFF'}`;
             btn.setAttribute('aria-label', `Toggle AdBlock (Currently ${enabled ? 'ON' : 'OFF'})`);
             btn.setAttribute('aria-pressed', enabled.toString());
-            styleButton(btn as HTMLButtonElement);
+            styleButtonDynamic(btn as HTMLButtonElement);
         }
 
         console.log(`YouTube AdBlock is now ${enabled ? 'ENABLED' : 'DISABLED'}`);

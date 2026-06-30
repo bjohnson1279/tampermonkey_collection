@@ -5,7 +5,7 @@
 // @grant    none
 // ==/UserScript==
 
-interface QueryParams {
+export interface QueryParams {
     [key: string]: string;
 }
 
@@ -35,3 +35,4 @@ export const getQueryParams = (urlString: string): QueryParams => {
         return Object.create(null);
     }
 };
+

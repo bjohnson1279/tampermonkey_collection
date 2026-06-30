@@ -4,6 +4,7 @@
   "description": "Collection of Tampermonkey scripts",
   "main": "index.js",
   "scripts": {
+    "test": "jest",
     "build": "tsc",
     "build:watch": "tsc --watch",
     "generate:extensions": "node scripts/generate-extensions.js",

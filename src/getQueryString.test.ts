@@ -22,7 +22,6 @@ describe('getQueryParams', () => {
         expect(params.__proto__).toBeUndefined();
         expect(({} as any).polluted).toBeUndefined();
     });
-
     // Edge cases
     it('should return empty object for empty query string', () => {
         const url = 'https://example.com/page?';
@@ -63,7 +62,6 @@ describe('getQueryParams', () => {
         const url = 'https://example.com/page?foo=bar=baz';
         expect(getQueryParams(url)).toEqual({ foo: 'bar=baz' });
     });
-
     // Error cases
     it('should return empty object for invalid URL string', () => {
         const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -86,6 +84,21 @@ describe('getQueryParams', () => {
         const url = 'example.com/page?foo=bar';
         expect(getQueryParams(url)).toEqual({});
         expect(consoleSpy).toHaveBeenCalledWith('Error parsing URL:', expect.anything());
+        consoleSpy.mockRestore();
+    });
+    it('should handle invalid URLs by catching the error and returning an empty object', () => {
+        // Suppress console.error during this test
+        const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+        // Invalid URL string that throws when passed to new URL()
+        const invalidUrl = 'not-a-valid-url';
+        const params = getQueryParams(invalidUrl);
+
+        expect(params).toEqual({});
+        expect(consoleSpy).toHaveBeenCalled();
+        expect(consoleSpy.mock.calls[0][0]).toBe('Error parsing URL:');
+        expect(consoleSpy.mock.calls[0][1].message).toBe('Invalid URL');
+
         consoleSpy.mockRestore();
     });
 });

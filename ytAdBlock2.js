@@ -11,14 +11,22 @@
 "use strict";
 (function () {
     'use strict';
+
+    //----------------------------------------
+    // Persistent state
+    //----------------------------------------
     let enabled = true;
     try {
-        enabled = JSON.parse(localStorage.getItem('ytAdblockEnabled') || 'true') ?? true;
-    }
-    catch (e) {
-        console.warn('Invalid ytAdblockEnabled state in localStorage, defaulting to true');
+        const stored = localStorage.getItem('ytAdblockEnabled');
+        if (stored !== null) {
+            const parsed = JSON.parse(stored);
+            enabled = parsed ?? true;
+        }
+    } catch (e) {
+        console.warn('Failed to parse ytAdblockEnabled from localStorage', e);
         enabled = true;
     }
+
     function saveState() {
         localStorage.setItem('ytAdblockEnabled', JSON.stringify(enabled));
     }
@@ -36,19 +44,26 @@
     const origFetch = window.fetch;
     window.fetch = (async (...args) => {
         const req = args[0];
-        const url = req instanceof Request
-            ? req.url
-            : req instanceof URL
-                ? req.href
-                : req?.toString() || '';
+        // 🛡️ Sentinel: Use duck typing for Request/URL objects to prevent cross-realm (iframe) adblock evasion
+        // where `instanceof` fails and `.toString()` returns "[object Request]"
+        const url =
+            req && typeof req === 'object' && 'url' in req && typeof req.url === 'string'
+                ? req.url
+                : req && typeof req === 'object' && 'href' in req && typeof req.href === 'string'
+                  ? req.href
+                  : req?.toString() || '';
         if (shouldBlock(url)) {
             return new Response('', { status: 204 });
         }
         return origFetch(...args);
     });
     const origOpen = XMLHttpRequest.prototype.open;
-    XMLHttpRequest.prototype.open = function (method, url, async, username, password) {
-        const urlStr = url instanceof URL ? url.href : url?.toString() || '';
+    XMLHttpRequest.prototype.open = function (method, url, ...rest) {
+        // 🛡️ Sentinel: Use duck typing for URL objects to prevent cross-realm adblock evasion
+        const urlStr =
+            url && typeof url === 'object' && 'href' in url && typeof url.href === 'string'
+                ? url.href
+                : url?.toString() || '';
         if (shouldBlock(urlStr)) {
             this.abort();
             return;
@@ -145,28 +160,46 @@
         btn.setAttribute('aria-pressed', enabled.toString());
         btn.setAttribute('title', 'Toggle AdBlock (Shift+A)');
         btn.setAttribute('aria-keyshortcuts', 'Shift+A');
-        styleButton(btn);
+        btn.setAttribute('aria-live', 'polite');
+        styleButtonStatic(btn);
+        styleButtonDynamic(btn);
+
         btn.addEventListener('click', toggleAdblock);
         btn.addEventListener('mouseover', () => (btn.style.opacity = '0.8'));
         btn.addEventListener('mouseout', () => (btn.style.opacity = '1'));
-        btn.addEventListener('focus', () => (btn.style.outline = '2px solid white'));
-        btn.addEventListener('blur', () => (btn.style.outline = 'none'));
-        logo.parentElement?.insertBefore(btn, logo.nextSibling);
+        btn.addEventListener('focus', () => {
+            btn.style.outline = '2px solid currentColor';
+            btn.style.outlineOffset = '2px';
+        });
+        btn.addEventListener('blur', () => {
+            btn.style.outline = 'none';
+            btn.style.outlineOffset = '0px';
+        });
+
+        logo.parentElement.insertBefore(btn, logo.nextSibling);
     }
-    function styleButton(btn) {
+
+    function styleButtonStatic(btn) {
         btn.style.cssText = `
             margin-left: 12px;
             padding: 4px 8px;
             font-size: 12px;
-            background: ${enabled ? '#cc0000' : '#444'};
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            transition: opacity 0.2s, outline 0.2s;
+            transition: opacity 0.2s, outline 0.2s, background-color 0.2s;
             outline: none;
         `;
     }
+
+    function styleButtonDynamic(btn) {
+        btn.style.backgroundColor = enabled ? '#cc0000' : '#444';
+    }
+
+    //----------------------------------------
+    // Toggle logic (shared for button + hotkey)
+    //----------------------------------------
     function toggleAdblock() {
         enabled = !enabled;
         saveState();
@@ -175,7 +208,7 @@
             btn.textContent = `AdBlock: ${enabled ? 'ON' : 'OFF'}`;
             btn.setAttribute('aria-label', `Toggle AdBlock (Currently ${enabled ? 'ON' : 'OFF'})`);
             btn.setAttribute('aria-pressed', enabled.toString());
-            styleButton(btn);
+            styleButtonDynamic(btn);
         }
         console.log(`YouTube AdBlock is now ${enabled ? 'ENABLED' : 'DISABLED'}`);
     }
