@@ -13,39 +13,35 @@
     'use strict';
 
     // Show all score cards
-    const scoreCards = document.querySelectorAll<HTMLElement>(".spl-card");
-    console.log('Score cards found:', scoreCards.length);
+    const scoreCards = document.querySelectorAll<HTMLElement>('.spl-card');
     scoreCards.forEach((card: HTMLElement): void => {
-        card.style.display = "block";
+        card.style.display = 'block';
     });
 
     // Expand schedule section
-    const schedule = document.querySelector<HTMLElement>(".spl-schedule");
-    console.log('Schedule section:', schedule ? 'found' : 'not found');
+    const schedule = document.querySelector<HTMLElement>('.spl-schedule');
     if (schedule) {
-        const scheduleHiddenRows = schedule.querySelectorAll<HTMLElement>(".b_hide");
+        const scheduleHiddenRows = schedule.querySelectorAll<HTMLElement>('.b_hide');
         scheduleHiddenRows.forEach((row: HTMLElement): void => {
-            row.style.display = "table-row";
+            row.style.display = 'table-row';
         });
     }
 
     // Expand standings section
-    const standings = document.querySelector<HTMLElement>(".spl-standingTbl");
-    console.log('Standings section:', standings ? 'found' : 'not found');
+    const standings = document.querySelector<HTMLElement>('.spl-standingTbl');
     if (standings) {
-        const standingsHiddenRows = standings.querySelectorAll<HTMLElement>(".b_hide");
+        const standingsHiddenRows = standings.querySelectorAll<HTMLElement>('.b_hide');
         standingsHiddenRows.forEach((row: HTMLElement): void => {
-            row.style.display = "table-row";
+            row.style.display = 'table-row';
         });
     }
 
     // Expand filter content section
-    const filContent = document.querySelector<HTMLElement>(".tfil-content");
-    console.log('Filter content section:', filContent ? 'found' : 'not found');
+    const filContent = document.querySelector<HTMLElement>('.tfil-content');
     if (filContent) {
-        const contentHiddenRows = filContent.querySelectorAll<HTMLElement>(".b_hide");
+        const contentHiddenRows = filContent.querySelectorAll<HTMLElement>('.b_hide');
         contentHiddenRows.forEach((row: HTMLElement): void => {
-            row.style.display = "table-row";
+            row.style.display = 'table-row';
         });
     }
 })();

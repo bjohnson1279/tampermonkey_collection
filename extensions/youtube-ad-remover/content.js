@@ -8,7 +8,6 @@ class YouTubeAdRemover {
         this.initialize();
     }
     initialize() {
-        console.log('YouTube Ad Remover initialized');
         this.startWatching();
     }
     startWatching() {
@@ -21,34 +20,51 @@ class YouTubeAdRemover {
             const callback = (mutationsList, observer) => {
                 for (const mutation of mutationsList) {
                     if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-                        this.removeAds();
+                        this.removeAds(mutation.addedNodes);
                     }
                 }
             };
             this.observer = new MutationObserver(callback);
             const config = {
-                attributes: true,
+                attributes: false,
                 childList: true,
-                subtree: true
+                subtree: true,
             };
             this.observer.observe(targetNode, config);
             this.removeAds();
         }, this.INITIAL_DELAY_MS);
     }
-    removeAds() {
-        const videoItems = document.querySelectorAll('ytd-rich-item-renderer, ytd-video-renderer');
-        videoItems.forEach((videoItem) => {
-            const contentDiv = videoItem.querySelector('#content, #dismissible');
-            if (!contentDiv)
-                return;
-            const adItem = contentDiv.querySelector(this.AD_SELECTOR);
-            if (adItem) {
-                console.log('Removing ad:', adItem);
-                adItem.remove();
-                contentDiv.remove();
-                videoItem.remove();
-            }
-        });
+    processVideoItem(videoItem) {
+        const contentDiv = videoItem.querySelector('#content, #dismissible');
+        if (!contentDiv)
+            return;
+        const adItem = contentDiv.querySelector(this.AD_SELECTOR);
+        if (adItem) {
+            console.log('Removing ad:', adItem);
+            adItem.remove();
+            contentDiv.remove();
+            videoItem.remove();
+        }
+    }
+    removeAds(addedNodes) {
+        if (!addedNodes) {
+            const videoItems = document.querySelectorAll('ytd-rich-item-renderer, ytd-video-renderer');
+            videoItems.forEach((videoItem) => this.processVideoItem(videoItem));
+        }
+        else {
+            addedNodes.forEach((node) => {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    const element = node;
+                    if (element.matches('ytd-rich-item-renderer, ytd-video-renderer')) {
+                        this.processVideoItem(element);
+                    }
+                    else {
+                        const videoItems = element.querySelectorAll('ytd-rich-item-renderer, ytd-video-renderer');
+                        videoItems.forEach((videoItem) => this.processVideoItem(videoItem));
+                    }
+                }
+            });
+        }
     }
     destroy() {
         if (this.observer) {

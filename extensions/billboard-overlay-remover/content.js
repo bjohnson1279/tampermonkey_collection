@@ -16,7 +16,6 @@
     });
     const chartOverlay = document.querySelector('.chart-piano-overlay__attachment-point');
     if (!chartOverlay) {
-        console.log('Chart overlay not found');
         return;
     }
     const config = {
@@ -40,7 +39,6 @@
     try {
         const observer = new MutationObserver(handleMutations);
         observer.observe(chartOverlay, config);
-        console.log('Billboard overlay observer started');
     }
     catch (error) {
         console.error('Error initializing Billboard overlay observer:', error);

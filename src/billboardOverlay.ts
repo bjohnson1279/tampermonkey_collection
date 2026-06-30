@@ -36,12 +36,12 @@ interface ExtendedHTMLElement extends HTMLElement {
     // Set up mutation observer for the chart overlay
     const chartOverlay = document.querySelector<HTMLElement>('.chart-piano-overlay__attachment-point');
     if (!chartOverlay) {
-        console.log('Chart overlay not found');
         return;
     }
 
+    // ⚡ Bolt: Disable attributes to prevent unnecessary callbacks on every attribute change
     const config: MutationObserverInit = {
-        attributes: true,
+        attributes: false,
         childList: true,
         subtree: true
     };
@@ -65,7 +65,6 @@ interface ExtendedHTMLElement extends HTMLElement {
     try {
         const observer = new MutationObserver(handleMutations);
         observer.observe(chartOverlay, config);
-        console.log('Billboard overlay observer started');
     } catch (error) {
         console.error('Error initializing Billboard overlay observer:', error);
     }

@@ -20,7 +20,6 @@ class YouTubeAdRemover {
     }
 
     private initialize(): void {
-        console.log('YouTube Ad Remover initialized');
         this.startWatching();
     }
 
@@ -28,7 +27,7 @@ class YouTubeAdRemover {
         // Wait for the page to load and then start observing
         window.setTimeout(() => {
             const targetNode = document.querySelector(this.TARGET_NODE_SELECTOR);
-            
+
             if (!targetNode) {
                 console.error(`Could not find the target node: ${this.TARGET_NODE_SELECTOR}`);
                 return;
@@ -38,7 +37,7 @@ class YouTubeAdRemover {
             const callback: MutationCallback = (mutationsList, observer) => {
                 for (const mutation of mutationsList) {
                     if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-                        this.removeAds();
+                        this.removeAds(mutation.addedNodes);
                     }
                 }
             };
@@ -48,38 +47,59 @@ class YouTubeAdRemover {
 
             // Configuration for the observer
             const config: MutationObserverInit = {
-                attributes: true, // Watch for attribute changes
+                attributes: false, // Don't watch for attribute changes to prevent unnecessary callbacks
                 childList: true, // Watch for additions/removals of children
-                subtree: true // Extend observation to all descendants
+                subtree: true, // Extend observation to all descendants
             };
 
             // Start observing the target node for configured mutations
             this.observer.observe(targetNode, config);
-            
+
             // Initial check
             this.removeAds();
-            
         }, this.INITIAL_DELAY_MS);
     }
 
-    private removeAds(): void {
-        // Find all video items
-        const videoItems = document.querySelectorAll('ytd-rich-item-renderer, ytd-video-renderer');
-        
-        videoItems.forEach((videoItem) => {
-            // Find the content div that might contain ads
-            const contentDiv = videoItem.querySelector('#content, #dismissible');
-            if (!contentDiv) return;
+    private processVideoItem(videoItem: Element): void {
+        // Find the content div that might contain ads
+        const contentDiv = videoItem.querySelector('#content, #dismissible');
+        if (!contentDiv) return;
 
-            // Check for ad elements
-            const adItem = contentDiv.querySelector(this.AD_SELECTOR);
-            if (adItem) {
-                console.log('Removing ad:', adItem);
-                adItem.remove();
-                contentDiv.remove();
-                videoItem.remove();
-            }
-        });
+        // Check for ad elements
+        const adItem = contentDiv.querySelector(this.AD_SELECTOR);
+        if (adItem) {
+            console.log('Removing ad:', adItem);
+            adItem.remove();
+            contentDiv.remove();
+            videoItem.remove();
+        }
+    }
+
+    private removeAds(addedNodes?: NodeList | Node[]): void {
+        if (!addedNodes) {
+            // Fallback for initial check or if no specific nodes are provided
+            // Find all video items
+            const videoItems = document.querySelectorAll(
+                'ytd-rich-item-renderer, ytd-video-renderer'
+            );
+            videoItems.forEach((videoItem) => this.processVideoItem(videoItem));
+        } else {
+            // Process only the added nodes to improve performance
+            addedNodes.forEach((node) => {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    const element = node as Element;
+
+                    if (element.matches('ytd-rich-item-renderer, ytd-video-renderer')) {
+                        this.processVideoItem(element);
+                    } else {
+                        const videoItems = element.querySelectorAll(
+                            'ytd-rich-item-renderer, ytd-video-renderer'
+                        );
+                        videoItems.forEach((videoItem) => this.processVideoItem(videoItem));
+                    }
+                }
+            });
+        }
     }
 
     public destroy(): void {

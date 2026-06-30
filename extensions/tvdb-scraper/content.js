@@ -42,5 +42,6 @@
             episodesData.push(episode);
         });
     });
+    return episodesData;
 })();
 //# sourceMappingURL=tvdbScraper.js.map

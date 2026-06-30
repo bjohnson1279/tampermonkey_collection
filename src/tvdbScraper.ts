@@ -17,56 +17,58 @@ interface Episode {
     description: string;
 }
 
-(function (): void {
+(function (): Episode[] {
     'use strict';
 
     const episodesData: Episode[] = [];
-    const episodeListContainers = document.querySelectorAll<HTMLElement>(".list-group");
+    const episodeListContainers = document.querySelectorAll<HTMLElement>('.list-group');
 
     episodeListContainers.forEach((season: HTMLElement): void => {
-        const episodes = season.querySelectorAll<HTMLElement>(".list-group-item");
-        
+        const episodes = season.querySelectorAll<HTMLElement>('.list-group-item');
+
         episodes.forEach((ep: HTMLElement): void => {
-            const heading = ep.querySelector<HTMLElement>(".list-group-item-heading");
+            const heading = ep.querySelector<HTMLElement>('.list-group-item-heading');
             if (!heading) return;
 
-            const epLabelElement = heading.querySelector<HTMLElement>(".episode-label");
-            const epLabel = epLabelElement?.textContent?.trim() || "";
+            const epLabelElement = heading.querySelector<HTMLElement>('.episode-label');
+            const epLabel = epLabelElement?.textContent?.trim() || '';
             const matches = epLabel.match(/\d+/g) || [];
-            
-            const titleLink = heading.querySelector<HTMLAnchorElement>("a");
-            const epTitle = titleLink?.textContent?.trim() || "";
-            
-            const itemTextElement = ep.querySelector<HTMLElement>(".list-group-item-text");
-            const itemText = itemTextElement?.textContent?.trim() || "";
 
-            let itemDate = "";
-            const listInline = ep.querySelectorAll<HTMLElement>(".list-inline");
+            const titleLink = heading.querySelector<HTMLAnchorElement>('a');
+            const epTitle = titleLink?.textContent?.trim() || '';
+
+            const itemTextElement = ep.querySelector<HTMLElement>('.list-group-item-text');
+            const itemText = itemTextElement?.textContent?.trim() || '';
+
+            let itemDate = '';
+            const listInline = ep.querySelectorAll<HTMLElement>('.list-inline');
 
             listInline.forEach((listItem: HTMLElement): void => {
-                const dateText = listItem.textContent
-                    ?.replace(/ABC|CBS|FOX|NBC|PBS|History|H2|\(US\)|A&E/gi, "")
-                    .trim() || "";
-                
+                const dateText =
+                    listItem.textContent
+                        ?.replace(/ABC|CBS|FOX|NBC|PBS|History|H2|\(US\)|A&E/gi, '')
+                        .trim() || '';
+
                 try {
                     const date = new Date(dateText);
                     if (!isNaN(date.getTime())) {
-                        itemDate = date.toISOString().split("T")[0];
+                        itemDate = date.toISOString().split('T')[0];
                     }
                 } catch (e) {
-                    console.error("Error parsing date:", e);
+                    console.error('Error parsing date:', e);
                 }
             });
 
             const episode: Episode = {
-                season: matches[0] || "",
-                episode: matches[1] || "",
+                season: matches[0] || '',
+                episode: matches[1] || '',
                 title: epTitle,
                 release: itemDate,
-                description: itemText
+                description: itemText,
             };
 
             episodesData.push(episode);
         });
     });
+    return episodesData;
 })();

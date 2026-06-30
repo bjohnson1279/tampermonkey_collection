@@ -25,7 +25,6 @@
                 console.log(`Search query: "${searchQuery}"`);
                 const isBlacklisted = blacklist.some((phrase) => searchQuery.toLowerCase().includes(phrase.toLowerCase()));
                 if (isBlacklisted) {
-                    console.log("Query contains a blacklisted phrase. Redirecting...");
                     window.location.href = engine.url;
                 }
             }
