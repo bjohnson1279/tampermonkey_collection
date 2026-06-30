@@ -12,6 +12,16 @@ describe('getQueryParams', () => {
         expect(getQueryParams(url)).toEqual({ foo: 'bar', baz: 'qux' });
     });
 
+    // Security cases
+    it('should prevent prototype pollution', () => {
+        const url =
+            'https://example.com/page?__proto__=polluted&constructor=polluted&prototype=polluted&normal=true';
+        const params = getQueryParams(url) as any;
+
+        expect(params).toEqual({ normal: 'true' });
+        expect(params.__proto__).toBeUndefined();
+        expect(({} as any).polluted).toBeUndefined();
+    });
     // Edge cases
     it('should return empty object for empty query string', () => {
         const url = 'https://example.com/page?';
@@ -38,6 +48,20 @@ describe('getQueryParams', () => {
         expect(getQueryParams(url)).toEqual({ foo: 'bar baz', qux: '✓' });
     });
 
+    it('should ignore hash fragments', () => {
+        const url = 'https://example.com/page?foo=bar#section';
+        expect(getQueryParams(url)).toEqual({ foo: 'bar' });
+    });
+
+    it('should handle empty values', () => {
+        const url = 'https://example.com/page?foo=&bar';
+        expect(getQueryParams(url)).toEqual({ foo: '', bar: '' });
+    });
+
+    it('should handle equal signs in values', () => {
+        const url = 'https://example.com/page?foo=bar=baz';
+        expect(getQueryParams(url)).toEqual({ foo: 'bar=baz' });
+    });
     // Error cases
     it('should return empty object for invalid URL string', () => {
         const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});

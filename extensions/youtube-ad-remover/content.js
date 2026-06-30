@@ -26,9 +26,9 @@ class YouTubeAdRemover {
             };
             this.observer = new MutationObserver(callback);
             const config = {
-                attributes: true,
+                attributes: false,
                 childList: true,
-                subtree: true
+                subtree: true,
             };
             this.observer.observe(targetNode, config);
             this.removeAds();
@@ -40,6 +40,7 @@ class YouTubeAdRemover {
             return;
         const adItem = contentDiv.querySelector(this.AD_SELECTOR);
         if (adItem) {
+
             adItem.remove();
             contentDiv.remove();
             videoItem.remove();

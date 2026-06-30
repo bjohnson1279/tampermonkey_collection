@@ -27,7 +27,7 @@ class YouTubeAdRemover {
         // Wait for the page to load and then start observing
         window.setTimeout(() => {
             const targetNode = document.querySelector(this.TARGET_NODE_SELECTOR);
-            
+
             if (!targetNode) {
                 console.error(`Could not find the target node: ${this.TARGET_NODE_SELECTOR}`);
                 return;
@@ -47,17 +47,16 @@ class YouTubeAdRemover {
 
             // Configuration for the observer
             const config: MutationObserverInit = {
-                attributes: true, // Watch for attribute changes
+                attributes: false, // Don't watch for attribute changes to prevent unnecessary callbacks
                 childList: true, // Watch for additions/removals of children
-                subtree: true // Extend observation to all descendants
+                subtree: true, // Extend observation to all descendants
             };
 
             // Start observing the target node for configured mutations
             this.observer.observe(targetNode, config);
-            
+
             // Initial check
             this.removeAds();
-            
         }, this.INITIAL_DELAY_MS);
     }
 
@@ -69,6 +68,7 @@ class YouTubeAdRemover {
         // Check for ad elements
         const adItem = contentDiv.querySelector(this.AD_SELECTOR);
         if (adItem) {
+
             adItem.remove();
             contentDiv.remove();
             videoItem.remove();
@@ -79,7 +79,9 @@ class YouTubeAdRemover {
         if (!addedNodes) {
             // Fallback for initial check or if no specific nodes are provided
             // Find all video items
-            const videoItems = document.querySelectorAll('ytd-rich-item-renderer, ytd-video-renderer');
+            const videoItems = document.querySelectorAll(
+                'ytd-rich-item-renderer, ytd-video-renderer'
+            );
             videoItems.forEach((videoItem) => this.processVideoItem(videoItem));
         } else {
             // Process only the added nodes to improve performance
@@ -90,7 +92,9 @@ class YouTubeAdRemover {
                     if (element.matches('ytd-rich-item-renderer, ytd-video-renderer')) {
                         this.processVideoItem(element);
                     } else {
-                        const videoItems = element.querySelectorAll('ytd-rich-item-renderer, ytd-video-renderer');
+                        const videoItems = element.querySelectorAll(
+                            'ytd-rich-item-renderer, ytd-video-renderer'
+                        );
                         videoItems.forEach((videoItem) => this.processVideoItem(videoItem));
                     }
                 }
