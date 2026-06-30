@@ -24,7 +24,6 @@ interface SponsoredElement extends HTMLElement {
             // Try to find the closest parent container to remove
             const sponsoredContainer = sponsored.closest('.queue, .queue_story');
             if (sponsoredContainer) {
-                console.log('Removing sponsored content');
                 sponsoredContainer.remove();
             }
         });
@@ -36,14 +35,13 @@ interface SponsoredElement extends HTMLElement {
     // Set up mutation observer to handle dynamically loaded content
     const loadMoreContainer = document.querySelector<HTMLElement>('#loadMoreBtnContainer');
     if (!loadMoreContainer) {
-        console.log('Load more container not found');
         return;
     }
 
     const config: MutationObserverInit = {
         attributes: false,
         childList: true,
-        subtree: true
+        subtree: true,
     };
 
     const handleMutations: MutationCallback = (mutationsList: MutationRecord[]): void => {

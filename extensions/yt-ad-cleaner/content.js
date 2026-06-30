@@ -3,41 +3,40 @@
     'use strict';
     let enabled = true;
     try {
-        const stored = localStorage.getItem("ytAdblockEnabled");
+        const stored = localStorage.getItem('ytAdblockEnabled');
         if (stored !== null) {
             enabled = JSON.parse(stored) ?? true;
         }
     }
     catch (e) {
-        console.warn("Failed to parse ytAdblockEnabled from localStorage", e);
+        console.warn('Failed to parse ytAdblockEnabled from localStorage', e);
+        enabled = true;
     }
     function saveState() {
-        localStorage.setItem("ytAdblockEnabled", JSON.stringify(enabled));
+        localStorage.setItem('ytAdblockEnabled', JSON.stringify(enabled));
     }
     const blockedPatterns = [
-        "doubleclick.net",
-        "youtube.com/api/stats/ads",
-        "youtube.com/api/stats/atr",
-        "youtube.com/get_midroll",
-        "youtube.com/pagead",
-        "ytimg.com/ads/",
+        'doubleclick.net',
+        'youtube.com/api/stats/ads',
+        'youtube.com/api/stats/atr',
+        'youtube.com/get_midroll',
+        'youtube.com/pagead',
+        'ytimg.com/ads/',
     ];
     function shouldBlock(url) {
-        return enabled && blockedPatterns.some(pattern => url.includes(pattern));
+        return enabled && blockedPatterns.some((pattern) => url.includes(pattern));
     }
     const origFetch = window.fetch;
     window.fetch = (async (...args) => {
-        const url = args[0]?.toString() || "";
+        const url = args[0]?.toString() || '';
         if (shouldBlock(url)) {
-            console.log("Blocked fetch:", url);
-            return new Response("", { status: 204 });
+            return new Response('', { status: 204 });
         }
         return origFetch(...args);
     });
     const origOpen = XMLHttpRequest.prototype.open;
     XMLHttpRequest.prototype.open = function (method, url, async, username, password) {
         if (shouldBlock(url)) {
-            console.log("Blocked XHR:", url);
             this.abort();
             return;
         }
@@ -62,20 +61,48 @@
         'ytd-video-masthead-ad-primary-video-renderer',
         'ytd-banner-promo-renderer',
         'ytd-carousel-ad-renderer',
-        'ytd-companion-slot-renderer'
+        'ytd-companion-slot-renderer',
     ];
-    function removeAds() {
+    const combinedAdSelector = adSelectors.join(',');
+    const adObserver = new MutationObserver((mutations) => {
         if (!enabled)
             return;
-        adSelectors.forEach(sel => {
-            document.querySelectorAll(sel).forEach(el => el.remove());
+        mutations.forEach((mutation) => {
+            mutation.addedNodes.forEach((node) => {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    const el = node;
+                    if (el.matches && el.matches(combinedAdSelector)) {
+                        el.remove();
+                    }
+                    else if (el.querySelectorAll) {
+                        el.querySelectorAll(combinedAdSelector).forEach((e) => e.remove());
+                        el.querySelectorAll('#dismissible ytd-badge-supported-renderer').forEach((badge) => {
+                            if (badge.innerText
+                                .toLowerCase()
+                                .includes('promoted')) {
+                                badge
+                                    .closest('ytd-video-renderer,ytd-compact-video-renderer')
+                                    ?.remove();
+                            }
+                        });
+                    }
+                }
+            });
         });
-        document.querySelectorAll('#dismissible ytd-badge-supported-renderer')
-            .forEach(badge => {
-            if (badge.innerText.toLowerCase().includes("promoted")) {
+    });
+    function removeInitialAds() {
+        if (!enabled)
+            return;
+        document.querySelectorAll(combinedAdSelector).forEach((el) => el.remove());
+        document.querySelectorAll('#dismissible ytd-badge-supported-renderer').forEach((badge) => {
+            if (badge.innerText.toLowerCase().includes('promoted')) {
                 badge.closest('ytd-video-renderer,ytd-compact-video-renderer')?.remove();
             }
         });
+    }
+    removeInitialAds();
+    if (document.documentElement) {
+        adObserver.observe(document.documentElement, { childList: true, subtree: true });
     }
     function skipVideoAds() {
         if (!enabled)
@@ -99,8 +126,11 @@
         if (!logo)
             return;
         const btn = document.createElement('button');
-        btn.id = "adblock-toggle";
-        btn.textContent = `AdBlock: ${enabled ? "ON" : "OFF"}`;
+        btn.id = 'adblock-toggle';
+        btn.textContent = `AdBlock: ${enabled ? 'ON' : 'OFF'}`;
+        btn.setAttribute('aria-label', `Toggle AdBlock (Currently ${enabled ? 'ON' : 'OFF'})`);
+        btn.setAttribute('aria-pressed', enabled.toString());
+        btn.setAttribute('title', 'Toggle AdBlock (Shift+A)');
         styleButton(btn);
         btn.addEventListener('click', toggleAdblock);
         logo.parentElement?.insertBefore(btn, logo.nextSibling);
@@ -110,7 +140,7 @@
             margin-left: 12px;
             padding: 4px 8px;
             font-size: 12px;
-            background: ${enabled ? "#cc0000" : "#444"};
+            background: ${enabled ? '#cc0000' : '#444'};
             color: white;
             border: none;
             border-radius: 4px;
@@ -122,10 +152,12 @@
         saveState();
         const btn = document.querySelector('#adblock-toggle');
         if (btn) {
-            btn.textContent = `AdBlock: ${enabled ? "ON" : "OFF"}`;
+            btn.textContent = `AdBlock: ${enabled ? 'ON' : 'OFF'}`;
+            btn.setAttribute('aria-label', `Toggle AdBlock (Currently ${enabled ? 'ON' : 'OFF'})`);
+            btn.setAttribute('aria-pressed', enabled.toString());
             styleButton(btn);
         }
-        console.log(`YouTube AdBlock is now ${enabled ? "ENABLED" : "DISABLED"}`);
+        console.log(`YouTube AdBlock is now ${enabled ? 'ENABLED' : 'DISABLED'}`);
     }
     document.addEventListener('keydown', (e) => {
         if (e.shiftKey && e.key.toLowerCase() === 'a') {
@@ -134,7 +166,6 @@
     });
     setInterval(() => {
         addToggleButton();
-        removeAds();
         skipVideoAds();
     }, 500);
 })();

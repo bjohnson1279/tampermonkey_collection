@@ -17,12 +17,12 @@ interface CommentElement extends Element {
 
     const container = document.querySelector<HTMLElement>('#commentsContainer');
     if (!container) {
-        console.log('Comments container not found');
         return;
     }
 
+    // ⚡ Bolt: Disable attributes to prevent unnecessary callbacks on every attribute change
     const config: MutationObserverInit = {
-        attributes: true,
+        attributes: false,
         childList: true,
         subtree: true
     };

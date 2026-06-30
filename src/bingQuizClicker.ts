@@ -60,7 +60,6 @@ class BingQuizClicker {
 
         // Handle next button if no correct answers found
         if (elements.nextButton) {
-            console.log('Clicking next button');
             this.safeClick(elements.nextButton);
         }
     }

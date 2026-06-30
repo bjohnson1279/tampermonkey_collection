@@ -9,7 +9,7 @@
 // @grant        none
 // ==/UserScript==
 
-(function() {
+(function () {
     'use strict';
 
     //----------------------------------------
@@ -17,54 +17,67 @@
     //----------------------------------------
     let enabled: boolean = true;
     try {
-        const stored = localStorage.getItem("ytAdblockEnabled");
+        const stored = localStorage.getItem('ytAdblockEnabled');
         if (stored !== null) {
             enabled = JSON.parse(stored) ?? true;
         }
     } catch (e) {
-        console.warn("Failed to parse ytAdblockEnabled from localStorage", e);
+        console.warn('Failed to parse ytAdblockEnabled from localStorage', e);
+        enabled = true;
     }
 
     function saveState(): void {
-        localStorage.setItem("ytAdblockEnabled", JSON.stringify(enabled));
+        localStorage.setItem('ytAdblockEnabled', JSON.stringify(enabled));
     }
 
     //----------------------------------------
     // Block ad/tracking requests
     //----------------------------------------
     const blockedPatterns: string[] = [
-        "doubleclick.net",
-        "youtube.com/api/stats/ads",
-        "youtube.com/api/stats/atr",
-        "youtube.com/get_midroll",
-        "youtube.com/pagead",
-        "ytimg.com/ads/",
+        'doubleclick.net',
+        'youtube.com/api/stats/ads',
+        'youtube.com/api/stats/atr',
+        'youtube.com/get_midroll',
+        'youtube.com/pagead',
+        'ytimg.com/ads/',
     ];
 
     function shouldBlock(url: string): boolean {
-        return enabled && blockedPatterns.some(pattern => url.includes(pattern));
+        return enabled && blockedPatterns.some((pattern) => url.includes(pattern));
     }
 
     // Patch fetch()
     const origFetch = window.fetch;
     window.fetch = (async (...args: Parameters<typeof window.fetch>): Promise<Response> => {
-        const url: string = args[0]?.toString() || "";
+        const req = args[0];
+        const url: string =
+            req instanceof Request
+                ? req.url
+                : req instanceof URL
+                  ? req.href
+                  : req?.toString() || '';
         if (shouldBlock(url)) {
-            console.log("Blocked fetch:", url);
-            return new Response("", { status: 204 });
+            return new Response('', { status: 204 });
         }
         return origFetch(...args);
     }) as typeof window.fetch;
 
     // Patch XMLHttpRequest
     const origOpen = XMLHttpRequest.prototype.open;
-    XMLHttpRequest.prototype.open = function(this: XMLHttpRequest, method: string, url: string, async?: boolean, username?: string | null, password?: string | null): void {
-        if (shouldBlock(url)) {
-            console.log("Blocked XHR:", url);
-        this.abort();
-        return;
+    XMLHttpRequest.prototype.open = function (
+        this: XMLHttpRequest,
+        method: string,
+        url: string | URL,
+        async?: boolean,
+        username?: string | null,
+        password?: string | null
+    ): void {
+        const urlStr = url instanceof URL ? url.href : url?.toString() || '';
+        if (shouldBlock(urlStr)) {
+            this.abort();
+            return;
         }
-        return origOpen.apply(this, [method, url, async ?? true, username, password]);
+        return origOpen.apply(this, [method, url as string, async ?? true, username, password]);
     };
 
     //----------------------------------------
@@ -89,23 +102,57 @@
         'ytd-video-masthead-ad-primary-video-renderer',
         'ytd-banner-promo-renderer',
         'ytd-carousel-ad-renderer',
-        'ytd-companion-slot-renderer'
+        'ytd-companion-slot-renderer',
     ];
 
-    function removeAds(): void {
+    const combinedAdSelector = adSelectors.join(',');
+
+    const adObserver = new MutationObserver((mutations) => {
         if (!enabled) return;
+        mutations.forEach((mutation) => {
+            mutation.addedNodes.forEach((node) => {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    const el = node as HTMLElement;
+                    if (el.matches && el.matches(combinedAdSelector)) {
+                        el.remove();
+                    } else if (el.querySelectorAll) {
+                        el.querySelectorAll(combinedAdSelector).forEach((e) => e.remove());
 
-        adSelectors.forEach(sel => {
-            document.querySelectorAll(sel).forEach(el => el.remove());
-        });
-
-        // Remove "Promoted" sidebar/homepage videos
-        document.querySelectorAll('#dismissible ytd-badge-supported-renderer')
-            .forEach(badge => {
-                if ((badge as HTMLElement).innerText.toLowerCase().includes("promoted")) {
-                    badge.closest('ytd-video-renderer,ytd-compact-video-renderer')?.remove();
+                        // Remove "Promoted" sidebar/homepage videos
+                        el.querySelectorAll('#dismissible ytd-badge-supported-renderer').forEach(
+                            (badge) => {
+                                if (
+                                    ((badge as HTMLElement).textContent || '')
+                                        .toLowerCase()
+                                        .includes('promoted')
+                                ) {
+                                    badge
+                                        .closest('ytd-video-renderer,ytd-compact-video-renderer')
+                                        ?.remove();
+                                }
+                            }
+                        );
+                    }
                 }
             });
+        });
+    });
+
+    // Initial scan to remove ads already in the DOM before observer kicks in
+    function removeInitialAds(): void {
+        if (!enabled) return;
+        document.querySelectorAll(combinedAdSelector).forEach((el) => el.remove());
+        document.querySelectorAll('#dismissible ytd-badge-supported-renderer').forEach((badge) => {
+            if (((badge as HTMLElement).textContent || '').toLowerCase().includes('promoted')) {
+                badge.closest('ytd-video-renderer,ytd-compact-video-renderer')?.remove();
+            }
+        });
+    }
+
+    removeInitialAds();
+
+    if (document.documentElement) {
+        adObserver.observe(document.documentElement, { childList: true, subtree: true });
     }
 
     //----------------------------------------
@@ -137,11 +184,22 @@
         if (!logo) return;
 
         const btn: HTMLButtonElement = document.createElement('button');
-        btn.id = "adblock-toggle";
-        btn.textContent = `AdBlock: ${enabled ? "ON" : "OFF"}`;
+        btn.id = 'adblock-toggle';
+        btn.textContent = `AdBlock: ${enabled ? 'ON' : 'OFF'}`;
+        btn.setAttribute('aria-label', `Toggle AdBlock (Currently ${enabled ? 'ON' : 'OFF'})`);
+        btn.setAttribute('aria-pressed', enabled.toString());
+        btn.setAttribute('title', 'Toggle AdBlock (Shift+A)');
+        btn.setAttribute('aria-keyshortcuts', 'Shift+A');
         styleButton(btn);
 
         btn.addEventListener('click', toggleAdblock);
+
+        // Add hover and focus styles for accessibility
+        btn.addEventListener('mouseover', () => (btn.style.opacity = '0.8'));
+        btn.addEventListener('mouseout', () => (btn.style.opacity = '1'));
+        btn.addEventListener('focus', () => (btn.style.outline = '2px solid white'));
+        btn.addEventListener('blur', () => (btn.style.outline = 'none'));
+
         logo.parentElement?.insertBefore(btn, logo.nextSibling);
     }
 
@@ -150,11 +208,13 @@
             margin-left: 12px;
             padding: 4px 8px;
             font-size: 12px;
-            background: ${enabled ? "#cc0000" : "#444"};
+            background: ${enabled ? '#cc0000' : '#444'};
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            transition: opacity 0.2s, outline 0.2s;
+            outline: none;
         `;
     }
 
@@ -167,11 +227,13 @@
 
         const btn: HTMLElement | null = document.querySelector('#adblock-toggle');
         if (btn) {
-            btn.textContent = `AdBlock: ${enabled ? "ON" : "OFF"}`;
+            btn.textContent = `AdBlock: ${enabled ? 'ON' : 'OFF'}`;
+            btn.setAttribute('aria-label', `Toggle AdBlock (Currently ${enabled ? 'ON' : 'OFF'})`);
+            btn.setAttribute('aria-pressed', enabled.toString());
             styleButton(btn as HTMLButtonElement);
         }
 
-        console.log(`YouTube AdBlock is now ${enabled ? "ENABLED" : "DISABLED"}`);
+        console.log(`YouTube AdBlock is now ${enabled ? 'ENABLED' : 'DISABLED'}`);
     }
 
     //----------------------------------------
@@ -188,8 +250,6 @@
     //----------------------------------------
     setInterval(() => {
         addToggleButton();
-        removeAds();
         skipVideoAds();
     }, 500);
-
 })();

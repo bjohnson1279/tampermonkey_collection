@@ -31,7 +31,6 @@ class BingQuizClicker {
             return;
         }
         if (elements.nextButton) {
-            console.log('Clicking next button');
             this.safeClick(elements.nextButton);
         }
     }
