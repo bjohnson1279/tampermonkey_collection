@@ -14,7 +14,8 @@ describe('getQueryParams', () => {
 
     // Security cases
     it('should prevent prototype pollution', () => {
-        const url = 'https://example.com/page?__proto__=polluted&constructor=polluted&prototype=polluted&normal=true';
+        const url =
+            'https://example.com/page?__proto__=polluted&constructor=polluted&prototype=polluted&normal=true';
         const params = getQueryParams(url) as any;
 
         expect(params).toEqual({ normal: 'true' });
@@ -46,6 +47,21 @@ describe('getQueryParams', () => {
     it('should handle special characters in query string', () => {
         const url = 'https://example.com/page?foo=bar%20baz&qux=%E2%9C%93';
         expect(getQueryParams(url)).toEqual({ foo: 'bar baz', qux: '✓' });
+    });
+
+    it('should ignore hash fragments', () => {
+        const url = 'https://example.com/page?foo=bar#section';
+        expect(getQueryParams(url)).toEqual({ foo: 'bar' });
+    });
+
+    it('should handle empty values', () => {
+        const url = 'https://example.com/page?foo=&bar';
+        expect(getQueryParams(url)).toEqual({ foo: '', bar: '' });
+    });
+
+    it('should handle equal signs in values', () => {
+        const url = 'https://example.com/page?foo=bar=baz';
+        expect(getQueryParams(url)).toEqual({ foo: 'bar=baz' });
     });
 
     // Error cases

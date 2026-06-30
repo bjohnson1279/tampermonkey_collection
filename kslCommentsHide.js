@@ -11,7 +11,8 @@
 (function() {
     'use strict';
     const container = document.querySelector('#commentsContainer');
-    const config = { attributes: true, childList: true, subtree: true };
+    // ⚡ Bolt: Disable attributes to prevent unnecessary callbacks on every attribute change
+    const config = { attributes: false, childList: true, subtree: true };
 
     const cbk = (ml, obs) => {
         const cList = container.querySelector('.CommentsList__root');
