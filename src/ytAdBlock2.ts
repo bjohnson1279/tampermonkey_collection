@@ -17,9 +17,12 @@
     //----------------------------------------
     let enabled: boolean = true;
     try {
-        enabled = JSON.parse(localStorage.getItem('ytAdblockEnabled') || 'true') ?? true;
+        const stored = localStorage.getItem('ytAdblockEnabled');
+        if (stored !== null) {
+            enabled = JSON.parse(stored) ?? true;
+        }
     } catch (e) {
-        console.warn('Invalid ytAdblockEnabled state in localStorage, defaulting to true');
+        console.warn('Failed to parse ytAdblockEnabled from localStorage', e);
         enabled = true;
     }
 
