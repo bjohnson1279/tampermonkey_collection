@@ -112,7 +112,8 @@
                     const el = node as HTMLElement;
                     if (el.matches && el.matches(combinedAdSelector)) {
                         el.remove();
-                    } else if (el.querySelectorAll) {
+                    } else if (el.firstElementChild && el.querySelectorAll) {
+                        // ⚡ Bolt: Fast path for leaf nodes - avoid querySelectorAll parsing overhead if no children exist
                         el.querySelectorAll(combinedAdSelector).forEach((e) => e.remove());
 
                         // Remove "Promoted" sidebar/homepage videos

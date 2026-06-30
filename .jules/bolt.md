@@ -5,3 +5,6 @@
 ## 2024-06-27 - Performance impact of .innerText in MutationObservers
 **Learning:** Using `.innerText` inside high-frequency `MutationObserver` callbacks or `setInterval`s causes layout thrashing because it calculates CSS styling and visibility, forcing the browser to compute a synchronous reflow. In a highly dynamic page like YouTube, this freezes the main thread.
 **Action:** Use `.textContent` instead of `.innerText` whenever just looking for string presence or basic values. `.textContent` simply reads the DOM nodes without triggering a reflow.
+## 2024-07-27 - querySelectorAll on leaf nodes in MutationObserver
+**Learning:** Calling `.querySelectorAll()` on every added node inside a high-frequency `MutationObserver` (e.g., YouTube ad blockers) introduces significant parsing and setup overhead. If a node is just an empty leaf node (which many added nodes are), `querySelectorAll` does a lot of work for nothing.
+**Action:** Always check `if (node.firstElementChild)` before running `querySelectorAll` on deeply nested selectors within `MutationObserver` childList loops. This single check avoids massive CPU overhead by early-returning on leaf nodes.
