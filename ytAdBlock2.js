@@ -142,32 +142,43 @@
         btn.setAttribute('aria-pressed', enabled.toString());
         btn.setAttribute('title', 'Toggle AdBlock (Shift+A)');
         btn.setAttribute('aria-keyshortcuts', 'Shift+A');
-        styleButton(btn);
+        btn.setAttribute('aria-live', 'polite');
+        styleButtonStatic(btn);
+        styleButtonDynamic(btn);
 
         btn.addEventListener('click', toggleAdblock);
 
         // Add hover and focus styles for accessibility
         btn.addEventListener('mouseover', () => (btn.style.opacity = '0.8'));
         btn.addEventListener('mouseout', () => (btn.style.opacity = '1'));
-        btn.addEventListener('focus', () => (btn.style.outline = '2px solid white'));
-        btn.addEventListener('blur', () => (btn.style.outline = 'none'));
+        btn.addEventListener('focus', () => {
+            btn.style.outline = '2px solid currentColor';
+            btn.style.outlineOffset = '2px';
+        });
+        btn.addEventListener('blur', () => {
+            btn.style.outline = 'none';
+            btn.style.outlineOffset = '0px';
+        });
 
         logo.parentElement.insertBefore(btn, logo.nextSibling);
     }
 
-    function styleButton(btn) {
+    function styleButtonStatic(btn) {
         btn.style.cssText = `
             margin-left: 12px;
             padding: 4px 8px;
             font-size: 12px;
-            background: ${enabled ? '#cc0000' : '#444'};
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            transition: opacity 0.2s, outline 0.2s;
+            transition: opacity 0.2s, outline 0.2s, background-color 0.2s;
             outline: none;
         `;
+    }
+
+    function styleButtonDynamic(btn) {
+        btn.style.backgroundColor = enabled ? '#cc0000' : '#444';
     }
 
     //----------------------------------------
@@ -182,7 +193,7 @@
             btn.textContent = `AdBlock: ${enabled ? 'ON' : 'OFF'}`;
             btn.setAttribute('aria-label', `Toggle AdBlock (Currently ${enabled ? 'ON' : 'OFF'})`);
             btn.setAttribute('aria-pressed', enabled.toString());
-            styleButton(btn);
+            styleButtonDynamic(btn);
         }
 
         console.log(`YouTube AdBlock is now ${enabled ? 'ENABLED' : 'DISABLED'}`);
