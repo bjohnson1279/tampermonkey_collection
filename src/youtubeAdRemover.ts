@@ -91,7 +91,8 @@ class YouTubeAdRemover {
 
                     if (element.matches('ytd-rich-item-renderer, ytd-video-renderer')) {
                         this.processVideoItem(element);
-                    } else {
+                    } else if (element.firstElementChild) {
+                        // ⚡ Bolt: Fast path for leaf nodes - avoid querySelectorAll parsing overhead if no children exist
                         const videoItems = element.querySelectorAll(
                             'ytd-rich-item-renderer, ytd-video-renderer'
                         );
