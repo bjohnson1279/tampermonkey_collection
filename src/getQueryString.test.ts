@@ -22,7 +22,6 @@ describe('getQueryParams', () => {
         expect(params.__proto__).toBeUndefined();
         expect(({} as any).polluted).toBeUndefined();
     });
-
     // Edge cases
     it('should return empty object for empty query string', () => {
         const url = 'https://example.com/page?';
