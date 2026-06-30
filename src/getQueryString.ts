@@ -36,7 +36,3 @@ export const getQueryParams = (urlString: string): QueryParams => {
     }
 };
 
-// Log the current URL's query parameters to the console
-if (typeof window !== 'undefined') {
-    console.log('Query parameters:', getQueryParams(window.location.href));
-}

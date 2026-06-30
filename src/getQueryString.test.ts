@@ -14,7 +14,8 @@ describe('getQueryParams', () => {
 
     // Security cases
     it('should prevent prototype pollution', () => {
-        const url = 'https://example.com/page?__proto__=polluted&constructor=polluted&prototype=polluted&normal=true';
+        const url =
+            'https://example.com/page?__proto__=polluted&constructor=polluted&prototype=polluted&normal=true';
         const params = getQueryParams(url) as any;
 
         expect(params).toEqual({ normal: 'true' });
@@ -48,6 +49,20 @@ describe('getQueryParams', () => {
         expect(getQueryParams(url)).toEqual({ foo: 'bar baz', qux: '✓' });
     });
 
+    it('should ignore hash fragments', () => {
+        const url = 'https://example.com/page?foo=bar#section';
+        expect(getQueryParams(url)).toEqual({ foo: 'bar' });
+    });
+
+    it('should handle empty values', () => {
+        const url = 'https://example.com/page?foo=&bar';
+        expect(getQueryParams(url)).toEqual({ foo: '', bar: '' });
+    });
+
+    it('should handle equal signs in values', () => {
+        const url = 'https://example.com/page?foo=bar=baz';
+        expect(getQueryParams(url)).toEqual({ foo: 'bar=baz' });
+    });
     // Error cases
     it('should return empty object for invalid URL string', () => {
         const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -72,7 +87,6 @@ describe('getQueryParams', () => {
         expect(consoleSpy).toHaveBeenCalledWith('Error parsing URL:', expect.anything());
         consoleSpy.mockRestore();
     });
-
     it('should handle invalid URLs by catching the error and returning an empty object', () => {
         // Suppress console.error during this test
         const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});

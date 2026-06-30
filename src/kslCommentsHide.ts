@@ -20,8 +20,9 @@ interface CommentElement extends Element {
         return;
     }
 
+    // ⚡ Bolt: Disable attributes to prevent unnecessary callbacks on every attribute change
     const config: MutationObserverInit = {
-        attributes: true,
+        attributes: false,
         childList: true,
         subtree: true
     };

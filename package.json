@@ -11,7 +11,8 @@
     "generate:icons": "node scripts/generate-icons.js",
     "prepare": "husky install",
     "generate:all": "npm run build && npm run generate:extensions && npm run generate:icons",
-    "postinstall": "npm run generate:all"
+    "postinstall": "npm run generate:all",
+    "test": "jest"
   },
   "keywords": [
     "tampermonkey",
