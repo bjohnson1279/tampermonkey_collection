@@ -18,22 +18,25 @@ interface SearchEngines {
     'use strict';
 
     const blacklist: string[] = ['asdf']; // Add terms to blacklist here
+    const lowercaseBlacklist: string[] = blacklist.map((phrase: string) => phrase.toLowerCase());
 
     const searchEngines: SearchEngines = {
         'bing.com': { queryParam: 'q', url: 'https://www.bing.com' },
         'google.com': { queryParam: 'q', url: 'https://www.google.com' },
         'duckduckgo.com': { queryParam: 'q', url: 'https://duckduckgo.com' },
-        'yahoo.com': { queryParam: 'p', url: 'https://www.yahoo.com' }
+        'yahoo.com': { queryParam: 'p', url: 'https://www.yahoo.com' },
     };
 
     const processSearch = (): void => {
         try {
             const href: string = window.location.href;
             const params: URLSearchParams = new URLSearchParams(window.location.search);
-            
+
             // Find the matching search engine configuration
-            const engineEntry = Object.entries(searchEngines).find(([domain]) => href.includes(domain));
-            
+            const engineEntry = Object.entries(searchEngines).find(([domain]) =>
+                href.includes(domain)
+            );
+
             if (!engineEntry) {
                 console.log('No matching search engine found');
                 return;
@@ -41,15 +44,16 @@ interface SearchEngines {
 
             const [domain, engine] = engineEntry;
             console.log(`Search engine detected: ${domain}`);
-            
+
             const query: string | null = params.get(engine.queryParam);
 
             if (query) {
                 const searchQuery: string = query.replace(/\+/g, ' ');
                 console.log(`Search query: "${searchQuery}"`);
 
-                const isBlacklisted: boolean = blacklist.some(
-                    (phrase: string): boolean => searchQuery.toLowerCase().includes(phrase.toLowerCase())
+                const searchQueryLower = searchQuery.toLowerCase();
+                const isBlacklisted: boolean = lowercaseBlacklist.some((phrase: string): boolean =>
+                    searchQueryLower.includes(phrase)
                 );
 
                 if (isBlacklisted) {
