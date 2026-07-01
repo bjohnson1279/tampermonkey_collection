@@ -196,11 +196,11 @@
         const btn: HTMLButtonElement = document.createElement('button');
         btn.id = 'adblock-toggle';
         btn.textContent = `AdBlock: ${enabled ? 'ON' : 'OFF'}`;
-        btn.setAttribute('aria-label', `Toggle AdBlock (Currently ${enabled ? 'ON' : 'OFF'})`);
+        // Palette: Use static aria-label since aria-pressed already indicates the current state
+        btn.setAttribute('aria-label', `Toggle AdBlock`);
         btn.setAttribute('aria-pressed', enabled.toString());
         btn.setAttribute('title', 'Toggle AdBlock (Shift+A)');
         btn.setAttribute('aria-keyshortcuts', 'Shift+A');
-        btn.setAttribute('aria-live', 'polite');
         styleButtonStatic(btn);
         styleButtonDynamic(btn);
 
@@ -208,7 +208,10 @@
 
         // Add hover and focus styles for accessibility
         btn.addEventListener('mouseover', () => (btn.style.opacity = '0.8'));
-        btn.addEventListener('mouseout', () => (btn.style.opacity = '1'));
+        btn.addEventListener('mouseout', () => {
+            btn.style.opacity = '1';
+            btn.style.transform = 'scale(1)';
+        });
         btn.addEventListener('focus', () => {
             btn.style.outline = '2px solid currentColor';
             btn.style.outlineOffset = '2px';
@@ -216,9 +219,41 @@
         btn.addEventListener('blur', () => {
             btn.style.outline = 'none';
             btn.style.outlineOffset = '0px';
+            btn.style.transform = 'scale(1)';
+        });
+        // Add tactile active state scaling
+        btn.addEventListener('mousedown', () => (btn.style.transform = 'scale(0.95)'));
+        btn.addEventListener('mouseup', () => (btn.style.transform = 'scale(1)'));
+        btn.addEventListener('keydown', (e) => {
+            if (e.key === ' ' || e.key === 'Enter') {
+                btn.style.transform = 'scale(0.95)';
+            }
+        });
+        btn.addEventListener('keyup', (e) => {
+            if (e.key === ' ' || e.key === 'Enter') {
+                btn.style.transform = 'scale(1)';
+            }
         });
 
         logo.parentElement?.insertBefore(btn, logo.nextSibling);
+
+        // Add visually hidden live announcer for screen readers
+        if (!document.querySelector('#adblock-announcer')) {
+            const announcer = document.createElement('div');
+            announcer.id = 'adblock-announcer';
+            announcer.setAttribute('aria-live', 'polite');
+            announcer.style.cssText = `
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                border: 0;
+            `;
+            document.body.appendChild(announcer);
+        }
     }
 
     function styleButtonStatic(btn: HTMLButtonElement): void {
@@ -230,8 +265,9 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            transition: opacity 0.2s, outline 0.2s, background-color 0.2s;
+            transition: opacity 0.2s, outline 0.2s, background-color 0.2s, transform 0.1s;
             outline: none;
+            transform-origin: center;
         `;
     }
 
@@ -249,9 +285,14 @@
         const btn: HTMLElement | null = document.querySelector('#adblock-toggle');
         if (btn) {
             btn.textContent = `AdBlock: ${enabled ? 'ON' : 'OFF'}`;
-            btn.setAttribute('aria-label', `Toggle AdBlock (Currently ${enabled ? 'ON' : 'OFF'})`);
             btn.setAttribute('aria-pressed', enabled.toString());
             styleButtonDynamic(btn as HTMLButtonElement);
+        }
+
+        const announcer: HTMLElement | null = document.querySelector('#adblock-announcer');
+        if (announcer) {
+            // Update announcer text to ensure screen readers read the new state, especially useful when toggled via hotkey
+            announcer.textContent = `AdBlock is now ${enabled ? 'ON' : 'OFF'}`;
         }
 
         console.log(`YouTube AdBlock is now ${enabled ? 'ENABLED' : 'DISABLED'}`);

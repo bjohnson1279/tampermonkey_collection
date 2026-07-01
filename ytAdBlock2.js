@@ -8,7 +8,7 @@
 // @grant        none
 // ==/UserScript==
 
-"use strict";
+'use strict';
 (function () {
     'use strict';
 
@@ -42,7 +42,7 @@
         return enabled && blockedPatterns.some((pattern) => url.includes(pattern));
     }
     const origFetch = window.fetch;
-    window.fetch = (async (...args) => {
+    window.fetch = async (...args) => {
         const req = args[0];
         // 🛡️ Sentinel: Use duck typing for Request/URL objects to prevent cross-realm (iframe) adblock evasion
         // where `instanceof` fails and `.toString()` returns "[object Request]"
@@ -56,7 +56,7 @@
             return new Response('', { status: 204 });
         }
         return origFetch(...args);
-    });
+    };
     const origOpen = XMLHttpRequest.prototype.open;
     XMLHttpRequest.prototype.open = function (method, url, ...rest) {
         // 🛡️ Sentinel: Use duck typing for URL objects to prevent cross-realm adblock evasion
@@ -93,34 +93,31 @@
     ];
     const combinedAdSelector = adSelectors.join(',');
     const adObserver = new MutationObserver((mutations) => {
-        if (!enabled)
-            return;
+        if (!enabled) return;
         mutations.forEach((mutation) => {
             mutation.addedNodes.forEach((node) => {
                 if (node.nodeType === Node.ELEMENT_NODE) {
                     const el = node;
                     if (el.matches && el.matches(combinedAdSelector)) {
                         el.remove();
-                    }
-                    else if (el.firstElementChild && el.querySelectorAll) {
+                    } else if (el.firstElementChild && el.querySelectorAll) {
                         el.querySelectorAll(combinedAdSelector).forEach((e) => e.remove());
-                        el.querySelectorAll('#dismissible ytd-badge-supported-renderer').forEach((badge) => {
-                            if ((badge.textContent || '')
-                                .toLowerCase()
-                                .includes('promoted')) {
-                                badge
-                                    .closest('ytd-video-renderer,ytd-compact-video-renderer')
-                                    ?.remove();
+                        el.querySelectorAll('#dismissible ytd-badge-supported-renderer').forEach(
+                            (badge) => {
+                                if ((badge.textContent || '').toLowerCase().includes('promoted')) {
+                                    badge
+                                        .closest('ytd-video-renderer,ytd-compact-video-renderer')
+                                        ?.remove();
+                                }
                             }
-                        });
+                        );
                     }
                 }
             });
         });
     });
     function removeInitialAds() {
-        if (!enabled)
-            return;
+        if (!enabled) return;
         document.querySelectorAll(combinedAdSelector).forEach((el) => el.remove());
         document.querySelectorAll('#dismissible ytd-badge-supported-renderer').forEach((badge) => {
             if ((badge.textContent || '').toLowerCase().includes('promoted')) {
@@ -133,40 +130,39 @@
         adObserver.observe(document.documentElement, { childList: true, subtree: true });
     }
     function skipVideoAds() {
-        if (!enabled)
-            return;
+        if (!enabled) return;
         const video = document.querySelector('video');
-        if (!video)
-            return;
+        if (!video) return;
         if (document.querySelector('.ad-showing')) {
             if (Number.isFinite(video.duration)) {
                 video.currentTime = video.duration;
             }
         }
         const skipBtn = document.querySelector('.ytp-ad-skip-button');
-        if (skipBtn)
-            skipBtn.click();
+        if (skipBtn) skipBtn.click();
     }
     function addToggleButton() {
-        if (document.querySelector('#adblock-toggle'))
-            return;
+        if (document.querySelector('#adblock-toggle')) return;
         const logo = document.querySelector('#logo');
-        if (!logo)
-            return;
+        if (!logo) return;
         const btn = document.createElement('button');
         btn.id = 'adblock-toggle';
         btn.textContent = `AdBlock: ${enabled ? 'ON' : 'OFF'}`;
-        btn.setAttribute('aria-label', `Toggle AdBlock (Currently ${enabled ? 'ON' : 'OFF'})`);
+        // Palette: Use static aria-label since aria-pressed already indicates the current state
+        btn.setAttribute('aria-label', `Toggle AdBlock`);
         btn.setAttribute('aria-pressed', enabled.toString());
         btn.setAttribute('title', 'Toggle AdBlock (Shift+A)');
         btn.setAttribute('aria-keyshortcuts', 'Shift+A');
-        btn.setAttribute('aria-live', 'polite');
         styleButtonStatic(btn);
         styleButtonDynamic(btn);
 
         btn.addEventListener('click', toggleAdblock);
+        // Add hover and focus styles for accessibility
         btn.addEventListener('mouseover', () => (btn.style.opacity = '0.8'));
-        btn.addEventListener('mouseout', () => (btn.style.opacity = '1'));
+        btn.addEventListener('mouseout', () => {
+            btn.style.opacity = '1';
+            btn.style.transform = 'scale(1)';
+        });
         btn.addEventListener('focus', () => {
             btn.style.outline = '2px solid currentColor';
             btn.style.outlineOffset = '2px';
@@ -174,9 +170,41 @@
         btn.addEventListener('blur', () => {
             btn.style.outline = 'none';
             btn.style.outlineOffset = '0px';
+            btn.style.transform = 'scale(1)';
+        });
+        // Add tactile active state scaling
+        btn.addEventListener('mousedown', () => (btn.style.transform = 'scale(0.95)'));
+        btn.addEventListener('mouseup', () => (btn.style.transform = 'scale(1)'));
+        btn.addEventListener('keydown', (e) => {
+            if (e.key === ' ' || e.key === 'Enter') {
+                btn.style.transform = 'scale(0.95)';
+            }
+        });
+        btn.addEventListener('keyup', (e) => {
+            if (e.key === ' ' || e.key === 'Enter') {
+                btn.style.transform = 'scale(1)';
+            }
         });
 
-        logo.parentElement.insertBefore(btn, logo.nextSibling);
+        logo.parentElement?.insertBefore(btn, logo.nextSibling);
+
+        // Add visually hidden live announcer for screen readers
+        if (!document.querySelector('#adblock-announcer')) {
+            const announcer = document.createElement('div');
+            announcer.id = 'adblock-announcer';
+            announcer.setAttribute('aria-live', 'polite');
+            announcer.style.cssText = `
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                border: 0;
+            `;
+            document.body.appendChild(announcer);
+        }
     }
 
     function styleButtonStatic(btn) {
@@ -188,8 +216,9 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            transition: opacity 0.2s, outline 0.2s, background-color 0.2s;
+            transition: opacity 0.2s, outline 0.2s, background-color 0.2s, transform 0.1s;
             outline: none;
+            transform-origin: center;
         `;
     }
 
@@ -206,9 +235,14 @@
         const btn = document.querySelector('#adblock-toggle');
         if (btn) {
             btn.textContent = `AdBlock: ${enabled ? 'ON' : 'OFF'}`;
-            btn.setAttribute('aria-label', `Toggle AdBlock (Currently ${enabled ? 'ON' : 'OFF'})`);
             btn.setAttribute('aria-pressed', enabled.toString());
             styleButtonDynamic(btn);
+        }
+
+        const announcer = document.querySelector('#adblock-announcer');
+        if (announcer) {
+            // Update announcer text to ensure screen readers read the new state, especially useful when toggled via hotkey
+            announcer.textContent = `AdBlock is now ${enabled ? 'ON' : 'OFF'}`;
         }
         console.log(`YouTube AdBlock is now ${enabled ? 'ENABLED' : 'DISABLED'}`);
     }
