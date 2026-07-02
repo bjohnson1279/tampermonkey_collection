@@ -52,15 +52,28 @@
         const req = args[0];
         // 🛡️ Sentinel: Use duck typing for Request/URL objects to prevent cross-realm (iframe) adblock evasion
         // where `instanceof` fails and `.toString()` returns "[object Request]"
-        const url: string =
-            req && typeof req === 'object' && 'url' in req && typeof (req as any).url === 'string'
-                ? (req as any).url
-                : req &&
-                    typeof req === 'object' &&
-                    'href' in req &&
-                    typeof (req as any).href === 'string'
-                  ? (req as any).href
-                  : req?.toString() || '';
+        let url: string;
+        if (
+            req &&
+            typeof req === 'object' &&
+            'url' in req &&
+            typeof (req as any).url === 'string'
+        ) {
+            url = (req as any).url;
+        } else if (
+            req &&
+            typeof req === 'object' &&
+            'href' in req &&
+            typeof (req as any).href === 'string'
+        ) {
+            url = (req as any).href;
+        } else {
+            url = req?.toString() || '';
+            // 🛡️ Sentinel: Overwrite args[0] with evaluated string if relying on toString()
+            // to prevent TOCTOU evasion from an object returning safe string first and ad string later.
+            args[0] = url;
+        }
+
         if (shouldBlock(url)) {
             return new Response('', { status: 204 });
         }
@@ -86,7 +99,8 @@
             this.abort();
             return;
         }
-        return origOpen.apply(this, [method, url as string, async ?? true, username, password]);
+        // 🛡️ Sentinel: Pass the evaluated URL string to prevent TOCTOU evasion via dynamic toString() or getters
+        return origOpen.apply(this, [method, urlStr, async ?? true, username, password]);
     };
 
     //----------------------------------------

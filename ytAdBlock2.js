@@ -46,19 +46,30 @@
         const req = args[0];
         // 🛡️ Sentinel: Use duck typing for Request/URL objects to prevent cross-realm (iframe) adblock evasion
         // where `instanceof` fails and `.toString()` returns "[object Request]"
-        const url =
-            req && typeof req === 'object' && 'url' in req && typeof req.url === 'string'
-                ? req.url
-                : req && typeof req === 'object' && 'href' in req && typeof req.href === 'string'
-                  ? req.href
-                  : req?.toString() || '';
+        let url;
+        if (req && typeof req === 'object' && 'url' in req && typeof req.url === 'string') {
+            url = req.url;
+        } else if (
+            req &&
+            typeof req === 'object' &&
+            'href' in req &&
+            typeof req.href === 'string'
+        ) {
+            url = req.href;
+        } else {
+            url = req?.toString() || '';
+            // 🛡️ Sentinel: Overwrite args[0] with evaluated string if relying on toString()
+            // to prevent TOCTOU evasion from an object returning safe string first and ad string later.
+            args[0] = url;
+        }
+
         if (shouldBlock(url)) {
             return new Response('', { status: 204 });
         }
         return origFetch(...args);
     };
     const origOpen = XMLHttpRequest.prototype.open;
-    XMLHttpRequest.prototype.open = function (method, url, ...rest) {
+    XMLHttpRequest.prototype.open = function (method, url, async, username, password) {
         // 🛡️ Sentinel: Use duck typing for URL objects to prevent cross-realm adblock evasion
         const urlStr =
             url && typeof url === 'object' && 'href' in url && typeof url.href === 'string'
@@ -68,7 +79,8 @@
             this.abort();
             return;
         }
-        return origOpen.apply(this, [method, url, async ?? true, username, password]);
+        // 🛡️ Sentinel: Pass the evaluated URL string to prevent TOCTOU evasion via dynamic toString() or getters
+        return origOpen.apply(this, [method, urlStr, async ?? true, username, password]);
     };
     const adSelectors = [
         'ytd-promoted-sparkles-text-search-renderer',
