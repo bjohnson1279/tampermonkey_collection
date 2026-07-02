@@ -11,3 +11,6 @@
 ## 2024-05-24 - Avoid redundant string allocations in iterators
 **Learning:** Placing `.toLowerCase()` operations on both the target and the iterated items inside `.some()` or `.filter()` causes unnecessary string allocations and processing on every iteration, leading to O(N) redundant allocations.
 **Action:** Pre-compute static collections into their desired format globally, and extract loop-invariant operations (like transforming the search query) outside the iterator function.
+## 2024-07-28 - Regex matching vs Array.some + includes for URL interception
+**Learning:** Intercepting high-volume network events (like replacing `fetch` and `XMLHttpRequest`) requires extremely fast checks to avoid blocking the main thread during heavy page loads. Using an array of patterns and executing `Array.some(p => url.includes(p))` is O(N) strings checked per URL and is noticeably slower (roughly ~5x based on profiling) than testing against a single compiled Regular Expression.
+**Action:** When evaluating URLs against a static list of strings/patterns in high-frequency network intercepts, concatenate them into a single Regular Expression pattern and use `regex.test(url)` for significantly improved performance.
