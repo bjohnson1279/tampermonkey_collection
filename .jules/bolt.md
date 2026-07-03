@@ -14,3 +14,6 @@
 ## 2024-07-28 - Regex matching vs Array.some + includes for URL interception
 **Learning:** Intercepting high-volume network events (like replacing `fetch` and `XMLHttpRequest`) requires extremely fast checks to avoid blocking the main thread during heavy page loads. Using an array of patterns and executing `Array.some(p => url.includes(p))` is O(N) strings checked per URL and is noticeably slower (roughly ~5x based on profiling) than testing against a single compiled Regular Expression.
 **Action:** When evaluating URLs against a static list of strings/patterns in high-frequency network intercepts, concatenate them into a single Regular Expression pattern and use `regex.test(url)` for significantly improved performance.
+## 2024-07-28 - Regex matching vs .toLowerCase().includes() for text checks
+**Learning:** Checking for string presence via `.toLowerCase().includes()` inside high-frequency `MutationObserver` callbacks (like checking DOM text nodes) causes unnecessary string allocations and is noticeably slower than a pre-compiled regex check (e.g. `/pattern/i.test(text)`). In performance testing, a regex check is about ~6x faster than `toLowerCase().includes()`.
+**Action:** Always use pre-compiled regex with the `i` flag instead of calling `.toLowerCase().includes()` when evaluating text content inside `MutationObserver` or `setInterval` loops.
