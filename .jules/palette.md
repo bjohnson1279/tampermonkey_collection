@@ -32,3 +32,8 @@
 
 **Learning:** When displaying asynchronous text feedback directly inside a button (e.g., changing "Copy" to "Copied!" for 2 seconds), failing to programmatically disable the button (`btn.disabled = true`) allows rapid successive clicks that can trigger race conditions with the timeout resets, causing confusing text flickering and invalidating the feedback state. Furthermore, native `:active` CSS transformations must be scoped to `:not(:disabled)` to prevent visually implying the button is interactive while it is disabled.
 **Action:** Always apply `disabled = true` to buttons during async/timeout feedback states, manage the `clearTimeout` properly on consecutive calls, and ensure `:active` CSS states do not apply to `:disabled` elements.
+
+## 2024-08-16 - Dynamic tooltips and AA Contrast on Feedback Buttons
+
+**Learning:** When displaying asynchronous text feedback directly inside a button, standard alert colors (like Bootstrap's `#28a745` success green) often fail WCAG AA contrast requirements when used with white text. Furthermore, leaving the default action tooltip (e.g., "Copy JSON to clipboard") on the button during its disabled feedback state provides confusing information to screen reader and mouse users hovering over the button.
+**Action:** Always verify contrast ratios for dynamic feedback states (using darker shades like `#146c43` for success green). Additionally, dynamically update the `title` attribute to explain the current state (e.g., "Successfully copied") when disabling the button for feedback, and restore the original `title` when the feedback times out and the button becomes interactive again.
