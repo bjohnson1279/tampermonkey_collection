@@ -2,28 +2,27 @@
 (function () {
     'use strict';
     const blacklist = ['asdf'];
+    const lowercaseBlacklist = blacklist.map((phrase) => phrase.toLowerCase());
     const searchEngines = {
         'bing.com': { queryParam: 'q', url: 'https://www.bing.com' },
         'google.com': { queryParam: 'q', url: 'https://www.google.com' },
         'duckduckgo.com': { queryParam: 'q', url: 'https://duckduckgo.com' },
-        'yahoo.com': { queryParam: 'p', url: 'https://www.yahoo.com' }
+        'yahoo.com': { queryParam: 'p', url: 'https://www.yahoo.com' },
     };
     const processSearch = () => {
         try {
-            const href = window.location.href;
+            const hostname = window.location.hostname;
             const params = new URLSearchParams(window.location.search);
-            const engineEntry = Object.entries(searchEngines).find(([domain]) => href.includes(domain));
+            const engineEntry = Object.entries(searchEngines).find(([domain]) => hostname.includes(domain));
             if (!engineEntry) {
-                console.log('No matching search engine found');
                 return;
             }
-            const [domain, engine] = engineEntry;
-            console.log(`Search engine detected: ${domain}`);
+            const [, engine] = engineEntry;
             const query = params.get(engine.queryParam);
             if (query) {
                 const searchQuery = query.replace(/\+/g, ' ');
-                console.log(`Search query: "${searchQuery}"`);
-                const isBlacklisted = blacklist.some((phrase) => searchQuery.toLowerCase().includes(phrase.toLowerCase()));
+                const searchQueryLower = searchQuery.toLowerCase();
+                const isBlacklisted = lowercaseBlacklist.some((phrase) => searchQueryLower.includes(phrase));
                 if (isBlacklisted) {
                     window.location.href = engine.url;
                 }
