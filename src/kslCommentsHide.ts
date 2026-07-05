@@ -27,10 +27,10 @@ interface CommentElement extends Element {
         subtree: true,
     };
 
-    // ⚡ Bolt: Extract loop-invariant operations and use a Set for O(1) lookups.
-    // Initializing this array inside the .forEach() loop caused redundant memory allocations on every DOM mutation.
-    // Add usernames to the Set below to hide their comments
-    const blockedUsers: Set<string> = new Set([]);
+    // ⚡ Bolt: Extract array allocations out of high-frequency observer loops
+    // and convert to Set to improve lookup to O(1)
+    // Add usernames to the array below to hide their comments
+    const blockedUsers = new Set<string>([]);
 
     const handleMutations: MutationCallback = (
         mutationsList: MutationRecord[],
