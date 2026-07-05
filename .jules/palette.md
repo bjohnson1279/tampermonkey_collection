@@ -27,3 +27,8 @@
 
 **Learning:** Using JavaScript event listeners (`mouseover`, `focus`, `mousedown`) to simulate CSS pseudo-classes (`:hover`, `:focus`, `:active`) on dynamically injected elements creates an unmaintainable anti-pattern. It leads to buggy accessible behaviors (e.g., `:focus-visible` semantics cannot easily be replicated in JS, leading to sticky focus outlines after mouse clicks).
 **Action:** When styling custom injected UI elements, safely inject a `<style>` block dynamically (e.g., via `document.createElement('style')`) into the DOM to handle pseudo-class styling natively. This ensures proper browser accessibility support and removes redundant JS overhead.
+
+## 2024-08-01 - Interactive Element Async Feedback Disabled States
+
+**Learning:** When displaying asynchronous text feedback directly inside a button (e.g., changing "Copy" to "Copied!" for 2 seconds), failing to programmatically disable the button (`btn.disabled = true`) allows rapid successive clicks that can trigger race conditions with the timeout resets, causing confusing text flickering and invalidating the feedback state. Furthermore, native `:active` CSS transformations must be scoped to `:not(:disabled)` to prevent visually implying the button is interactive while it is disabled.
+**Action:** Always apply `disabled = true` to buttons during async/timeout feedback states, manage the `clearTimeout` properly on consecutive calls, and ensure `:active` CSS states do not apply to `:disabled` elements.
