@@ -24,10 +24,18 @@ interface CommentElement extends Element {
     const config: MutationObserverInit = {
         attributes: false,
         childList: true,
-        subtree: true
+        subtree: true,
     };
 
-    const handleMutations: MutationCallback = (mutationsList: MutationRecord[], observer: MutationObserver): void => {
+    // ⚡ Bolt: Extract array allocations out of high-frequency observer loops
+    // and convert to Set to improve lookup to O(1)
+    // Add usernames to the array below to hide their comments
+    const blockedUsers = new Set<string>([]);
+
+    const handleMutations: MutationCallback = (
+        mutationsList: MutationRecord[],
+        observer: MutationObserver
+    ): void => {
         const commentsList = container.querySelector<HTMLElement>('.CommentsList__root');
         if (!commentsList) return;
 
@@ -37,11 +45,8 @@ interface CommentElement extends Element {
             if (!usernameElement?.textContent) return;
 
             const username = usernameElement.textContent.trim();
-            
-            // Add usernames to the array below to hide their comments
-            const blockedUsers: string[] = [];
-            
-            if (blockedUsers.includes(username)) {
+
+            if (blockedUsers.has(username)) {
                 console.log(`Hiding comment from user: ${username}`);
                 (comment as CommentElement).style.display = 'none';
             }
@@ -51,7 +56,7 @@ interface CommentElement extends Element {
     try {
         const observer = new MutationObserver(handleMutations);
         observer.observe(container, config);
-        
+
         // Initial check in case comments are already loaded
         handleMutations([], observer);
     } catch (error) {
