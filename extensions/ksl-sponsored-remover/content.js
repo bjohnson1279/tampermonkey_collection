@@ -3,7 +3,6 @@
     'use strict';
     const removeSponsoredContent = () => {
         const sponsoredElements = document.querySelectorAll('.sponsored');
-        console.log(`Found ${sponsoredElements.length} sponsored elements`);
         sponsoredElements.forEach((sponsored) => {
             const sponsoredContainer = sponsored.closest('.queue, .queue_story');
             if (sponsoredContainer) {
@@ -14,13 +13,12 @@
     removeSponsoredContent();
     const loadMoreContainer = document.querySelector('#loadMoreBtnContainer');
     if (!loadMoreContainer) {
-        console.log('Load more container not found');
         return;
     }
     const config = {
         attributes: false,
         childList: true,
-        subtree: true
+        subtree: true,
     };
     const handleMutations = (mutationsList) => {
         for (const mutation of mutationsList) {

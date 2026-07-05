@@ -15,25 +15,30 @@
     function saveState() {
         localStorage.setItem('ytAdblockEnabled', JSON.stringify(enabled));
     }
-    const blockedPatterns = [
-        'doubleclick.net',
-        'youtube.com/api/stats/ads',
-        'youtube.com/api/stats/atr',
-        'youtube.com/get_midroll',
-        'youtube.com/pagead',
-        'ytimg.com/ads/',
-    ];
+    const blockedPatternRegex = /doubleclick\.net|youtube\.com\/api\/stats\/ads|youtube\.com\/api\/stats\/atr|youtube\.com\/get_midroll|youtube\.com\/pagead|ytimg\.com\/ads\//;
     function shouldBlock(url) {
-        return enabled && blockedPatterns.some((pattern) => url.includes(pattern));
+        return enabled && blockedPatternRegex.test(url);
     }
     const origFetch = window.fetch;
     window.fetch = (async (...args) => {
         const req = args[0];
-        const url = req instanceof Request
-            ? req.url
-            : req instanceof URL
-                ? req.href
-                : req?.toString() || '';
+        let url;
+        if (req &&
+            typeof req === 'object' &&
+            'url' in req &&
+            typeof req.url === 'string') {
+            url = req.url;
+        }
+        else if (req &&
+            typeof req === 'object' &&
+            'href' in req &&
+            typeof req.href === 'string') {
+            url = req.href;
+        }
+        else {
+            url = req?.toString() || '';
+            args[0] = url;
+        }
         if (shouldBlock(url)) {
             return new Response('', { status: 204 });
         }
@@ -41,12 +46,14 @@
     });
     const origOpen = XMLHttpRequest.prototype.open;
     XMLHttpRequest.prototype.open = function (method, url, async, username, password) {
-        const urlStr = url instanceof URL ? url.href : url?.toString() || '';
+        const urlStr = url && typeof url === 'object' && 'href' in url && typeof url.href === 'string'
+            ? url.href
+            : url?.toString() || '';
         if (shouldBlock(urlStr)) {
             this.abort();
             return;
         }
-        return origOpen.apply(this, [method, url, async ?? true, username, password]);
+        return origOpen.apply(this, [method, urlStr, async ?? true, username, password]);
     };
     const adSelectors = [
         'ytd-promoted-sparkles-text-search-renderer',
@@ -70,6 +77,7 @@
         'ytd-companion-slot-renderer',
     ];
     const combinedAdSelector = adSelectors.join(',');
+    const promotedBadgeRegex = /promoted/i;
     const adObserver = new MutationObserver((mutations) => {
         if (!enabled)
             return;
@@ -80,12 +88,10 @@
                     if (el.matches && el.matches(combinedAdSelector)) {
                         el.remove();
                     }
-                    else if (el.querySelectorAll) {
+                    else if (el.firstElementChild && el.querySelectorAll) {
                         el.querySelectorAll(combinedAdSelector).forEach((e) => e.remove());
                         el.querySelectorAll('#dismissible ytd-badge-supported-renderer').forEach((badge) => {
-                            if ((badge.textContent || '')
-                                .toLowerCase()
-                                .includes('promoted')) {
+                            if (promotedBadgeRegex.test(badge.textContent || '')) {
                                 badge
                                     .closest('ytd-video-renderer,ytd-compact-video-renderer')
                                     ?.remove();
@@ -101,7 +107,7 @@
             return;
         document.querySelectorAll(combinedAdSelector).forEach((el) => el.remove());
         document.querySelectorAll('#dismissible ytd-badge-supported-renderer').forEach((badge) => {
-            if ((badge.textContent || '').toLowerCase().includes('promoted')) {
+            if (promotedBadgeRegex.test(badge.textContent || '')) {
                 badge.closest('ytd-video-renderer,ytd-compact-video-renderer')?.remove();
             }
         });
@@ -134,25 +140,40 @@
         const btn = document.createElement('button');
         btn.id = 'adblock-toggle';
         btn.textContent = `AdBlock: ${enabled ? 'ON' : 'OFF'}`;
-        btn.setAttribute('aria-label', `Toggle AdBlock (Currently ${enabled ? 'ON' : 'OFF'})`);
+        btn.setAttribute('aria-label', `Toggle AdBlock`);
         btn.setAttribute('aria-pressed', enabled.toString());
         btn.setAttribute('title', 'Toggle AdBlock (Shift+A)');
         btn.setAttribute('aria-keyshortcuts', 'Shift+A');
-        btn.setAttribute('aria-live', 'polite');
         styleButtonStatic(btn);
         styleButtonDynamic(btn);
         btn.addEventListener('click', toggleAdblock);
-        btn.addEventListener('mouseover', () => (btn.style.opacity = '0.8'));
-        btn.addEventListener('mouseout', () => (btn.style.opacity = '1'));
-        btn.addEventListener('focus', () => {
-            btn.style.outline = '2px solid currentColor';
-            btn.style.outlineOffset = '2px';
-        });
-        btn.addEventListener('blur', () => {
-            btn.style.outline = 'none';
-            btn.style.outlineOffset = '0px';
-        });
         logo.parentElement?.insertBefore(btn, logo.nextSibling);
+        if (!document.querySelector('#adblock-styles')) {
+            const style = document.createElement('style');
+            style.id = 'adblock-styles';
+            style.textContent = `
+                #adblock-toggle:hover { opacity: 0.8; }
+                #adblock-toggle:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+                #adblock-toggle:active { transform: scale(0.95); }
+            `;
+            document.head.appendChild(style);
+        }
+        if (!document.querySelector('#adblock-announcer')) {
+            const announcer = document.createElement('div');
+            announcer.id = 'adblock-announcer';
+            announcer.setAttribute('aria-live', 'polite');
+            announcer.style.cssText = `
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                border: 0;
+            `;
+            document.body.appendChild(announcer);
+        }
     }
     function styleButtonStatic(btn) {
         btn.style.cssText = `
@@ -163,8 +184,9 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            transition: opacity 0.2s, outline 0.2s, background-color 0.2s;
+            transition: opacity 0.2s, outline 0.2s, background-color 0.2s, transform 0.1s;
             outline: none;
+            transform-origin: center;
         `;
     }
     function styleButtonDynamic(btn) {
@@ -176,9 +198,12 @@
         const btn = document.querySelector('#adblock-toggle');
         if (btn) {
             btn.textContent = `AdBlock: ${enabled ? 'ON' : 'OFF'}`;
-            btn.setAttribute('aria-label', `Toggle AdBlock (Currently ${enabled ? 'ON' : 'OFF'})`);
             btn.setAttribute('aria-pressed', enabled.toString());
             styleButtonDynamic(btn);
+        }
+        const announcer = document.querySelector('#adblock-announcer');
+        if (announcer) {
+            announcer.textContent = `AdBlock is now ${enabled ? 'ON' : 'OFF'}`;
         }
         console.log(`YouTube AdBlock is now ${enabled ? 'ENABLED' : 'DISABLED'}`);
     }

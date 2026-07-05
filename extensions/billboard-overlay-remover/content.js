@@ -19,7 +19,7 @@
         return;
     }
     const config = {
-        attributes: true,
+        attributes: false,
         childList: true,
         subtree: true
     };

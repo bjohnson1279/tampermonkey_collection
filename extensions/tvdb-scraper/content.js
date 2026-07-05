@@ -70,17 +70,20 @@
             try {
                 await navigator.clipboard.writeText(JSON.stringify(episodesData, null, 2));
                 btn.textContent = '✅ Copied!';
-                btn.style.backgroundColor = '#28a745';
+                btn.style.backgroundColor = '#146c43';
+                btn.setAttribute('title', 'Successfully copied');
                 announcer.textContent = 'Copied to clipboard';
             }
             catch (err) {
                 btn.textContent = '❌ Error';
-                btn.style.backgroundColor = '#dc3545';
+                btn.style.backgroundColor = '#b02a37';
+                btn.setAttribute('title', 'Failed to copy');
                 announcer.textContent = 'Failed to copy';
             }
             timeoutId = window.setTimeout(() => {
                 btn.textContent = '📋 Copy JSON';
                 btn.style.backgroundColor = '#007bff';
+                btn.setAttribute('title', 'Copy JSON to clipboard');
                 announcer.textContent = '';
                 btn.disabled = false;
             }, 2000);

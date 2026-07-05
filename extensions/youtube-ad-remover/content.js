@@ -40,7 +40,6 @@ class YouTubeAdRemover {
             return;
         const adItem = contentDiv.querySelector(this.AD_SELECTOR);
         if (adItem) {
-
             adItem.remove();
             contentDiv.remove();
             videoItem.remove();
@@ -58,7 +57,7 @@ class YouTubeAdRemover {
                     if (element.matches('ytd-rich-item-renderer, ytd-video-renderer')) {
                         this.processVideoItem(element);
                     }
-                    else {
+                    else if (element.firstElementChild) {
                         const videoItems = element.querySelectorAll('ytd-rich-item-renderer, ytd-video-renderer');
                         videoItems.forEach((videoItem) => this.processVideoItem(videoItem));
                     }
