@@ -17,3 +17,6 @@
 ## 2024-07-28 - Regex matching vs .toLowerCase().includes() for text checks
 **Learning:** Checking for string presence via `.toLowerCase().includes()` inside high-frequency `MutationObserver` callbacks (like checking DOM text nodes) causes unnecessary string allocations and is noticeably slower than a pre-compiled regex check (e.g. `/pattern/i.test(text)`). In performance testing, a regex check is about ~6x faster than `toLowerCase().includes()`.
 **Action:** Always use pre-compiled regex with the `i` flag instead of calling `.toLowerCase().includes()` when evaluating text content inside `MutationObserver` or `setInterval` loops.
+## 2024-11-20 - Set over Array for O(1) lookups in high-frequency callbacks
+**Learning:** Initializing an array inside a high-frequency `MutationObserver` callback or loop causes redundant O(N) memory allocations every time the callback fires. Furthermore, using `Array.includes()` inside the loop means O(N) lookups per element evaluated.
+**Action:** Always extract loop-invariant structures outside the observer callback. Use `Set` instead of `Array` to achieve O(1) lookups with `Set.has()`, significantly reducing overhead and garbage collection.
