@@ -77,6 +77,7 @@
         'ytd-companion-slot-renderer',
     ];
     const combinedAdSelector = adSelectors.join(',');
+    const promotedBadgeRegex = /promoted/i;
     const adObserver = new MutationObserver((mutations) => {
         if (!enabled)
             return;
@@ -90,9 +91,7 @@
                     else if (el.firstElementChild && el.querySelectorAll) {
                         el.querySelectorAll(combinedAdSelector).forEach((e) => e.remove());
                         el.querySelectorAll('#dismissible ytd-badge-supported-renderer').forEach((badge) => {
-                            if ((badge.textContent || '')
-                                .toLowerCase()
-                                .includes('promoted')) {
+                            if (promotedBadgeRegex.test(badge.textContent || '')) {
                                 badge
                                     .closest('ytd-video-renderer,ytd-compact-video-renderer')
                                     ?.remove();
@@ -108,7 +107,7 @@
             return;
         document.querySelectorAll(combinedAdSelector).forEach((el) => el.remove());
         document.querySelectorAll('#dismissible ytd-badge-supported-renderer').forEach((badge) => {
-            if ((badge.textContent || '').toLowerCase().includes('promoted')) {
+            if (promotedBadgeRegex.test(badge.textContent || '')) {
                 badge.closest('ytd-video-renderer,ytd-compact-video-renderer')?.remove();
             }
         });
@@ -148,33 +147,17 @@
         styleButtonStatic(btn);
         styleButtonDynamic(btn);
         btn.addEventListener('click', toggleAdblock);
-        btn.addEventListener('mouseover', () => (btn.style.opacity = '0.8'));
-        btn.addEventListener('mouseout', () => {
-            btn.style.opacity = '1';
-            btn.style.transform = 'scale(1)';
-        });
-        btn.addEventListener('focus', () => {
-            btn.style.outline = '2px solid currentColor';
-            btn.style.outlineOffset = '2px';
-        });
-        btn.addEventListener('blur', () => {
-            btn.style.outline = 'none';
-            btn.style.outlineOffset = '0px';
-            btn.style.transform = 'scale(1)';
-        });
-        btn.addEventListener('mousedown', () => (btn.style.transform = 'scale(0.95)'));
-        btn.addEventListener('mouseup', () => (btn.style.transform = 'scale(1)'));
-        btn.addEventListener('keydown', (e) => {
-            if (e.key === ' ' || e.key === 'Enter') {
-                btn.style.transform = 'scale(0.95)';
-            }
-        });
-        btn.addEventListener('keyup', (e) => {
-            if (e.key === ' ' || e.key === 'Enter') {
-                btn.style.transform = 'scale(1)';
-            }
-        });
         logo.parentElement?.insertBefore(btn, logo.nextSibling);
+        if (!document.querySelector('#adblock-styles')) {
+            const style = document.createElement('style');
+            style.id = 'adblock-styles';
+            style.textContent = `
+                #adblock-toggle:hover { opacity: 0.8; }
+                #adblock-toggle:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+                #adblock-toggle:active { transform: scale(0.95); }
+            `;
+            document.head.appendChild(style);
+        }
         if (!document.querySelector('#adblock-announcer')) {
             const announcer = document.createElement('div');
             announcer.id = 'adblock-announcer';

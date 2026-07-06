@@ -8,21 +8,25 @@
 // @grant        none
 // ==/UserScript==
 
-(function() {
+(function () {
     'use strict';
     const container = document.querySelector('#commentsContainer');
     // ⚡ Bolt: Disable attributes to prevent unnecessary callbacks on every attribute change
     const config = { attributes: false, childList: true, subtree: true };
 
+    // ⚡ Bolt: Extract array allocations out of high-frequency observer loops
+    // and convert to Set to improve lookup to O(1)
+    // Add usernames to the array below to hide their comments
+    const blockedUsers = new Set([]);
+
     const cbk = (ml, obs) => {
         const cList = container.querySelector('.CommentsList__root');
         if (cList) {
             const allComments = cList.querySelectorAll('.CommentsList__item');
-            allComments.forEach(comment => {
+            allComments.forEach((comment) => {
                 const username = comment.querySelector('.CommentsList__userName').innerText;
 
-                // Add usernames to the array below to hide their comments
-                if ([].includes(username)) {
+                if (blockedUsers.has(username)) {
                     console.log(`User ${username} comment removed`);
                     comment.style.display = 'none';
                 }

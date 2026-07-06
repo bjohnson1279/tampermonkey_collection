@@ -8,8 +8,9 @@
     const config = {
         attributes: false,
         childList: true,
-        subtree: true
+        subtree: true,
     };
+    const blockedUsers = new Set([]);
     const handleMutations = (mutationsList, observer) => {
         const commentsList = container.querySelector('.CommentsList__root');
         if (!commentsList)
@@ -20,8 +21,7 @@
             if (!usernameElement?.textContent)
                 return;
             const username = usernameElement.textContent.trim();
-            const blockedUsers = [];
-            if (blockedUsers.includes(username)) {
+            if (blockedUsers.has(username)) {
                 console.log(`Hiding comment from user: ${username}`);
                 comment.style.display = 'none';
             }
