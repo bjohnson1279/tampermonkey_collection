@@ -31,3 +31,7 @@
 ## 2024-11-20 - Set over Array for O(1) lookups in high-frequency callbacks
 **Learning:** Initializing an array inside a high-frequency `MutationObserver` callback or loop causes redundant O(N) memory allocations every time the callback fires. Furthermore, using `Array.includes()` inside the loop means O(N) lookups per element evaluated.
 **Action:** Always extract loop-invariant structures outside the observer callback. Use `Set` instead of `Array` to achieve O(1) lookups with `Set.has()`, significantly reducing overhead and garbage collection.
+
+## 2024-11-20 - Prevent O(N²) scaling inside MutationObservers with full-tree queries
+**Learning:** Querying the entire DOM tree (e.g. `querySelectorAll('.CommentsList__item')`) inside a `MutationObserver` on every `childList` mutation causes O(N²) behavior, re-evaluating existing nodes exponentially as the container grows.
+**Action:** Always iterate through `mutation.addedNodes` exclusively in `MutationObserver` callbacks instead of re-querying the whole container. Combined with leaf node checks (`firstElementChild`), this scales gracefully at O(1) relative to total container size.
