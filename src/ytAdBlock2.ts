@@ -298,7 +298,11 @@
     // Keyboard shortcut (Shift+A)
     //----------------------------------------
     document.addEventListener('keydown', (e: KeyboardEvent) => {
-        if (e.shiftKey && e.key.toLowerCase() === 'a') {
+        const target = e.target as HTMLElement;
+        const isInput =
+            target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+
+        if (!isInput && e.shiftKey && e.key.toLowerCase() === 'a') {
             toggleAdblock();
         }
     });
