@@ -16,7 +16,7 @@ interface SponsoredElement extends HTMLElement {
 (function (): void {
     'use strict';
 
-    // Function to remove sponsored content
+    // Function to remove sponsored content globally
     const removeSponsoredContent = (): void => {
         const sponsoredElements = document.querySelectorAll<SponsoredElement>('.sponsored');
 
@@ -44,12 +44,33 @@ interface SponsoredElement extends HTMLElement {
         subtree: true,
     };
 
-    const handleMutations: MutationCallback = (mutationsList: MutationRecord[]): void => {
-        for (const mutation of mutationsList) {
-            if (mutation.type === 'childList') {
-                removeSponsoredContent();
-                break;
+    const processNode = (el: HTMLElement): void => {
+        if (el.classList.contains('sponsored')) {
+            const sponsoredContainer = el.closest('.queue, .queue_story');
+            if (sponsoredContainer) {
+                sponsoredContainer.remove();
             }
+        } else if (el.firstElementChild) {
+            // ⚡ Bolt: Fast path for leaf nodes - avoid querySelectorAll parsing overhead if no children exist
+            const sponsoredElements = el.querySelectorAll<SponsoredElement>('.sponsored');
+            sponsoredElements.forEach((sponsored: SponsoredElement): void => {
+                const sponsoredContainer = sponsored.closest('.queue, .queue_story');
+                if (sponsoredContainer) {
+                    sponsoredContainer.remove();
+                }
+            });
+        }
+    };
+
+    const handleMutations: MutationCallback = (mutationsList: MutationRecord[]): void => {
+        // ⚡ Bolt: Only process added nodes instead of re-querying the entire DOM list on every mutation
+        // This avoids O(N²) scaling as more elements are loaded dynamically
+        for (const mutation of mutationsList) {
+            mutation.addedNodes.forEach((node) => {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    processNode(node as HTMLElement);
+                }
+            });
         }
     };
 
