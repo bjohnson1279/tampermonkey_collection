@@ -227,7 +227,7 @@
             style.id = 'adblock-styles';
             style.textContent = `
                 #adblock-toggle:hover { opacity: 0.8; }
-                #adblock-toggle:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+                #adblock-toggle:focus-visible { outline: 2px solid var(--yt-spec-text-primary, CanvasText); outline-offset: 2px; }
                 #adblock-toggle:active { transform: scale(0.95); }
             `;
             document.head.appendChild(style);

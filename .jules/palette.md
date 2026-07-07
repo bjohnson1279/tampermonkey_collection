@@ -42,3 +42,7 @@
 
 **Learning:** Global keyboard shortcuts (like `Shift+A`) can be incredibly frustrating if they trigger while a user is typing normally into an input, textarea, or contenteditable element (like a search bar or comment field).
 **Action:** When adding global keyboard shortcuts, always check the `e.target` of the keydown event. Ensure it is not an `<input>`, `<textarea>`, or an element with `isContentEditable` before executing the shortcut action.
+
+## 2026-07-07 - [Invisible Focus Rings with currentColor]
+**Learning:** Using `currentColor` for focus rings (e.g. `outline: 2px solid currentColor`) can cause accessibility failures (WCAG 2.4.7 Focus Visible) when the element's text color perfectly matches its dynamically themed container background. For example, a button with white text on a dynamically themed dark-or-light header will have a white focus ring, rendering it invisible in light mode.
+**Action:** When styling injected components over third-party, dynamically-themed layouts (like YouTube), avoid `currentColor` for focus outlines unless the element has its own isolated background. Instead, use the site's native high-contrast CSS variables (e.g., `var(--yt-spec-text-primary)`) with a fallback (e.g. `CanvasText`) to ensure contrast across all themes.

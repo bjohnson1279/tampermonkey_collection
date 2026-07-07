@@ -154,7 +154,7 @@
             btn.style.transform = 'scale(1)';
         });
         btn.addEventListener('focus', () => {
-            btn.style.outline = '2px solid currentColor';
+            btn.style.outline = '2px solid var(--yt-spec-text-primary, CanvasText)';
             btn.style.outlineOffset = '2px';
         });
         btn.addEventListener('blur', () => {
