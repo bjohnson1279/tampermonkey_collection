@@ -13,12 +13,9 @@
     'use strict';
 
     // Your code here...
-    document.querySelectorAll('.ad-container').forEach(ad => ad.remove());
-    document.querySelectorAll('.ad-holder').forEach(ad => ad.remove());
-    document.querySelectorAll('.ad_desktop_placeholder').forEach(ad => ad.remove());
-    document.querySelectorAll('.ad_desktop_wrapper').forEach(ad => ad.remove());
-    document.querySelectorAll('.ad_desktop').forEach(ad => ad.remove());
-    document.querySelectorAll('.ad_clarity').forEach(ad => ad.remove());
+    // ⚡ Bolt: Use a combined selector to reduce multiple O(N) DOM traversals to a single O(1) traversal
+    const adSelectors = '.ad-container, .ad-holder, .ad_desktop_placeholder, .ad_desktop_wrapper, .ad_desktop, .ad_clarity';
+    document.querySelectorAll(adSelectors).forEach(ad => ad.remove());
 
     const chartOverlay = document.querySelector('.chart-piano-overlay__attachment-point');
     // ⚡ Bolt: Disable attributes to prevent unnecessary callbacks on every attribute change
