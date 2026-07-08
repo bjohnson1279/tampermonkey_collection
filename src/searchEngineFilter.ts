@@ -29,27 +29,25 @@ interface SearchEngines {
 
     const processSearch = (): void => {
         try {
-            const href: string = window.location.href;
+            // 🛡️ Sentinel: Use hostname instead of href to prevent path/query confusion evasion
+            const hostname: string = window.location.hostname;
             const params: URLSearchParams = new URLSearchParams(window.location.search);
 
             // Find the matching search engine configuration
             const engineEntry = Object.entries(searchEngines).find(([domain]) =>
-                href.includes(domain)
+                hostname.includes(domain)
             );
 
             if (!engineEntry) {
-                console.log('No matching search engine found');
                 return;
             }
 
-            const [domain, engine] = engineEntry;
-            console.log(`Search engine detected: ${domain}`);
+            const [, engine] = engineEntry;
 
             const query: string | null = params.get(engine.queryParam);
 
             if (query) {
                 const searchQuery: string = query.replace(/\+/g, ' ');
-                console.log(`Search query: "${searchQuery}"`);
 
                 const searchQueryLower = searchQuery.toLowerCase();
                 const isBlacklisted: boolean = lowercaseBlacklist.some((phrase: string): boolean =>

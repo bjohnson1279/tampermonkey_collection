@@ -11,31 +11,21 @@
         subtree: true,
     };
     const blockedUsers = new Set([]);
-    const processComment = (comment) => {
-        const usernameElement = comment.querySelector('.CommentsList__userName');
-        if (!usernameElement?.textContent)
-            return;
-        const username = usernameElement.textContent.trim();
-        if (blockedUsers.has(username)) {
-            console.log(`Hiding comment from user: ${username}`);
-            comment.style.display = 'none';
-        }
-    };
     const handleMutations = (mutationsList, observer) => {
-        for (const mutation of mutationsList) {
-            mutation.addedNodes.forEach((node) => {
-                if (node.nodeType === Node.ELEMENT_NODE) {
-                    const el = node;
-                    if (el.classList.contains('CommentsList__item')) {
-                        processComment(el);
-                    }
-                    if (el.firstElementChild) {
-                        const nestedComments = el.querySelectorAll('.CommentsList__item');
-                        nestedComments.forEach(processComment);
-                    }
-                }
-            });
-        }
+        const commentsList = container.querySelector('.CommentsList__root');
+        if (!commentsList)
+            return;
+        const allComments = commentsList.querySelectorAll('.CommentsList__item');
+        allComments.forEach((comment) => {
+            const usernameElement = comment.querySelector('.CommentsList__userName');
+            if (!usernameElement?.textContent)
+                return;
+            const username = usernameElement.textContent.trim();
+            if (blockedUsers.has(username)) {
+                console.log(`Hiding comment from user: ${username}`);
+                comment.style.display = 'none';
+            }
+        });
     };
     try {
         const observer = new MutationObserver(handleMutations);
