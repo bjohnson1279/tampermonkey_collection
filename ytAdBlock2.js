@@ -7,7 +7,7 @@
 // @match        https://www.youtube.com/*
 // @grant        none
 // ==/UserScript==
-"use strict";
+'use strict';
 (function () {
     'use strict';
     let enabled = true;
@@ -16,35 +16,32 @@
         if (stored !== null) {
             enabled = JSON.parse(stored) ?? true;
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.warn('Failed to parse ytAdblockEnabled from localStorage', e);
         enabled = true;
     }
     function saveState() {
         localStorage.setItem('ytAdblockEnabled', JSON.stringify(enabled));
     }
-    const blockedPatternRegex = /doubleclick\.net|youtube\.com\/api\/stats\/ads|youtube\.com\/api\/stats\/atr|youtube\.com\/get_midroll|youtube\.com\/pagead|ytimg\.com\/ads\//;
+    const blockedPatternRegex =
+        /doubleclick\.net|youtube\.com\/api\/stats\/ads|youtube\.com\/api\/stats\/atr|youtube\.com\/get_midroll|youtube\.com\/pagead|ytimg\.com\/ads\//;
     function shouldBlock(url) {
         return enabled && blockedPatternRegex.test(url);
     }
     const origFetch = window.fetch;
-    window.fetch = (async (...args) => {
+    window.fetch = async (...args) => {
         const req = args[0];
         let url;
-        if (req &&
-            typeof req === 'object' &&
-            'url' in req &&
-            typeof req.url === 'string') {
+        if (req && typeof req === 'object' && 'url' in req && typeof req.url === 'string') {
             url = req.url;
-        }
-        else if (req &&
+        } else if (
+            req &&
             typeof req === 'object' &&
             'href' in req &&
-            typeof req.href === 'string') {
+            typeof req.href === 'string'
+        ) {
             url = req.href;
-        }
-        else {
+        } else {
             url = req?.toString() || '';
             args[0] = url;
         }
@@ -52,12 +49,13 @@
             return new Response('', { status: 204 });
         }
         return origFetch(...args);
-    });
+    };
     const origOpen = XMLHttpRequest.prototype.open;
     XMLHttpRequest.prototype.open = function (method, url, async, username, password) {
-        const urlStr = url && typeof url === 'object' && 'href' in url && typeof url.href === 'string'
-            ? url.href
-            : url?.toString() || '';
+        const urlStr =
+            url && typeof url === 'object' && 'href' in url && typeof url.href === 'string'
+                ? url.href
+                : url?.toString() || '';
         if (shouldBlock(urlStr)) {
             this.abort();
             return;
@@ -88,32 +86,31 @@
     const combinedAdSelector = adSelectors.join(',');
     const promotedBadgeRegex = /promoted/i;
     const adObserver = new MutationObserver((mutations) => {
-        if (!enabled)
-            return;
+        if (!enabled) return;
         mutations.forEach((mutation) => {
             mutation.addedNodes.forEach((node) => {
                 if (node.nodeType === Node.ELEMENT_NODE) {
                     const el = node;
                     if (el.matches && el.matches(combinedAdSelector)) {
                         el.remove();
-                    }
-                    else if (el.firstElementChild && el.querySelectorAll) {
+                    } else if (el.firstElementChild && el.querySelectorAll) {
                         el.querySelectorAll(combinedAdSelector).forEach((e) => e.remove());
-                        el.querySelectorAll('#dismissible ytd-badge-supported-renderer').forEach((badge) => {
-                            if (promotedBadgeRegex.test(badge.textContent || '')) {
-                                badge
-                                    .closest('ytd-video-renderer,ytd-compact-video-renderer')
-                                    ?.remove();
+                        el.querySelectorAll('#dismissible ytd-badge-supported-renderer').forEach(
+                            (badge) => {
+                                if (promotedBadgeRegex.test(badge.textContent || '')) {
+                                    badge
+                                        .closest('ytd-video-renderer,ytd-compact-video-renderer')
+                                        ?.remove();
+                                }
                             }
-                        });
+                        );
                     }
                 }
             });
         });
     });
     function removeInitialAds() {
-        if (!enabled)
-            return;
+        if (!enabled) return;
         document.querySelectorAll(combinedAdSelector).forEach((el) => el.remove());
         document.querySelectorAll('#dismissible ytd-badge-supported-renderer').forEach((badge) => {
             if (promotedBadgeRegex.test(badge.textContent || '')) {
@@ -126,26 +123,21 @@
         adObserver.observe(document.documentElement, { childList: true, subtree: true });
     }
     function skipVideoAds() {
-        if (!enabled)
-            return;
+        if (!enabled) return;
         const video = document.querySelector('video');
-        if (!video)
-            return;
+        if (!video) return;
         if (document.querySelector('.ad-showing')) {
             if (Number.isFinite(video.duration)) {
                 video.currentTime = video.duration;
             }
         }
         const skipBtn = document.querySelector('.ytp-ad-skip-button');
-        if (skipBtn)
-            skipBtn.click();
+        if (skipBtn) skipBtn.click();
     }
     function addToggleButton() {
-        if (document.querySelector('#adblock-toggle'))
-            return;
+        if (document.querySelector('#adblock-toggle')) return;
         const logo = document.querySelector('#logo');
-        if (!logo)
-            return;
+        if (!logo) return;
         const btn = document.createElement('button');
         btn.id = 'adblock-toggle';
         btn.textContent = `AdBlock: ${enabled ? 'ON' : 'OFF'}`;
@@ -156,33 +148,18 @@
         styleButtonStatic(btn);
         styleButtonDynamic(btn);
         btn.addEventListener('click', toggleAdblock);
-        btn.addEventListener('mouseover', () => (btn.style.opacity = '0.8'));
-        btn.addEventListener('mouseout', () => {
-            btn.style.opacity = '1';
-            btn.style.transform = 'scale(1)';
-        });
-        btn.addEventListener('focus', () => {
-            btn.style.outline = '2px solid currentColor';
-            btn.style.outlineOffset = '2px';
-        });
-        btn.addEventListener('blur', () => {
-            btn.style.outline = 'none';
-            btn.style.outlineOffset = '0px';
-            btn.style.transform = 'scale(1)';
-        });
-        btn.addEventListener('mousedown', () => (btn.style.transform = 'scale(0.95)'));
-        btn.addEventListener('mouseup', () => (btn.style.transform = 'scale(1)'));
-        btn.addEventListener('keydown', (e) => {
-            if (e.key === ' ' || e.key === 'Enter') {
-                btn.style.transform = 'scale(0.95)';
-            }
-        });
-        btn.addEventListener('keyup', (e) => {
-            if (e.key === ' ' || e.key === 'Enter') {
-                btn.style.transform = 'scale(1)';
-            }
-        });
         logo.parentElement?.insertBefore(btn, logo.nextSibling);
+        if (!document.querySelector('#adblock-styles')) {
+            const style = document.createElement('style');
+            style.id = 'adblock-styles';
+            style.textContent = `
+                #adblock-toggle { outline: none; }
+                #adblock-toggle:hover { opacity: 0.8; }
+                #adblock-toggle:focus-visible { outline: 2px solid var(--yt-spec-text-primary, CanvasText); outline-offset: 2px; }
+                #adblock-toggle:active { transform: scale(0.95); }
+            `;
+            document.head.appendChild(style);
+        }
         if (!document.querySelector('#adblock-announcer')) {
             const announcer = document.createElement('div');
             announcer.id = 'adblock-announcer';
@@ -210,7 +187,6 @@
             border-radius: 4px;
             cursor: pointer;
             transition: opacity 0.2s, outline 0.2s, background-color 0.2s, transform 0.1s;
-            outline: none;
             transform-origin: center;
         `;
     }
@@ -233,7 +209,10 @@
         console.log(`YouTube AdBlock is now ${enabled ? 'ENABLED' : 'DISABLED'}`);
     }
     document.addEventListener('keydown', (e) => {
-        if (e.shiftKey && e.key.toLowerCase() === 'a') {
+        const target = e.target;
+        const isInput =
+            target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+        if (!isInput && e.shiftKey && e.key.toLowerCase() === 'a') {
             toggleAdblock();
         }
     });

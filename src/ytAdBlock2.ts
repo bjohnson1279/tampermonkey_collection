@@ -226,8 +226,9 @@
             const style = document.createElement('style');
             style.id = 'adblock-styles';
             style.textContent = `
+                #adblock-toggle { outline: none; }
                 #adblock-toggle:hover { opacity: 0.8; }
-                #adblock-toggle:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+                #adblock-toggle:focus-visible { outline: 2px solid var(--yt-spec-text-primary, CanvasText); outline-offset: 2px; }
                 #adblock-toggle:active { transform: scale(0.95); }
             `;
             document.head.appendChild(style);
@@ -262,7 +263,6 @@
             border-radius: 4px;
             cursor: pointer;
             transition: opacity 0.2s, outline 0.2s, background-color 0.2s, transform 0.1s;
-            outline: none;
             transform-origin: center;
         `;
     }
@@ -298,7 +298,11 @@
     // Keyboard shortcut (Shift+A)
     //----------------------------------------
     document.addEventListener('keydown', (e: KeyboardEvent) => {
-        if (e.shiftKey && e.key.toLowerCase() === 'a') {
+        const target = e.target as HTMLElement;
+        const isInput =
+            target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+
+        if (!isInput && e.shiftKey && e.key.toLowerCase() === 'a') {
             toggleAdblock();
         }
     });

@@ -9,10 +9,8 @@
         '.ad_desktop',
         '.ad_clarity'
     ];
-    adSelectors.forEach((selector) => {
-        document.querySelectorAll(selector).forEach((ad) => {
-            ad.remove();
-        });
+    document.querySelectorAll(adSelectors.join(',')).forEach((ad) => {
+        ad.remove();
     });
     const chartOverlay = document.querySelector('.chart-piano-overlay__attachment-point');
     if (!chartOverlay) {

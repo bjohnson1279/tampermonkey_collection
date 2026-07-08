@@ -20,12 +20,30 @@
         childList: true,
         subtree: true,
     };
+    const processNode = (el) => {
+        if (el.classList.contains('sponsored')) {
+            const sponsoredContainer = el.closest('.queue, .queue_story');
+            if (sponsoredContainer) {
+                sponsoredContainer.remove();
+            }
+        }
+        else if (el.firstElementChild) {
+            const sponsoredElements = el.querySelectorAll('.sponsored');
+            sponsoredElements.forEach((sponsored) => {
+                const sponsoredContainer = sponsored.closest('.queue, .queue_story');
+                if (sponsoredContainer) {
+                    sponsoredContainer.remove();
+                }
+            });
+        }
+    };
     const handleMutations = (mutationsList) => {
         for (const mutation of mutationsList) {
-            if (mutation.type === 'childList') {
-                removeSponsoredContent();
-                break;
-            }
+            mutation.addedNodes.forEach((node) => {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    processNode(node);
+                }
+            });
         }
     };
     try {

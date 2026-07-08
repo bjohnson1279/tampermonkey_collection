@@ -30,7 +30,11 @@
     try {
         const observer = new MutationObserver(handleMutations);
         observer.observe(container, config);
-        handleMutations([], observer);
+        const commentsList = container.querySelector('.CommentsList__root');
+        if (commentsList) {
+            const allComments = commentsList.querySelectorAll('.CommentsList__item');
+            allComments.forEach(processComment);
+        }
     }
     catch (error) {
         console.error('Error initializing comment observer:', error);

@@ -19,16 +19,32 @@
     // Add usernames to the array below to hide their comments
     const blockedUsers = new Set([]);
 
-    const cbk = (ml, obs) => {
-        const cList = container.querySelector('.CommentsList__root');
-        if (cList) {
-            const allComments = cList.querySelectorAll('.CommentsList__item');
-            allComments.forEach((comment) => {
-                const username = comment.querySelector('.CommentsList__userName').innerText;
+    const processComment = (comment) => {
+        const usernameElement = comment.querySelector('.CommentsList__userName');
+        if (!usernameElement?.textContent) return;
 
-                if (blockedUsers.has(username)) {
-                    console.log(`User ${username} comment removed`);
-                    comment.style.display = 'none';
+        const username = usernameElement.textContent.trim();
+
+        if (blockedUsers.has(username)) {
+            console.log(`User ${username} comment removed`);
+            comment.style.display = 'none';
+        }
+    };
+
+    const cbk = (ml, obs) => {
+        // ⚡ Bolt: Only process added nodes instead of re-querying the entire DOM list on every mutation
+        // This avoids O(N²) scaling as more comments are loaded dynamically
+        for (const mutation of ml) {
+            mutation.addedNodes.forEach((node) => {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    if (node.classList.contains('CommentsList__item')) {
+                        processComment(node);
+                    }
+                    if (node.firstElementChild) {
+                        // ⚡ Bolt: Fast path for leaf nodes - avoid querySelectorAll parsing overhead if no children exist
+                        const nestedComments = node.querySelectorAll('.CommentsList__item');
+                        nestedComments.forEach(processComment);
+                    }
                 }
             });
         }
@@ -36,4 +52,11 @@
 
     const obs = new MutationObserver(cbk);
     obs.observe(container, config);
+
+    // Initial check in case comments are already loaded
+    const cList = container.querySelector('.CommentsList__root');
+    if (cList) {
+        const allComments = cList.querySelectorAll('.CommentsList__item');
+        allComments.forEach(processComment);
+    }
 })();

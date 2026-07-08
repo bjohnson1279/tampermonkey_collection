@@ -27,10 +27,9 @@ interface ExtendedHTMLElement extends HTMLElement {
         '.ad_clarity'
     ];
 
-    adSelectors.forEach((selector: string): void => {
-        document.querySelectorAll<HTMLElement>(selector).forEach((ad: HTMLElement): void => {
-            ad.remove();
-        });
+    // ⚡ Bolt: Use a combined selector to reduce multiple O(N) DOM traversals to a single O(1) traversal
+    document.querySelectorAll<HTMLElement>(adSelectors.join(',')).forEach((ad: HTMLElement): void => {
+        ad.remove();
     });
 
     // Set up mutation observer for the chart overlay

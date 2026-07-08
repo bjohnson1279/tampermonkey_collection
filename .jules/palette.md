@@ -37,3 +37,21 @@
 
 **Learning:** When displaying asynchronous text feedback directly inside a button, standard alert colors (like Bootstrap's `#28a745` success green) often fail WCAG AA contrast requirements when used with white text. Furthermore, leaving the default action tooltip (e.g., "Copy JSON to clipboard") on the button during its disabled feedback state provides confusing information to screen reader and mouse users hovering over the button.
 **Action:** Always verify contrast ratios for dynamic feedback states (using darker shades like `#146c43` for success green). Additionally, dynamically update the `title` attribute to explain the current state (e.g., "Successfully copied") when disabling the button for feedback, and restore the original `title` when the feedback times out and the button becomes interactive again.
+
+## 2024-10-25 - Prevent global keyboard shortcuts inside text inputs
+
+**Learning:** Global keyboard shortcuts (like `Shift+A`) can be incredibly frustrating if they trigger while a user is typing normally into an input, textarea, or contenteditable element (like a search bar or comment field).
+**Action:** When adding global keyboard shortcuts, always check the `e.target` of the keydown event. Ensure it is not an `<input>`, `<textarea>`, or an element with `isContentEditable` before executing the shortcut action.
+
+## 2026-07-07 - [Invisible Focus Rings with currentColor]
+**Learning:** Using `currentColor` for focus rings (e.g. `outline: 2px solid currentColor`) can cause accessibility failures (WCAG 2.4.7 Focus Visible) when the element's text color perfectly matches its dynamically themed container background. For example, a button with white text on a dynamically themed dark-or-light header will have a white focus ring, rendering it invisible in light mode.
+**Action:** When styling injected components over third-party, dynamically-themed layouts (like YouTube), avoid `currentColor` for focus outlines unless the element has its own isolated background. Instead, use the site's native high-contrast CSS variables (e.g., `var(--yt-spec-text-primary)`) with a fallback (e.g. `CanvasText`) to ensure contrast across all themes.
+## 2026-07-08 - Custom Focus Styles Specificity
+
+**Learning:** When applying custom  styles via an injected `<style>` block (e.g. for accessibility), setting an inline style of `outline: none;` directly on the element (e.g., via `element.style.cssText`) will override the injected stylesheet's `:focus-visible` rule due to CSS specificity rules, leaving keyboard users with an entirely invisible focus ring.
+**Action:** Place the `outline: none;` reset rule inside the injected `<style>` block alongside the custom `:focus-visible` rule to ensure the CSS cascading rules evaluate the pseudo-class state correctly without being overridden by inline properties.
+
+## 2024-11-12 - Custom Focus Styles Specificity
+
+**Learning:** When applying custom `:focus-visible` styles via an injected `<style>` block (e.g. for accessibility), setting an inline style of `outline: none;` directly on the element (e.g., via `element.style.cssText`) will override the injected stylesheet's `:focus-visible` rule due to CSS specificity rules, leaving keyboard users with an entirely invisible focus ring.
+**Action:** Place the `outline: none;` reset rule inside the injected `<style>` block alongside the custom `:focus-visible` rule to ensure the CSS cascading rules evaluate the pseudo-class state correctly without being overridden by inline properties.
