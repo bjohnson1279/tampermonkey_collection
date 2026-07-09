@@ -18,30 +18,12 @@
         card.style.display = 'block';
     });
 
-    // Expand schedule section
-    const schedule = document.querySelector<HTMLElement>('.spl-schedule');
-    if (schedule) {
-        const scheduleHiddenRows = schedule.querySelectorAll<HTMLElement>('.b_hide');
-        scheduleHiddenRows.forEach((row: HTMLElement): void => {
-            row.style.display = 'table-row';
-        });
-    }
-
-    // Expand standings section
-    const standings = document.querySelector<HTMLElement>('.spl-standingTbl');
-    if (standings) {
-        const standingsHiddenRows = standings.querySelectorAll<HTMLElement>('.b_hide');
-        standingsHiddenRows.forEach((row: HTMLElement): void => {
-            row.style.display = 'table-row';
-        });
-    }
-
-    // Expand filter content section
-    const filContent = document.querySelector<HTMLElement>('.tfil-content');
-    if (filContent) {
-        const contentHiddenRows = filContent.querySelectorAll<HTMLElement>('.b_hide');
-        contentHiddenRows.forEach((row: HTMLElement): void => {
-            row.style.display = 'table-row';
-        });
-    }
+    // ⚡ Bolt: Combine multiple O(N) DOM traversals into a single O(1) pass using a comma-separated selector
+    // Expand schedule, standings, and filter content sections
+    const hiddenRows = document.querySelectorAll<HTMLElement>(
+        '.spl-schedule .b_hide, .spl-standingTbl .b_hide, .tfil-content .b_hide'
+    );
+    hiddenRows.forEach((row: HTMLElement): void => {
+        row.style.display = 'table-row';
+    });
 })();

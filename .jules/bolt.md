@@ -39,3 +39,7 @@
 ## 2024-11-20 - Batch DOM queries for performance
 **Learning:** Executing `querySelectorAll()` inside a loop or multiple times in sequence forces the browser to perform O(N) full DOM traversals.
 **Action:** Combine selectors with a comma string `selectors.join(',')` to reduce it to a single O(1) traversal, drastically improving performance when querying multiple classes or tags at once.
+
+## 2024-11-20 - Combine DOM traversals with comma-separated selectors
+**Learning:** Performing multiple sequential `querySelector` or `querySelectorAll` operations on the DOM tree creates multiple O(N) traversal passes, which is inefficient.
+**Action:** Combine multiple distinct CSS selectors into a single comma-separated string (e.g., `document.querySelectorAll('.a, .b, .c')`) to perform a single O(1) pass through the DOM, significantly improving performance when extracting multiple disparate elements.
