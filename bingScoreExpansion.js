@@ -9,38 +9,21 @@
 // @grant        none
 // ==/UserScript==
 
-(function() {
+(function () {
     'use strict';
 
-    const scoreCards = document.querySelectorAll(".spl-card");
+    const scoreCards = document.querySelectorAll('.spl-card');
     console.log({ scoreCards });
-    scoreCards.forEach(card => {
-        card.style.display = "block";
+    scoreCards.forEach((card) => {
+        card.style.display = 'block';
     });
 
-    const schedule = document.querySelector(".spl-schedule");
-    if (schedule) {
-        const scheduleHiddenRows = schedule.querySelectorAll(".b_hide");
-        scheduleHiddenRows.forEach(row => {
-            row.style.display = "table-row";
-        });
-    }
-
-    const standings = document.querySelector(".spl-standingTbl");
-    console.log({ standings });
-    if (standings) {
-        const standingsHiddenRows = standings.querySelectorAll(".b_hide");
-        standingsHiddenRows.forEach(row => {
-            row.style.display = "table-row";
-        });
-    }
-
-    const filContent = document.querySelector(".tfil-content");
-    console.log({ filContent });
-    if (filContent) {
-        const contentHiddenRows = filContent.querySelectorAll(".b_hide");
-        contentHiddenRows.forEach(row => {
-            row.style.display = "table-row";
-        });
-    }
+    // ⚡ Bolt: Combine multiple O(N) DOM traversals into a single O(1) pass using a comma-separated selector
+    // Expand schedule, standings, and filter content sections
+    const hiddenRows = document.querySelectorAll(
+        '.spl-schedule .b_hide, .spl-standingTbl .b_hide, .tfil-content .b_hide'
+    );
+    hiddenRows.forEach((row) => {
+        row.style.display = 'table-row';
+    });
 })();
