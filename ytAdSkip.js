@@ -32,7 +32,7 @@
             )
                 return false;
             return true;
-        } catch (e) {
+        } catch {
             return false;
         }
     }
@@ -103,7 +103,7 @@
         try {
             clearInterval(intervalId);
             observer.disconnect();
-        } catch (e) {}
+        } catch {}
     });
 
     // Helpful console message
