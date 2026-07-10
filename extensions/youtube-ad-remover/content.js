@@ -72,15 +72,14 @@ class YouTubeAdRemover {
         }
     }
 }
-let adRemover = null;
 function initAdRemover() {
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
-            adRemover = new YouTubeAdRemover();
+            new YouTubeAdRemover();
         });
     }
     else {
-        adRemover = new YouTubeAdRemover();
+        new YouTubeAdRemover();
     }
 }
 initAdRemover();
