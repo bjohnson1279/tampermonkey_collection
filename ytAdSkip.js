@@ -32,7 +32,7 @@
             )
                 return false;
             return true;
-        } catch (e) {
+        } catch {
             return false;
         }
     }
