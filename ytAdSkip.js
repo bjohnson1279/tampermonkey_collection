@@ -32,7 +32,7 @@
             )
                 return false;
             return true;
-        } catch (e) {
+        } catch {
             return false;
         }
     }
@@ -82,7 +82,7 @@
     findAndClickSkip();
 
     // MutationObserver to catch dynamic UI changes quickly
-    const observer = new MutationObserver((mutations) => {
+    const observer = new MutationObserver(() => {
         // Quick check for common added nodes could be added, but doing a lightweight unconditional check is fine here.
         findAndClickSkip();
     });
@@ -103,7 +103,7 @@
         try {
             clearInterval(intervalId);
             observer.disconnect();
-        } catch (e) {}
+        } catch {}
     });
 
     // Helpful console message

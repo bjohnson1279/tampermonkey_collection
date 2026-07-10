@@ -39,15 +39,12 @@ interface CommentElement extends Element {
         const username = usernameElement.textContent.trim();
 
         if (blockedUsers.has(username)) {
-            console.log(`Hiding comment from user: ${username}`);
+            // 🛡️ Sentinel: Removed console.log to prevent User Identifier Exposure
             (comment as CommentElement).style.display = 'none';
         }
     };
 
-    const handleMutations: MutationCallback = (
-        mutationsList: MutationRecord[],
-        observer: MutationObserver
-    ): void => {
+    const handleMutations: MutationCallback = (mutationsList: MutationRecord[]): void => {
         // ⚡ Bolt: Only process added nodes instead of re-querying the entire DOM list on every mutation
         // This avoids O(N²) scaling as more comments are loaded dynamically
         for (const mutation of mutationsList) {

@@ -12,18 +12,16 @@
 (function (): void {
     'use strict';
 
-    // Show all score cards
-    const scoreCards = document.querySelectorAll<HTMLElement>('.spl-card');
-    scoreCards.forEach((card: HTMLElement): void => {
-        card.style.display = 'block';
-    });
+    // ⚡ Bolt: Replace O(N) DOM mutations with O(1) injected stylesheet
+    // Avoids forced reflows and loop iteration entirely
+    const style = document.createElement('style');
+    style.textContent = `
+        /* Show all score cards */
+        .spl-card { display: block !important; }
+        /* Expand schedule, standings, and filter content sections */
+        .spl-schedule .b_hide, .spl-standingTbl .b_hide, .tfil-content .b_hide { display: table-row !important; }
+    `;
 
-    // ⚡ Bolt: Combine multiple O(N) DOM traversals into a single O(1) pass using a comma-separated selector
-    // Expand schedule, standings, and filter content sections
-    const hiddenRows = document.querySelectorAll<HTMLElement>(
-        '.spl-schedule .b_hide, .spl-standingTbl .b_hide, .tfil-content .b_hide'
-    );
-    hiddenRows.forEach((row: HTMLElement): void => {
-        row.style.display = 'table-row';
-    });
+    // Fallback to documentElement if head is not available yet
+    (document.head || document.documentElement).appendChild(style);
 })();

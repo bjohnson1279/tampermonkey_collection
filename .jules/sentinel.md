@@ -21,3 +21,8 @@
 **Vulnerability:** In `src/searchEngineFilter.ts`, the script matched the target search engine domain using `window.location.href.includes(domain)`. This allowed a malicious or unrelated site with a URL like `https://attacker.com/?q=blacklist_word&bing.com` to trigger the script's logic, leading to unintended behavior (redirects). Additionally, the script logged potentially sensitive user search queries to the console.
 **Learning:** Checking the entire `href` for a domain substring is a classic path/query confusion vulnerability. Any part of the URL (path, query, hash) can contain the domain string.
 **Prevention:** Always use `window.location.hostname` (or `URL.hostname`) to verify the domain or origin before executing sensitive script logic. Avoid logging sensitive user input like search queries to the console in production scripts.
+
+## 2026-07-10 - [User Identifier Exposure in Console Logs]
+**Vulnerability:** Usernames of blocked users were being logged to the console using `console.log` when hiding their comments in `kslCommentsHide.ts`.
+**Learning:** Logging sensitive user input or identifiers (like usernames, even of blocked users) to the console in production browser scripts exposes Personally Identifiable Information (PII) to anyone with access to the developer console or telemetry tools capturing console output.
+**Prevention:** Never log user identifiers or sensitive data to the browser console in production environments. Remove debug statements that expose this information before deploying.

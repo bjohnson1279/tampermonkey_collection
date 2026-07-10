@@ -28,7 +28,7 @@ class YouTubeAdRemover {
                 console.error(`Could not find the target node: ${this.TARGET_NODE_SELECTOR}`);
                 return;
             }
-            const callback = (mutationsList, observer) => {
+            const callback = (mutationsList) => {
                 for (const mutation of mutationsList) {
                     if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
                         this.removeAds(mutation.addedNodes);
