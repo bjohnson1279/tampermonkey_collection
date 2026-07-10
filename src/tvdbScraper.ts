@@ -9,7 +9,7 @@
 // @grant        none
 // ==/UserScript==
 
-interface Episode {
+export interface Episode {
     season: string;
     episode: string;
     title: string;
@@ -17,7 +17,7 @@ interface Episode {
     description: string;
 }
 
-(function (): Episode[] {
+export function scrapeTVDBData(): Episode[] {
     'use strict';
 
     const episodesData: Episode[] = [];
@@ -138,4 +138,8 @@ interface Episode {
     }
 
     return episodesData;
-})();
+}
+
+if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+    scrapeTVDBData();
+}

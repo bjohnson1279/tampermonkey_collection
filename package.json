@@ -27,6 +27,7 @@
     "@types/node": "^20.11.19",
     "husky": "^9.0.10",
     "jest": "^30.4.2",
+    "jest-environment-jsdom": "^30.4.1",
     "lint-staged": "^15.0.0",
     "prettier": "^3.0.0",
     "ts-jest": "^29.4.11",
