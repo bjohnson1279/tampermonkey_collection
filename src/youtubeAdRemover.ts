@@ -34,7 +34,7 @@ class YouTubeAdRemover {
             }
 
             // Callback function to execute when mutations are observed
-            const callback: MutationCallback = (mutationsList, observer) => {
+            const callback: MutationCallback = (mutationsList) => {
                 for (const mutation of mutationsList) {
                     if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
                         this.removeAds(mutation.addedNodes);
