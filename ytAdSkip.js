@@ -103,7 +103,7 @@
         try {
             clearInterval(intervalId);
             observer.disconnect();
-        } catch (e) {}
+        } catch {}
     });
 
     // Helpful console message
