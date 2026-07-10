@@ -107,7 +107,7 @@ interface Episode {
                 btn.style.backgroundColor = '#146c43';
                 btn.setAttribute('title', 'Successfully copied');
                 announcer.textContent = 'Copied to clipboard';
-            } catch (err) {
+            } catch {
                 btn.textContent = '❌ Error';
                 btn.style.backgroundColor = '#b02a37';
                 btn.setAttribute('title', 'Failed to copy');
