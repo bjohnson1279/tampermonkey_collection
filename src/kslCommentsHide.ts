@@ -39,7 +39,7 @@ interface CommentElement extends Element {
         const username = usernameElement.textContent.trim();
 
         if (blockedUsers.has(username)) {
-            console.log(`Hiding comment from user: ${username}`);
+            // 🛡️ Sentinel: Removed console.log to prevent User Identifier Exposure
             (comment as CommentElement).style.display = 'none';
         }
     };

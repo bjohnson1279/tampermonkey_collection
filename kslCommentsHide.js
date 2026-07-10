@@ -26,7 +26,7 @@
         const username = usernameElement.textContent.trim();
 
         if (blockedUsers.has(username)) {
-            console.log(`User ${username} comment removed`);
+            // 🛡️ Sentinel: Removed console.log to prevent User Identifier Exposure
             comment.style.display = 'none';
         }
     };
