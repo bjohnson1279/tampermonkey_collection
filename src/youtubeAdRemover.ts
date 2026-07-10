@@ -68,7 +68,6 @@ class YouTubeAdRemover {
         // Check for ad elements
         const adItem = contentDiv.querySelector(this.AD_SELECTOR);
         if (adItem) {
-
             adItem.remove();
             contentDiv.remove();
             videoItem.remove();
@@ -124,4 +123,12 @@ function initAdRemover() {
     }
 }
 
-initAdRemover();
+if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+    initAdRemover();
+}
+
+// Export for testing
+if (typeof exports !== 'undefined') {
+    exports.YouTubeAdRemover = YouTubeAdRemover;
+    exports.initAdRemover = initAdRemover;
+}
