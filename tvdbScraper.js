@@ -33,7 +33,7 @@
                     .trim();
                 try {
                     itemDate = new Date(dateText).toISOString().split('T')[0];
-                } catch (e) {
+                } catch {
                     itemDate = '';
                 }
             });
