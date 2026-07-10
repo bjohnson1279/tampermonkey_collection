@@ -44,10 +44,7 @@ interface CommentElement extends Element {
         }
     };
 
-    const handleMutations: MutationCallback = (
-        mutationsList: MutationRecord[],
-        observer: MutationObserver
-    ): void => {
+    const handleMutations: MutationCallback = (mutationsList: MutationRecord[]): void => {
         // ⚡ Bolt: Only process added nodes instead of re-querying the entire DOM list on every mutation
         // This avoids O(N²) scaling as more comments are loaded dynamically
         for (const mutation of mutationsList) {
