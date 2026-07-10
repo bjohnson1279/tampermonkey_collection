@@ -43,3 +43,6 @@
 ## 2024-11-20 - Combine DOM traversals with comma-separated selectors
 **Learning:** Performing multiple sequential `querySelector` or `querySelectorAll` operations on the DOM tree creates multiple O(N) traversal passes, which is inefficient.
 **Action:** Combine multiple distinct CSS selectors into a single comma-separated string (e.g., `document.querySelectorAll('.a, .b, .c')`) to perform a single O(1) pass through the DOM, significantly improving performance when extracting multiple disparate elements.
+
+## 2024-07-10 - [Avoid N+1 DOM Queries]
+When filtering nodes, avoid querying the DOM inside a loop (N+1 queries). Instead, use a single composite selector (e.g. `querySelectorAll('.parent .child')`) to fetch target elements in one pass.

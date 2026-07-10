@@ -12,18 +12,16 @@
 (function (): void {
     'use strict';
 
-    const slideContainer: HTMLElement | null = document.querySelector(".tob_calcontainer");
+    const slideContainer: HTMLElement | null = document.querySelector('.tob_calcontainer');
 
     if (slideContainer) {
-        const boxes: NodeListOf<HTMLElement> = slideContainer.querySelectorAll(".tobitem");
-
-        if (boxes.length > 0) {
-            boxes.forEach((box: HTMLElement) => {
-                const ad: HTMLElement | null = box.querySelector(".b_adSlug");
-                if (ad) {
-                    box.remove();
-                }
-            });
-        }
+        // ⚡ Performance: Use a single query for all ads to avoid O(N) redundant DOM searches
+        const ads: NodeListOf<HTMLElement> = slideContainer.querySelectorAll('.tobitem .b_adSlug');
+        ads.forEach((ad: HTMLElement) => {
+            const box: HTMLElement | null = ad.closest('.tobitem');
+            if (box) {
+                box.remove();
+            }
+        });
     }
 })();
