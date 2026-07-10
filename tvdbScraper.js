@@ -9,7 +9,7 @@
 // @grant        none
 // ==/UserScript==
 
-(function () {
+function scrapeTVDBData() {
     'use strict';
 
     const episodesData = [];
@@ -117,4 +117,8 @@
     }
 
     return episodesData;
-})();
+}
+
+if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+    scrapeTVDBData();
+}
