@@ -31,7 +31,7 @@
         }
     };
 
-    const cbk = (ml, obs) => {
+    const cbk = (ml) => {
         // ⚡ Bolt: Only process added nodes instead of re-querying the entire DOM list on every mutation
         // This avoids O(N²) scaling as more comments are loaded dynamically
         for (const mutation of ml) {
