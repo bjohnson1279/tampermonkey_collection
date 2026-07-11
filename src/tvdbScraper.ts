@@ -84,10 +84,21 @@ export function scrapeTVDBData(): Episode[] {
 
         const btn = document.createElement('button');
         btn.id = 'tvdb-copy-json-btn';
-        btn.textContent = '📋 Copy JSON';
-        btn.setAttribute('aria-label', 'Copy episodes data to clipboard');
-        btn.setAttribute('title', 'Copy JSON to clipboard (Shift+C)');
-        btn.setAttribute('aria-keyshortcuts', 'Shift+C');
+
+        const hasData = episodesData.length > 0;
+        btn.textContent = hasData ? '📋 Copy JSON' : '📋 No Data';
+        btn.disabled = !hasData;
+        btn.setAttribute(
+            'aria-label',
+            hasData ? 'Copy episodes data to clipboard' : 'No episodes data found'
+        );
+        btn.setAttribute(
+            'title',
+            hasData ? 'Copy JSON to clipboard (Shift+C)' : 'No episodes found to copy'
+        );
+        if (hasData) {
+            btn.setAttribute('aria-keyshortcuts', 'Shift+C');
+        }
 
         const announcer = document.createElement('div');
         announcer.setAttribute('aria-live', 'polite');
@@ -116,7 +127,7 @@ export function scrapeTVDBData(): Episode[] {
             timeoutId = window.setTimeout(() => {
                 btn.textContent = '📋 Copy JSON';
                 btn.style.backgroundColor = '#007bff';
-                btn.setAttribute('title', 'Copy JSON to clipboard');
+                btn.setAttribute('title', 'Copy JSON to clipboard (Shift+C)');
                 announcer.textContent = '';
                 btn.disabled = false;
             }, 2000);
