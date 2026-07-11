@@ -78,7 +78,8 @@ export function scrapeTVDBData(): Episode[] {
             #tvdb-copy-json-btn:hover { opacity: 0.9; }
             #tvdb-copy-json-btn:focus-visible { outline: 3px solid #0056b3; outline-offset: 2px; }
             #tvdb-copy-json-btn:not(:disabled):active { transform: scale(0.95); }
-            #tvdb-copy-json-btn:disabled { cursor: not-allowed; opacity: 0.7; }
+            #tvdb-copy-json-btn:disabled:not([data-feedback="true"]) { cursor: not-allowed; opacity: 0.7; }
+            #tvdb-copy-json-btn[data-feedback="true"] { cursor: default; }
         `;
         document.head.appendChild(style);
 
@@ -111,23 +112,28 @@ export function scrapeTVDBData(): Episode[] {
             if (btn.disabled) return;
             clearTimeout(timeoutId);
             btn.disabled = true;
+            btn.setAttribute('data-feedback', 'true');
 
             try {
                 await navigator.clipboard.writeText(JSON.stringify(episodesData, null, 2));
                 btn.textContent = '✅ Copied!';
                 btn.style.backgroundColor = '#146c43';
                 btn.setAttribute('title', 'Successfully copied');
+                btn.setAttribute('aria-label', 'Successfully copied');
                 announcer.textContent = 'Copied to clipboard';
             } catch {
                 btn.textContent = '❌ Error';
                 btn.style.backgroundColor = '#b02a37';
                 btn.setAttribute('title', 'Failed to copy');
+                btn.setAttribute('aria-label', 'Failed to copy');
                 announcer.textContent = 'Failed to copy';
             }
             timeoutId = window.setTimeout(() => {
                 btn.textContent = '📋 Copy JSON';
                 btn.style.backgroundColor = '#007bff';
                 btn.setAttribute('title', 'Copy JSON to clipboard (Shift+C)');
+                btn.setAttribute('aria-label', 'Copy episodes data to clipboard');
+                btn.removeAttribute('data-feedback');
                 announcer.textContent = '';
                 btn.disabled = false;
             }, 2000);
