@@ -26,3 +26,8 @@
 **Vulnerability:** Usernames of blocked users were being logged to the console using `console.log` when hiding their comments in `kslCommentsHide.ts`.
 **Learning:** Logging sensitive user input or identifiers (like usernames, even of blocked users) to the console in production browser scripts exposes Personally Identifiable Information (PII) to anyone with access to the developer console or telemetry tools capturing console output.
 **Prevention:** Never log user identifiers or sensitive data to the browser console in production environments. Remove debug statements that expose this information before deploying.
+
+## 2024-07-06 - [Fetch Evasion via TOCTOU in POJO getters]
+**Vulnerability:** The fetch monkeypatch in `src/ytAdBlock2.ts` used simple duck typing (`'url' in req`) to identify Request objects. This allowed malicious POJOs to spoof properties to evade checks via dynamic getters, leading to a Time-Of-Check to Time-Of-Use (TOCTOU) vulnerability where the ad URL passed the `shouldBlock` filter but hit the native fetch intact.
+**Learning:** Simple duck typing on object properties is easily spoofable by getters. Moreover, intercepting native `Request` objects and replacing them with coerced strings destroys other request metadata (like `method` or `body`). Native `Request` objects are immune to TOCTOU for `url` since their internal slot is immutable.
+**Prevention:** Use WebIDL brand-checking (e.g., `Object.getOwnPropertyDescriptor(Request.prototype, 'url')?.get?.call(req)`) to securely and reliably identify Native `Request` objects across all JavaScript realms. Only overwrite `args[0]` with the safe URL string if the object is a POJO.
