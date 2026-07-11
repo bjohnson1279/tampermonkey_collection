@@ -26,3 +26,8 @@
 **Vulnerability:** Usernames of blocked users were being logged to the console using `console.log` when hiding their comments in `kslCommentsHide.ts`.
 **Learning:** Logging sensitive user input or identifiers (like usernames, even of blocked users) to the console in production browser scripts exposes Personally Identifiable Information (PII) to anyone with access to the developer console or telemetry tools capturing console output.
 **Prevention:** Never log user identifiers or sensitive data to the browser console in production environments. Remove debug statements that expose this information before deploying.
+
+## 2025-07-02 - [TOCTOU via Duck-Typing Evasion in Request Interception]
+**Vulnerability:** The adblocker interceptors in `ytAdBlock2.ts` used duck typing (`'url' in req`) to extract URLs, which allowed malicious POJOs with dynamic getters to evade blocking. A POJO could return a safe URL during the `shouldBlock` check but an ad URL when the native API later accessed the property.
+**Learning:** Checking for properties via duck typing in interceptors and leaving the object unmodified enables a Time-Of-Check to Time-Of-Use (TOCTOU) vulnerability if the property getter is dynamic.
+**Prevention:** Use WebIDL brand checking (e.g., `Object.getOwnPropertyDescriptor(Request.prototype, 'url')?.get?.call(req)`) to securely identify native `Request` and `URL` objects. For any non-native object, immediately evaluate and replace the argument with the coerced string URL to eliminate the time gap.
