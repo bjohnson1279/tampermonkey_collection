@@ -8,16 +8,23 @@
 // @grant        none
 // ==/UserScript==
 
+const _global = typeof window !== 'undefined' ? window : global;
+_global.__kslTestExports = _global.__kslTestExports || {};
+
 (function () {
     'use strict';
-    const container = document.querySelector('#commentsContainer');
+    const container =
+        typeof document !== 'undefined' ? document.querySelector('#commentsContainer') : null;
+
     // ⚡ Bolt: Disable attributes to prevent unnecessary callbacks on every attribute change
     const config = { attributes: false, childList: true, subtree: true };
+    _global.__kslTestExports.config = config;
 
     // ⚡ Bolt: Extract array allocations out of high-frequency observer loops
     // and convert to Set to improve lookup to O(1)
     // Add usernames to the array below to hide their comments
     const blockedUsers = new Set([]);
+    _global.__kslTestExports.blockedUsers = blockedUsers;
 
     const processComment = (comment) => {
         const usernameElement = comment.querySelector('.CommentsList__userName');
@@ -30,6 +37,7 @@
             comment.style.display = 'none';
         }
     };
+    _global.__kslTestExports.processComment = processComment;
 
     const cbk = (ml, obs) => {
         // ⚡ Bolt: Only process added nodes instead of re-querying the entire DOM list on every mutation
@@ -49,14 +57,25 @@
             });
         }
     };
+    _global.__kslTestExports.cbk = cbk;
 
-    const obs = new MutationObserver(cbk);
-    obs.observe(container, config);
+    if (!container) return;
 
-    // Initial check in case comments are already loaded
-    const cList = container.querySelector('.CommentsList__root');
-    if (cList) {
-        const allComments = cList.querySelectorAll('.CommentsList__item');
-        allComments.forEach(processComment);
+    try {
+        const obs = new MutationObserver(cbk);
+        obs.observe(container, config);
+
+        // Initial check in case comments are already loaded
+        const cList = container.querySelector('.CommentsList__root');
+        if (cList) {
+            const allComments = cList.querySelectorAll('.CommentsList__item');
+            allComments.forEach(processComment);
+        }
+    } catch (e) {
+        console.error('Observer initialization failed:', e);
     }
 })();
+
+if (typeof module !== 'undefined') {
+    module.exports = _global.__kslTestExports;
+}
