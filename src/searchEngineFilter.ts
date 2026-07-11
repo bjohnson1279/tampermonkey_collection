@@ -18,7 +18,17 @@ interface SearchEngines {
     'use strict';
 
     const blacklist: string[] = ['asdf']; // Add terms to blacklist here
-    const lowercaseBlacklist: string[] = blacklist.map((phrase: string) => phrase.toLowerCase());
+    // ⚡ Bolt: Replace O(N) Array.some() and redundant string allocations with a single
+    // pre-compiled Regex for significantly faster URL query checks.
+    const blacklistRegex =
+        blacklist.length > 0
+            ? new RegExp(
+                  blacklist
+                      .map((phrase) => phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+                      .join('|'),
+                  'i'
+              )
+            : null;
 
     const searchEngines: SearchEngines = {
         'bing.com': { queryParam: 'q', url: 'https://www.bing.com' },
@@ -49,12 +59,7 @@ interface SearchEngines {
             if (query) {
                 const searchQuery: string = query.replace(/\+/g, ' ');
 
-                const searchQueryLower = searchQuery.toLowerCase();
-                const isBlacklisted: boolean = lowercaseBlacklist.some((phrase: string): boolean =>
-                    searchQueryLower.includes(phrase)
-                );
-
-                if (isBlacklisted) {
+                if (blacklistRegex && blacklistRegex.test(searchQuery)) {
                     window.location.href = engine.url;
                 }
             }
