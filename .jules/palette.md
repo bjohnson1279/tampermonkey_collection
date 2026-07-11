@@ -60,3 +60,8 @@
 
 **Learning:** When a page-level action button is injected (like a "Copy JSON" button for scraped data), it fails UX expectations if it allows interaction when no data is actually present on the page. Also, if a button uses its `title` to provide keyboard shortcut hints (like `(Shift+C)`), resetting the title after a temporary feedback state without restoring the hint removes crucial accessibility cues.
 **Action:** Always implement a clear empty state (e.g., changing text to "No Data" and setting `disabled=true`) when injected actions rely on page data that may be missing. Ensure that state restoration logic (e.g. `setTimeout` for temporary feedback) perfectly mirrors the original initialization state, including shortcut hints in tooltips.
+
+## 2024-11-20 - Disabled states vs Feedback states
+
+**Learning:** When using `disabled=true` on a button temporarily to prevent duplicate submissions during an async action (like a copy to clipboard success feedback message), applying generic `:disabled` CSS rules (`opacity: 0.7`, `cursor: not-allowed`) will make the success message look faded out, forbidden, or broken. Furthermore, failing to update the `aria-label` during this feedback state means screen readers will announce stale action text instead of the success message.
+**Action:** When a button is disabled specifically for async feedback, add a custom attribute like `data-feedback="true"` to opt-out of generic `:disabled` opacity/cursor styles, and explicitly update both the `aria-label` and `title` to match the feedback state.
