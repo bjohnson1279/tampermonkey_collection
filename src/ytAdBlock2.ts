@@ -47,25 +47,35 @@
         const req = args[0];
         // 🛡️ Sentinel: Use duck typing for Request/URL objects to prevent cross-realm (iframe) adblock evasion
         // where `instanceof` fails and `.toString()` returns "[object Request]"
-        let url: string;
-        if (
-            req &&
-            typeof req === 'object' &&
-            'url' in req &&
-            typeof (req as any).url === 'string'
-        ) {
-            url = (req as any).url;
-        } else if (
-            req &&
-            typeof req === 'object' &&
-            'href' in req &&
-            typeof (req as any).href === 'string'
-        ) {
-            url = (req as any).href;
-        } else {
-            url = req?.toString() || '';
+        let url: string = '';
+        let isNativeRequest = false;
+
+        if (req && typeof req === 'object') {
+            const reqUrlGetter = Object.getOwnPropertyDescriptor(Request.prototype, 'url')?.get;
+            if (reqUrlGetter) {
+                try {
+                    // WebIDL brand check safely extracts the URL even across realms
+                    url = reqUrlGetter.call(req) as string;
+                    isNativeRequest = true;
+                } catch {
+                    // Throws if not a true native Request object (fails brand check)
+                }
+            }
+        }
+
+        if (!isNativeRequest) {
+            if (
+                req &&
+                typeof req === 'object' &&
+                'href' in req &&
+                typeof (req as any).href === 'string'
+            ) {
+                url = (req as any).href;
+            } else {
+                url = req?.toString() || '';
+            }
             // 🛡️ Sentinel: Overwrite args[0] with evaluated string if relying on toString()
-            // to prevent TOCTOU evasion from an object returning safe string first and ad string later.
+            // or POJO properties to prevent TOCTOU evasion from dynamic returns.
             args[0] = url;
         }
 
