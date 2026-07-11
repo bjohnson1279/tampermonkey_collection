@@ -12,18 +12,18 @@
 (function (): void {
     'use strict';
 
-    const slideContainer: HTMLElement | null = document.querySelector(".tob_calcontainer");
+    const slideContainer: HTMLElement | null = document.querySelector('.tob_calcontainer');
 
     if (slideContainer) {
-        const boxes: NodeListOf<HTMLElement> = slideContainer.querySelectorAll(".tobitem");
+        // ⚡ Bolt: Replace O(N) internal DOM traversals inside the loop with a single O(1) pass
+        // using a descendant CSS selector, significantly reducing main thread parsing overhead.
+        const ads: NodeListOf<HTMLElement> = slideContainer.querySelectorAll('.tobitem .b_adSlug');
 
-        if (boxes.length > 0) {
-            boxes.forEach((box: HTMLElement) => {
-                const ad: HTMLElement | null = box.querySelector(".b_adSlug");
-                if (ad) {
-                    box.remove();
-                }
-            });
-        }
+        ads.forEach((ad: HTMLElement) => {
+            const box = ad.closest('.tobitem');
+            if (box) {
+                box.remove();
+            }
+        });
     }
 })();

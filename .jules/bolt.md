@@ -48,3 +48,6 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2024-11-20 - Empty Regex Pattern Danger
 **Learning:** When replacing an `Array.some(str => target.includes(str))` pattern with a dynamically generated Regular Expression (e.g., `new RegExp(array.join('|'))`) for performance, an empty array (`[]`) evaluates to an empty regex pattern (`/(?:)/`). This empty pattern matches *everything* (returns `true` for all `.test()` calls), whereas `[].some(...)` returns `false`. This causes catastrophic false positives if the array can be emptied by configuration.
 **Action:** Always check the array length before generating dynamic RegExps from configuration variables, or provide a safe fallback (like `null` or a never-matching pattern) when the array is empty.
+## 2024-07-28 - O(N) loop queries vs Single O(1) descendant CSS selector
+**Learning:** Selecting all container nodes and executing `.querySelector()` on each of them in a loop (e.g., `containers.forEach(c => c.querySelector('.ad'))`) causes N independent DOM traversals, which scales poorly and blocks the main thread.
+**Action:** Use a single descendant CSS selector (e.g., `document.querySelectorAll('.container .ad')`) and step up the DOM tree via `.closest('.container')`. This reduces N traversals into a single O(1) pass and is significantly faster.
