@@ -119,14 +119,35 @@ describe('scrapeTVDBData', () => {
         expect(episodes[0].release).toBe('2023-10-01');
     });
 
-    it('should inject copy JSON button', () => {
+    it('should inject copy JSON button and show empty state when no data', () => {
         document.body.innerHTML = '<div class="list-group"></div>';
 
         scrapeTVDBData();
 
-        const btn = document.getElementById('tvdb-copy-json-btn');
+        const btn = document.getElementById('tvdb-copy-json-btn') as HTMLButtonElement;
+        expect(btn).not.toBeNull();
+        expect(btn?.textContent).toBe('📋 No Data');
+        expect(btn?.disabled).toBe(true);
+    });
+
+    it('should inject copy JSON button with correct state when data exists', () => {
+        document.body.innerHTML = `
+            <div class="list-group">
+                <div class="list-group-item">
+                    <div class="list-group-item-heading">
+                        <span class="episode-label">S01E01</span>
+                        <a href="/some/link">Pilot</a>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        scrapeTVDBData();
+
+        const btn = document.getElementById('tvdb-copy-json-btn') as HTMLButtonElement;
         expect(btn).not.toBeNull();
         expect(btn?.textContent).toBe('📋 Copy JSON');
+        expect(btn?.disabled).toBe(false);
     });
 
     it('should not inject multiple copy JSON buttons', () => {

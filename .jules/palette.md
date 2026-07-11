@@ -55,3 +55,8 @@
 
 **Learning:** When applying custom `:focus-visible` styles via an injected `<style>` block (e.g. for accessibility), setting an inline style of `outline: none;` directly on the element (e.g., via `element.style.cssText`) will override the injected stylesheet's `:focus-visible` rule due to CSS specificity rules, leaving keyboard users with an entirely invisible focus ring.
 **Action:** Place the `outline: none;` reset rule inside the injected `<style>` block alongside the custom `:focus-visible` rule to ensure the CSS cascading rules evaluate the pseudo-class state correctly without being overridden by inline properties.
+
+## 2024-11-12 - Empty states and persistent shortcuts on action buttons
+
+**Learning:** When a page-level action button is injected (like a "Copy JSON" button for scraped data), it fails UX expectations if it allows interaction when no data is actually present on the page. Also, if a button uses its `title` to provide keyboard shortcut hints (like `(Shift+C)`), resetting the title after a temporary feedback state without restoring the hint removes crucial accessibility cues.
+**Action:** Always implement a clear empty state (e.g., changing text to "No Data" and setting `disabled=true`) when injected actions rely on page data that may be missing. Ensure that state restoration logic (e.g. `setTimeout` for temporary feedback) perfectly mirrors the original initialization state, including shortcut hints in tooltips.
