@@ -44,8 +44,8 @@ interface SearchEngines {
             const params: URLSearchParams = new URLSearchParams(window.location.search);
 
             // Find the matching search engine configuration
-            const engineEntry = Object.entries(searchEngines).find(([domain]) =>
-                hostname.includes(domain)
+            const engineEntry = Object.entries(searchEngines).find(
+                ([domain]) => hostname === domain || hostname.endsWith('.' + domain)
             );
 
             if (!engineEntry) {
