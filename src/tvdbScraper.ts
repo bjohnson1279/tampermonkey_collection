@@ -74,7 +74,7 @@ export function scrapeTVDBData(): Episode[] {
     if (!document.getElementById('tvdb-copy-json-btn')) {
         const style = document.createElement('style');
         style.textContent = `
-            #tvdb-copy-json-btn { outline: none; position: fixed; bottom: 24px; right: 24px; z-index: 9999; background: #007bff; color: white; border: none; border-radius: 8px; padding: 12px 20px; font: 600 14px system-ui, sans-serif; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s; }
+            #tvdb-copy-json-btn { outline: none; position: fixed; bottom: 24px; right: 24px; z-index: 9999; background: #0056b3; color: white; border: none; border-radius: 8px; padding: 12px 20px; font: 600 14px system-ui, sans-serif; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s; }
             #tvdb-copy-json-btn:hover { opacity: 0.9; }
             #tvdb-copy-json-btn:focus-visible { outline: 3px solid #0056b3; outline-offset: 2px; }
             #tvdb-copy-json-btn:not(:disabled):active { transform: scale(0.95); }
@@ -130,7 +130,7 @@ export function scrapeTVDBData(): Episode[] {
             }
             timeoutId = window.setTimeout(() => {
                 btn.textContent = '📋 Copy JSON';
-                btn.style.backgroundColor = '#007bff';
+                btn.style.backgroundColor = '#0056b3';
                 btn.setAttribute('title', 'Copy JSON to clipboard (Shift+C)');
                 btn.setAttribute('aria-label', 'Copy episodes data to clipboard');
                 btn.removeAttribute('data-feedback');
