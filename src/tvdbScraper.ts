@@ -21,54 +21,52 @@ export function scrapeTVDBData(): Episode[] {
     'use strict';
 
     const episodesData: Episode[] = [];
-    const episodeListContainers = document.querySelectorAll<HTMLElement>('.list-group');
+    // ⚡ Bolt: Replace O(N) independent DOM traversals inside the container loop with a single O(1) pass
+    // using a descendant CSS selector to significantly reduce main thread parsing overhead.
+    const episodes = document.querySelectorAll<HTMLElement>('.list-group .list-group-item');
 
-    episodeListContainers.forEach((season: HTMLElement): void => {
-        const episodes = season.querySelectorAll<HTMLElement>('.list-group-item');
+    episodes.forEach((ep: HTMLElement): void => {
+        const heading = ep.querySelector<HTMLElement>('.list-group-item-heading');
+        if (!heading) return;
 
-        episodes.forEach((ep: HTMLElement): void => {
-            const heading = ep.querySelector<HTMLElement>('.list-group-item-heading');
-            if (!heading) return;
+        const epLabelElement = heading.querySelector<HTMLElement>('.episode-label');
+        const epLabel = epLabelElement?.textContent?.trim() || '';
+        const matches = epLabel.match(/\d+/g) || [];
 
-            const epLabelElement = heading.querySelector<HTMLElement>('.episode-label');
-            const epLabel = epLabelElement?.textContent?.trim() || '';
-            const matches = epLabel.match(/\d+/g) || [];
+        const titleLink = heading.querySelector<HTMLAnchorElement>('a');
+        const epTitle = titleLink?.textContent?.trim() || '';
 
-            const titleLink = heading.querySelector<HTMLAnchorElement>('a');
-            const epTitle = titleLink?.textContent?.trim() || '';
+        const itemTextElement = ep.querySelector<HTMLElement>('.list-group-item-text');
+        const itemText = itemTextElement?.textContent?.trim() || '';
 
-            const itemTextElement = ep.querySelector<HTMLElement>('.list-group-item-text');
-            const itemText = itemTextElement?.textContent?.trim() || '';
+        let itemDate = '';
+        const listInline = ep.querySelectorAll<HTMLElement>('.list-inline');
 
-            let itemDate = '';
-            const listInline = ep.querySelectorAll<HTMLElement>('.list-inline');
+        listInline.forEach((listItem: HTMLElement): void => {
+            const dateText =
+                listItem.textContent
+                    ?.replace(/ABC|CBS|FOX|NBC|PBS|History|H2|\(US\)|A&E/gi, '')
+                    .trim() || '';
 
-            listInline.forEach((listItem: HTMLElement): void => {
-                const dateText =
-                    listItem.textContent
-                        ?.replace(/ABC|CBS|FOX|NBC|PBS|History|H2|\(US\)|A&E/gi, '')
-                        .trim() || '';
-
-                try {
-                    const date = new Date(dateText);
-                    if (!isNaN(date.getTime())) {
-                        itemDate = date.toISOString().split('T')[0];
-                    }
-                } catch (e) {
-                    console.error('Error parsing date:', e);
+            try {
+                const date = new Date(dateText);
+                if (!isNaN(date.getTime())) {
+                    itemDate = date.toISOString().split('T')[0];
                 }
-            });
-
-            const episode: Episode = {
-                season: matches[0] || '',
-                episode: matches[1] || '',
-                title: epTitle,
-                release: itemDate,
-                description: itemText,
-            };
-
-            episodesData.push(episode);
+            } catch (e) {
+                console.error('Error parsing date:', e);
+            }
         });
+
+        const episode: Episode = {
+            season: matches[0] || '',
+            episode: matches[1] || '',
+            title: epTitle,
+            release: itemDate,
+            description: itemText,
+        };
+
+        episodesData.push(episode);
     });
 
     if (!document.getElementById('tvdb-copy-json-btn')) {
