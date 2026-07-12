@@ -65,3 +65,7 @@
 
 **Learning:** When using `disabled=true` on a button temporarily to prevent duplicate submissions during an async action (like a copy to clipboard success feedback message), applying generic `:disabled` CSS rules (`opacity: 0.7`, `cursor: not-allowed`) will make the success message look faded out, forbidden, or broken. Furthermore, failing to update the `aria-label` during this feedback state means screen readers will announce stale action text instead of the success message.
 **Action:** When a button is disabled specifically for async feedback, add a custom attribute like `data-feedback="true"` to opt-out of generic `:disabled` opacity/cursor styles, and explicitly update both the `aria-label` and `title` to match the feedback state.
+
+## 2024-11-20 - Default Button Color Contrast Accessibility
+**Learning:** Common default button colors (like Bootstrap's default blue `#007bff`) often fail WCAG AA contrast guidelines (4.5:1) when paired with white text, which can make them difficult to read for users with visual impairments.
+**Action:** Always verify color contrast on primary action buttons, even if using standard design system colors. Use darker shades (like `#0056b3` or Bootstrap 5's darker variants) to ensure compliant readability.
