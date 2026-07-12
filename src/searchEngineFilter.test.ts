@@ -49,6 +49,22 @@ describe('searchEngineFilter', () => {
         expect(window.location.href).toBe('https://example.com/');
     });
 
+    it('should do nothing if hostname contains but does not end with search engine', () => {
+        window.location.hostname = 'google.com.attacker.com';
+        window.location.search = '?q=hello+asdf+world';
+        window.location.href = 'https://google.com.attacker.com/?q=hello+asdf+world';
+        require('./searchEngineFilter');
+        expect(window.location.href).toBe('https://google.com.attacker.com/?q=hello+asdf+world');
+    });
+
+    it('should do nothing if hostname is a prefix of search engine', () => {
+        window.location.hostname = 'notgoogle.com';
+        window.location.search = '?q=hello+asdf+world';
+        window.location.href = 'https://notgoogle.com/?q=hello+asdf+world';
+        require('./searchEngineFilter');
+        expect(window.location.href).toBe('https://notgoogle.com/?q=hello+asdf+world');
+    });
+
     it('should do nothing if hostname matches but no query param', () => {
         window.location.hostname = 'www.google.com';
         window.location.search = '?p=hello'; // google uses 'q'

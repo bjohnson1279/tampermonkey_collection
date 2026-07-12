@@ -31,3 +31,8 @@
 **Vulnerability:** The fetch monkeypatch in `src/ytAdBlock2.ts` used simple duck typing (`'url' in req`) to identify Request objects. This allowed malicious POJOs to spoof properties to evade checks via dynamic getters, leading to a Time-Of-Check to Time-Of-Use (TOCTOU) vulnerability where the ad URL passed the `shouldBlock` filter but hit the native fetch intact.
 **Learning:** Simple duck typing on object properties is easily spoofable by getters. Moreover, intercepting native `Request` objects and replacing them with coerced strings destroys other request metadata (like `method` or `body`). Native `Request` objects are immune to TOCTOU for `url` since their internal slot is immutable.
 **Prevention:** Use WebIDL brand-checking (e.g., `Object.getOwnPropertyDescriptor(Request.prototype, 'url')?.get?.call(req)`) to securely and reliably identify Native `Request` objects across all JavaScript realms. Only overwrite `args[0]` with the safe URL string if the object is a POJO.
+
+## 2024-07-15 - [Hostname Confusion in Search Engine Filter]
+**Vulnerability:** Subdomain and prefix spoofing vulnerability found in `src/searchEngineFilter.ts` where `hostname.includes(domain)` was used to match search engines.
+**Learning:** Using `.includes()` on a hostname allows malicious domains like `notgoogle.com` or `google.com.attacker.com` to falsely match the target domain, potentially triggering unintended script logic or exposing sensitive user search queries.
+**Prevention:** Always use exact matching (`hostname === domain`) or proper suffix matching (`hostname.endsWith('.' + domain)`) when validating hostnames against a list of trusted domains.
