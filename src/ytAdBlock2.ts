@@ -222,7 +222,7 @@
         // Palette: Use static aria-label since aria-pressed already indicates the current state
         btn.setAttribute('aria-label', `Toggle AdBlock`);
         btn.setAttribute('aria-pressed', enabled.toString());
-        btn.setAttribute('title', 'Toggle AdBlock (Shift+A)');
+        btn.setAttribute('title', `${enabled ? 'Disable' : 'Enable'} AdBlock (Shift+A)`);
         btn.setAttribute('aria-keyshortcuts', 'Shift+A');
         styleButtonStatic(btn);
         styleButtonDynamic(btn);
@@ -292,6 +292,7 @@
         if (btn) {
             btn.textContent = `AdBlock: ${enabled ? 'ON' : 'OFF'}`;
             btn.setAttribute('aria-pressed', enabled.toString());
+            btn.setAttribute('title', `${enabled ? 'Disable' : 'Enable'} AdBlock (Shift+A)`);
             styleButtonDynamic(btn as HTMLButtonElement);
         }
 
