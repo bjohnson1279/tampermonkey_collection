@@ -69,3 +69,7 @@
 ## 2024-11-20 - Default Button Color Contrast Accessibility
 **Learning:** Common default button colors (like Bootstrap's default blue `#007bff`) often fail WCAG AA contrast guidelines (4.5:1) when paired with white text, which can make them difficult to read for users with visual impairments.
 **Action:** Always verify color contrast on primary action buttons, even if using standard design system colors. Use darker shades (like `#0056b3` or Bootstrap 5's darker variants) to ensure compliant readability.
+
+## 2024-11-28 - Actionable tooltips for toggle states
+**Learning:** Static tooltips on toggle buttons (e.g., "Toggle Feature") provide less clarity than dynamic, actionable tooltips. Updating the title attribute to reflect the action that will occur upon clicking (e.g., "Disable Feature" when currently ON) significantly improves user confidence and reduces cognitive load for sighted mouse users.
+**Action:** Always use actionable, dynamic tooltips for toggle states instead of generic "Toggle" text, ensuring the tooltip explicitly describes the result of the interaction based on the current state.
