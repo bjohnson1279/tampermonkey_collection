@@ -30,24 +30,28 @@ class BingQuizClicker {
     }
 
     private initialize(): void {
+        // ⚡ Bolt: Replace O(N) inline style assignments with O(1) injected stylesheet
+        const style = document.createElement('style');
+        style.textContent = `
+            .wk_hideCompulsary { visibility: visible !important; }
+            .wk_choiceMaxWidth:has(.wk_hideCompulsary) { color: green !important; }
+        `;
+        (document.head || document.documentElement).appendChild(style);
         this.startWatching();
     }
 
     private startWatching(): void {
         // Initial check
         this.checkAndClick();
-        
+
         // Set up interval for continuous checking
-        this.intervalId = window.setInterval(
-            () => this.checkAndClick(), 
-            this.CHECK_INTERVAL_MS
-        );
+        this.intervalId = window.setInterval(() => this.checkAndClick(), this.CHECK_INTERVAL_MS);
     }
 
     private getQuizElements(): QuizElements {
         return {
             gotThisRight: document.querySelectorAll('.wk_hideCompulsary'),
-            nextButton: document.querySelector(this.NEXT_BUTTON_SELECTOR)
+            nextButton: document.querySelector(this.NEXT_BUTTON_SELECTOR),
         };
     }
 
@@ -65,14 +69,11 @@ class BingQuizClicker {
     }
 
     private handleCorrectAnswers(elements: NodeListOf<HTMLElement>): void {
-        elements.forEach(element => {
+        elements.forEach((element) => {
             const parent = element.parentElement;
             if (!parent) return;
 
-            element.style.visibility = 'visible';
-            
             if (parent.classList.contains('wk_choiceMaxWidth')) {
-                parent.style.color = 'green';
                 this.safeClick(parent);
             }
         });

@@ -54,3 +54,7 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2024-07-28 - O(N) loop queries vs Single O(1) descendant CSS selector (Nested Queries)
 **Learning:** In `tvdbScraper.ts`, there was a nested loop querying `.list-group` and then `.list-group-item` inside. This is effectively the same anti-pattern as above but with an extra loop level, causing even more unnecessary parsing overhead.
 **Action:** Use a single descendant CSS selector (e.g., `document.querySelectorAll('.list-group .list-group-item')`) to significantly reduce main thread parsing overhead and loop complexity.
+
+## 2024-07-29 - Use injected stylesheet to prevent reflow in setInterval
+**Learning:** Modifying inline styles (`element.style.visibility = 'visible'`, `parent.style.color = 'green'`) inside a loop executing repeatedly (like in a `setInterval` checking for DOM changes) causes continuous, expensive layout calculation and synchronous reflows, freezing the main thread.
+**Action:** When handling styles for repeated or dynamic elements, inject a static `<style>` block once globally to offload the styling work to the browser's native CSS engine in O(1) time, avoiding O(N) JavaScript style assignments per tick.
