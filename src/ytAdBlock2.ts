@@ -108,6 +108,30 @@
         return origOpen.apply(this, [method, urlStr, async ?? true, username, password]);
     };
 
+    // Patch navigator.sendBeacon
+    const origSendBeacon = navigator.sendBeacon;
+    if (origSendBeacon) {
+        navigator.sendBeacon = function (
+            this: Navigator,
+            url: string | URL,
+            data?: BodyInit | null
+        ): boolean {
+            // 🛡️ Sentinel: Use duck typing for URL objects to prevent cross-realm adblock evasion
+            const urlStr =
+                url &&
+                typeof url === 'object' &&
+                'href' in url &&
+                typeof (url as any).href === 'string'
+                    ? (url as any).href
+                    : url?.toString() || '';
+            if (shouldBlock(urlStr)) {
+                return true; // Simulate success to prevent fallback mechanisms
+            }
+            // 🛡️ Sentinel: Pass the evaluated URL string to prevent TOCTOU evasion
+            return origSendBeacon.apply(this, [urlStr, data]);
+        };
+    }
+
     //----------------------------------------
     // DOM cleanup for ad containers
     //----------------------------------------
