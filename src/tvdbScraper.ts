@@ -112,6 +112,11 @@ export function scrapeTVDBData(): Episode[] {
             btn.disabled = true;
             btn.setAttribute('data-feedback', 'true');
 
+            btn.textContent = '⏳ Copying...';
+            btn.setAttribute('title', 'Copying to clipboard...');
+            btn.setAttribute('aria-label', 'Copying to clipboard...');
+            announcer.textContent = 'Copying to clipboard...';
+
             try {
                 await navigator.clipboard.writeText(JSON.stringify(episodesData, null, 2));
                 btn.textContent = '✅ Copied!';
