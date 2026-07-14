@@ -73,3 +73,7 @@
 ## 2024-11-28 - Actionable tooltips for toggle states
 **Learning:** Static tooltips on toggle buttons (e.g., "Toggle Feature") provide less clarity than dynamic, actionable tooltips. Updating the title attribute to reflect the action that will occur upon clicking (e.g., "Disable Feature" when currently ON) significantly improves user confidence and reduces cognitive load for sighted mouse users.
 **Action:** Always use actionable, dynamic tooltips for toggle states instead of generic "Toggle" text, ensuring the tooltip explicitly describes the result of the interaction based on the current state.
+
+## 2024-05-30 - Explicit loading states for Clipboard API
+**Learning:** The `navigator.clipboard.writeText()` API is asynchronous and can sometimes pause to prompt the user for clipboard permissions. Without an explicit loading state, the button appears frozen and unresponsive during this pause, leading to confusion.
+**Action:** Always implement an explicit loading state (e.g., updating button text to "⏳ Copying...") immediately before awaiting the Clipboard API.

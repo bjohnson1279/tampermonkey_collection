@@ -22,21 +22,29 @@
     const origFetch = window.fetch;
     window.fetch = (async (...args) => {
         const req = args[0];
-        let url;
-        if (req &&
-            typeof req === 'object' &&
-            'url' in req &&
-            typeof req.url === 'string') {
-            url = req.url;
+        let url = '';
+        let isNativeRequest = false;
+        if (req && typeof req === 'object') {
+            const reqUrlGetter = Object.getOwnPropertyDescriptor(Request.prototype, 'url')?.get;
+            if (reqUrlGetter) {
+                try {
+                    url = reqUrlGetter.call(req);
+                    isNativeRequest = true;
+                }
+                catch {
+                }
+            }
         }
-        else if (req &&
-            typeof req === 'object' &&
-            'href' in req &&
-            typeof req.href === 'string') {
-            url = req.href;
-        }
-        else {
-            url = req?.toString() || '';
+        if (!isNativeRequest) {
+            if (req &&
+                typeof req === 'object' &&
+                'href' in req &&
+                typeof req.href === 'string') {
+                url = req.href;
+            }
+            else {
+                url = req?.toString() || '';
+            }
             args[0] = url;
         }
         if (shouldBlock(url)) {
@@ -142,7 +150,7 @@
         btn.textContent = `AdBlock: ${enabled ? 'ON' : 'OFF'}`;
         btn.setAttribute('aria-label', `Toggle AdBlock`);
         btn.setAttribute('aria-pressed', enabled.toString());
-        btn.setAttribute('title', 'Toggle AdBlock (Shift+A)');
+        btn.setAttribute('title', `${enabled ? 'Disable' : 'Enable'} AdBlock (Shift+A)`);
         btn.setAttribute('aria-keyshortcuts', 'Shift+A');
         styleButtonStatic(btn);
         styleButtonDynamic(btn);
@@ -152,6 +160,7 @@
             const style = document.createElement('style');
             style.id = 'adblock-styles';
             style.textContent = `
+                #adblock-toggle { outline: none; }
                 #adblock-toggle:hover { opacity: 0.8; }
                 #adblock-toggle:focus-visible { outline: 2px solid var(--yt-spec-text-primary, CanvasText); outline-offset: 2px; }
                 #adblock-toggle:active { transform: scale(0.95); }
@@ -185,7 +194,6 @@
             border-radius: 4px;
             cursor: pointer;
             transition: opacity 0.2s, outline 0.2s, background-color 0.2s, transform 0.1s;
-            outline: none;
             transform-origin: center;
         `;
     }
@@ -199,6 +207,7 @@
         if (btn) {
             btn.textContent = `AdBlock: ${enabled ? 'ON' : 'OFF'}`;
             btn.setAttribute('aria-pressed', enabled.toString());
+            btn.setAttribute('title', `${enabled ? 'Disable' : 'Enable'} AdBlock (Shift+A)`);
             styleButtonDynamic(btn);
         }
         const announcer = document.querySelector('#adblock-announcer');

@@ -1,32 +1,49 @@
 "use strict";
+const _global = typeof window !== 'undefined' ? window : global;
+_global.__kslTestExports = _global.__kslTestExports || {};
 (function () {
     'use strict';
-    const container = document.querySelector('#commentsContainer');
-    if (!container) {
-        return;
-    }
+    const container = typeof document !== 'undefined'
+        ? document.querySelector('#commentsContainer')
+        : null;
     const config = {
         attributes: false,
         childList: true,
         subtree: true,
     };
+    _global.__kslTestExports.config = config;
     const blockedUsers = new Set([]);
-    const handleMutations = (mutationsList, observer) => {
-        const commentsList = container.querySelector('.CommentsList__root');
-        if (!commentsList)
+    _global.__kslTestExports.blockedUsers = blockedUsers;
+    const processComment = (comment) => {
+        const usernameElement = comment.querySelector('.CommentsList__userName');
+        if (!usernameElement?.textContent)
             return;
-        const allComments = commentsList.querySelectorAll('.CommentsList__item');
-        allComments.forEach((comment) => {
-            const usernameElement = comment.querySelector('.CommentsList__userName');
-            if (!usernameElement?.textContent)
-                return;
-            const username = usernameElement.textContent.trim();
-            if (blockedUsers.has(username)) {
-                console.log(`Hiding comment from user: ${username}`);
-                comment.style.display = 'none';
-            }
-        });
+        const username = usernameElement.textContent.trim();
+        if (blockedUsers.has(username)) {
+            comment.style.display = 'none';
+        }
     };
+    _global.__kslTestExports.processComment = processComment;
+    const handleMutations = (mutationsList) => {
+        for (const mutation of mutationsList) {
+            mutation.addedNodes.forEach((node) => {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    const el = node;
+                    if (el.classList.contains('CommentsList__item')) {
+                        processComment(el);
+                    }
+                    if (el.firstElementChild) {
+                        const nestedComments = el.querySelectorAll('.CommentsList__item');
+                        nestedComments.forEach(processComment);
+                    }
+                }
+            });
+        }
+    };
+    _global.__kslTestExports.handleMutations = handleMutations;
+    if (!container) {
+        return;
+    }
     try {
         const observer = new MutationObserver(handleMutations);
         observer.observe(container, config);
