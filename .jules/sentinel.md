@@ -36,3 +36,8 @@
 **Vulnerability:** Subdomain and prefix spoofing vulnerability found in `src/searchEngineFilter.ts` where `hostname.includes(domain)` was used to match search engines.
 **Learning:** Using `.includes()` on a hostname allows malicious domains like `notgoogle.com` or `google.com.attacker.com` to falsely match the target domain, potentially triggering unintended script logic or exposing sensitive user search queries.
 **Prevention:** Always use exact matching (`hostname === domain`) or proper suffix matching (`hostname.endsWith('.' + domain)`) when validating hostnames against a list of trusted domains.
+
+## 2026-07-14 - [Tracking Evasion via sendBeacon]
+**Vulnerability:** YouTube AdBlocker (`ytAdBlock2`) intercepted `fetch` and `XMLHttpRequest`, but left `navigator.sendBeacon` unprotected. This allowed tracking and ad analytics requests (like those hitting `/api/stats/ads`) to bypass the network filter, exposing the user to tracking and potentially triggering secondary ad mechanisms.
+**Learning:** Modern web applications often use `navigator.sendBeacon` for analytics and telemetry because it guarantees request delivery even during page unload. Adblockers that only hook `fetch` and `XHR` are blind to these requests.
+**Prevention:** When building network interceptors for privacy or adblocking, always secure all outbound network APIs, including `navigator.sendBeacon`. Apply the same WebIDL/TOCTOU preventions as used in `fetch` and `XHR`.
