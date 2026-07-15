@@ -73,10 +73,10 @@ export function scrapeTVDBData(): Episode[] {
         const style = document.createElement('style');
         style.textContent = `
             #tvdb-copy-json-btn { outline: none; position: fixed; bottom: 24px; right: 24px; z-index: 9999; background: #0056b3; color: white; border: none; border-radius: 8px; padding: 12px 20px; font: 600 14px system-ui, sans-serif; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s; }
-            #tvdb-copy-json-btn:hover { opacity: 0.9; }
+            #tvdb-copy-json-btn:hover:not([aria-disabled="true"]) { opacity: 0.9; }
             #tvdb-copy-json-btn:focus-visible { outline: 3px solid #0056b3; outline-offset: 2px; }
-            #tvdb-copy-json-btn:not(:disabled):active { transform: scale(0.95); }
-            #tvdb-copy-json-btn:disabled:not([data-feedback="true"]) { cursor: not-allowed; opacity: 0.7; }
+            #tvdb-copy-json-btn:not([aria-disabled="true"]):active { transform: scale(0.95); }
+            #tvdb-copy-json-btn[aria-disabled="true"]:not([data-feedback="true"]) { cursor: not-allowed; opacity: 0.7; }
             #tvdb-copy-json-btn[data-feedback="true"] { cursor: default; }
         `;
         document.head.appendChild(style);
@@ -86,7 +86,7 @@ export function scrapeTVDBData(): Episode[] {
 
         const hasData = episodesData.length > 0;
         btn.textContent = hasData ? '📋 Copy JSON' : '📋 No Data';
-        btn.disabled = !hasData;
+        if (!hasData) btn.setAttribute('aria-disabled', 'true');
         btn.setAttribute(
             'aria-label',
             hasData ? 'Copy episodes data to clipboard' : 'No episodes data found'
@@ -107,9 +107,9 @@ export function scrapeTVDBData(): Episode[] {
         let timeoutId: number;
 
         btn.addEventListener('click', async () => {
-            if (btn.disabled) return;
+            if (btn.getAttribute('aria-disabled') === 'true') return;
             clearTimeout(timeoutId);
-            btn.disabled = true;
+            btn.setAttribute('aria-disabled', 'true');
             btn.setAttribute('data-feedback', 'true');
 
             btn.textContent = '⏳ Copying...';
@@ -138,7 +138,7 @@ export function scrapeTVDBData(): Episode[] {
                 btn.setAttribute('aria-label', 'Copy episodes data to clipboard');
                 btn.removeAttribute('data-feedback');
                 announcer.textContent = '';
-                btn.disabled = false;
+                btn.removeAttribute('aria-disabled');
             }, 2000);
         });
 
