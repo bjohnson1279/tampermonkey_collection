@@ -41,3 +41,8 @@
 **Vulnerability:** YouTube AdBlocker (`ytAdBlock2`) intercepted `fetch` and `XMLHttpRequest`, but left `navigator.sendBeacon` unprotected. This allowed tracking and ad analytics requests (like those hitting `/api/stats/ads`) to bypass the network filter, exposing the user to tracking and potentially triggering secondary ad mechanisms.
 **Learning:** Modern web applications often use `navigator.sendBeacon` for analytics and telemetry because it guarantees request delivery even during page unload. Adblockers that only hook `fetch` and `XHR` are blind to these requests.
 **Prevention:** When building network interceptors for privacy or adblocking, always secure all outbound network APIs, including `navigator.sendBeacon`. Apply the same WebIDL/TOCTOU preventions as used in `fetch` and `XHR`.
+
+## 2024-07-20 - [Network Filter Evasion via Relative URLs]
+**Vulnerability:** Adblocker/tracker blocking logic using fetch interception was vulnerable to evasion when requests were made using relative URLs (e.g., `fetch('/api/stats/ads')`). The URL was tested directly against a regex that expected full domain matches (like `youtube.com\/api\/stats`), causing relative URLs to silently bypass the filter.
+**Learning:** Network APIs like `fetch` and `XMLHttpRequest` accept relative URLs, which the browser automatically resolves against the current origin. Network filters relying on full URL patterns will fail to block these unless the relative URLs are resolved first.
+**Prevention:** When intercepting network requests to evaluate against a URL blocklist (e.g., via regex), always normalize the input URL to an absolute URL (e.g., `new URL(url, window.location.href).href`) before testing. Use a `try/catch` block to safely fallback to the original URL if parsing fails.
