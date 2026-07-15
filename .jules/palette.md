@@ -44,11 +44,13 @@
 **Action:** When adding global keyboard shortcuts, always check the `e.target` of the keydown event. Ensure it is not an `<input>`, `<textarea>`, or an element with `isContentEditable` before executing the shortcut action.
 
 ## 2026-07-07 - [Invisible Focus Rings with currentColor]
+
 **Learning:** Using `currentColor` for focus rings (e.g. `outline: 2px solid currentColor`) can cause accessibility failures (WCAG 2.4.7 Focus Visible) when the element's text color perfectly matches its dynamically themed container background. For example, a button with white text on a dynamically themed dark-or-light header will have a white focus ring, rendering it invisible in light mode.
 **Action:** When styling injected components over third-party, dynamically-themed layouts (like YouTube), avoid `currentColor` for focus outlines unless the element has its own isolated background. Instead, use the site's native high-contrast CSS variables (e.g., `var(--yt-spec-text-primary)`) with a fallback (e.g. `CanvasText`) to ensure contrast across all themes.
+
 ## 2026-07-08 - Custom Focus Styles Specificity
 
-**Learning:** When applying custom  styles via an injected `<style>` block (e.g. for accessibility), setting an inline style of `outline: none;` directly on the element (e.g., via `element.style.cssText`) will override the injected stylesheet's `:focus-visible` rule due to CSS specificity rules, leaving keyboard users with an entirely invisible focus ring.
+**Learning:** When applying custom styles via an injected `<style>` block (e.g. for accessibility), setting an inline style of `outline: none;` directly on the element (e.g., via `element.style.cssText`) will override the injected stylesheet's `:focus-visible` rule due to CSS specificity rules, leaving keyboard users with an entirely invisible focus ring.
 **Action:** Place the `outline: none;` reset rule inside the injected `<style>` block alongside the custom `:focus-visible` rule to ensure the CSS cascading rules evaluate the pseudo-class state correctly without being overridden by inline properties.
 
 ## 2024-11-12 - Custom Focus Styles Specificity
@@ -67,13 +69,21 @@
 **Action:** When a button is disabled specifically for async feedback, add a custom attribute like `data-feedback="true"` to opt-out of generic `:disabled` opacity/cursor styles, and explicitly update both the `aria-label` and `title` to match the feedback state.
 
 ## 2024-11-20 - Default Button Color Contrast Accessibility
+
 **Learning:** Common default button colors (like Bootstrap's default blue `#007bff`) often fail WCAG AA contrast guidelines (4.5:1) when paired with white text, which can make them difficult to read for users with visual impairments.
 **Action:** Always verify color contrast on primary action buttons, even if using standard design system colors. Use darker shades (like `#0056b3` or Bootstrap 5's darker variants) to ensure compliant readability.
 
 ## 2024-11-28 - Actionable tooltips for toggle states
+
 **Learning:** Static tooltips on toggle buttons (e.g., "Toggle Feature") provide less clarity than dynamic, actionable tooltips. Updating the title attribute to reflect the action that will occur upon clicking (e.g., "Disable Feature" when currently ON) significantly improves user confidence and reduces cognitive load for sighted mouse users.
 **Action:** Always use actionable, dynamic tooltips for toggle states instead of generic "Toggle" text, ensuring the tooltip explicitly describes the result of the interaction based on the current state.
 
 ## 2024-05-30 - Explicit loading states for Clipboard API
+
 **Learning:** The `navigator.clipboard.writeText()` API is asynchronous and can sometimes pause to prompt the user for clipboard permissions. Without an explicit loading state, the button appears frozen and unresponsive during this pause, leading to confusion.
 **Action:** Always implement an explicit loading state (e.g., updating button text to "⏳ Copying...") immediately before awaiting the Clipboard API.
+
+## 2024-11-29 - Use aria-disabled to prevent focus loss on async buttons
+
+**Learning:** When a button disables itself (`disabled=true`) upon clicking (e.g., during an async operation like copying to clipboard), it loses focus. This causes screen readers to unexpectedly drop focus to the `<body>`, disorienting keyboard and assistive technology users.
+**Action:** Instead of the native `disabled` attribute, use `aria-disabled="true"` to communicate the disabled state semantically without removing focusability. Ensure the click handler explicitly ignores clicks when `aria-disabled="true"` is set, and update the associated CSS pseudo-classes (`:disabled`, `:not(:disabled)`) to match the aria attribute.
