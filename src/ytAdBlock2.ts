@@ -43,6 +43,9 @@
 
     // Patch fetch()
     const origFetch = window.fetch;
+    // ⚡ Bolt: Cache the native Request URL getter to avoid expensive reflection inside the hot path fetch interceptor loop.
+    const nativeReqUrlGetter = Object.getOwnPropertyDescriptor(Request.prototype, 'url')?.get;
+
     window.fetch = (async (...args: Parameters<typeof window.fetch>): Promise<Response> => {
         const req = args[0];
         // 🛡️ Sentinel: Use duck typing for Request/URL objects to prevent cross-realm (iframe) adblock evasion
@@ -51,11 +54,10 @@
         let isNativeRequest = false;
 
         if (req && typeof req === 'object') {
-            const reqUrlGetter = Object.getOwnPropertyDescriptor(Request.prototype, 'url')?.get;
-            if (reqUrlGetter) {
+            if (nativeReqUrlGetter) {
                 try {
                     // WebIDL brand check safely extracts the URL even across realms
-                    url = reqUrlGetter.call(req) as string;
+                    url = nativeReqUrlGetter.call(req) as string;
                     isNativeRequest = true;
                 } catch {
                     // Throws if not a true native Request object (fails brand check)
