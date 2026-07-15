@@ -38,7 +38,14 @@
         /doubleclick\.net|youtube\.com\/api\/stats\/ads|youtube\.com\/api\/stats\/atr|youtube\.com\/get_midroll|youtube\.com\/pagead|ytimg\.com\/ads\//;
 
     function shouldBlock(url: string): boolean {
-        return enabled && blockedPatternRegex.test(url);
+        if (!enabled) return false;
+        try {
+            // 🛡️ Sentinel: Normalize URL to absolute to prevent relative URL evasion
+            const absoluteUrl = new URL(url, window.location.href).href;
+            return blockedPatternRegex.test(absoluteUrl);
+        } catch {
+            return blockedPatternRegex.test(url);
+        }
     }
 
     // Patch fetch()
