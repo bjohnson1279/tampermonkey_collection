@@ -58,3 +58,7 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2024-07-29 - Use injected stylesheet to prevent reflow in setInterval
 **Learning:** Modifying inline styles (`element.style.visibility = 'visible'`, `parent.style.color = 'green'`) inside a loop executing repeatedly (like in a `setInterval` checking for DOM changes) causes continuous, expensive layout calculation and synchronous reflows, freezing the main thread.
 **Action:** When handling styles for repeated or dynamic elements, inject a static `<style>` block once globally to offload the styling work to the browser's native CSS engine in O(1) time, avoiding O(N) JavaScript style assignments per tick.
+
+## 2024-05-13 - [Cache reflection getters in hot paths]
+**Learning:** Using `Object.getOwnPropertyDescriptor` inside a high-frequency function like a network fetch interceptor causes a significant performance penalty (e.g. 5-6x slower).
+**Action:** Always cache reflection results or descriptor getters outside of the hot path for reuse.
