@@ -87,3 +87,7 @@
 
 **Learning:** When a button disables itself (`disabled=true`) upon clicking (e.g., during an async operation like copying to clipboard), it loses focus. This causes screen readers to unexpectedly drop focus to the `<body>`, disorienting keyboard and assistive technology users.
 **Action:** Instead of the native `disabled` attribute, use `aria-disabled="true"` to communicate the disabled state semantically without removing focusability. Ensure the click handler explicitly ignores clicks when `aria-disabled="true"` is set, and update the associated CSS pseudo-classes (`:disabled`, `:not(:disabled)`) to match the aria attribute.
+
+## 2024-11-29 - Dynamic Item Counts in Actions
+**Learning:** Adding dynamic item counts (e.g., "(5 episodes)") to action buttons like "Copy JSON" gives users immediate, helpful context about the scope of the action they are about to take, reducing cognitive load and preventing surprises.
+**Action:** When injecting buttons that perform actions on a collection of scraped or parsed data, dynamically update the button text to include the count of items being acted upon.
