@@ -85,7 +85,9 @@ export function scrapeTVDBData(): Episode[] {
         btn.id = 'tvdb-copy-json-btn';
 
         const hasData = episodesData.length > 0;
-        btn.textContent = hasData ? '📋 Copy JSON' : '📋 No Data';
+        btn.textContent = hasData
+            ? `📋 Copy JSON (${episodesData.length} episode${episodesData.length === 1 ? '' : 's'})`
+            : '📋 No Data';
         if (!hasData) btn.setAttribute('aria-disabled', 'true');
         btn.setAttribute(
             'aria-label',
@@ -132,7 +134,7 @@ export function scrapeTVDBData(): Episode[] {
                 announcer.textContent = 'Failed to copy';
             }
             timeoutId = window.setTimeout(() => {
-                btn.textContent = '📋 Copy JSON';
+                btn.textContent = `📋 Copy JSON (${episodesData.length} episode${episodesData.length === 1 ? '' : 's'})`;
                 btn.style.backgroundColor = '#0056b3';
                 btn.setAttribute('title', 'Copy JSON to clipboard (Shift+C)');
                 btn.setAttribute('aria-label', 'Copy episodes data to clipboard');
