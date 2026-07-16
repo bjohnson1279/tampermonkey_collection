@@ -17,6 +17,10 @@ export interface Episode {
     description: string;
 }
 
+// ⚡ Bolt: Hoist static RegExp objects outside the loop to prevent repeated allocation and garbage collection overhead
+const EPISODE_NUM_REGEX = /\d+/g;
+const NETWORK_CLEANUP_REGEX = /ABC|CBS|FOX|NBC|PBS|History|H2|\(US\)|A&E/gi;
+
 export function scrapeTVDBData(): Episode[] {
     'use strict';
 
@@ -31,7 +35,7 @@ export function scrapeTVDBData(): Episode[] {
 
         const epLabelElement = heading.querySelector<HTMLElement>('.episode-label');
         const epLabel = epLabelElement?.textContent?.trim() || '';
-        const matches = epLabel.match(/\d+/g) || [];
+        const matches = epLabel.match(EPISODE_NUM_REGEX) || [];
 
         const titleLink = heading.querySelector<HTMLAnchorElement>('a');
         const epTitle = titleLink?.textContent?.trim() || '';
@@ -43,10 +47,7 @@ export function scrapeTVDBData(): Episode[] {
         const listInline = ep.querySelectorAll<HTMLElement>('.list-inline');
 
         listInline.forEach((listItem: HTMLElement): void => {
-            const dateText =
-                listItem.textContent
-                    ?.replace(/ABC|CBS|FOX|NBC|PBS|History|H2|\(US\)|A&E/gi, '')
-                    .trim() || '';
+            const dateText = listItem.textContent?.replace(NETWORK_CLEANUP_REGEX, '').trim() || '';
 
             try {
                 const date = new Date(dateText);

@@ -35,4 +35,3 @@ export const getQueryParams = (urlString: string): QueryParams => {
         return Object.create(null);
     }
 };
-
