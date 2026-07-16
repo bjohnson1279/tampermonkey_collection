@@ -62,3 +62,6 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2024-05-13 - [Cache reflection getters in hot paths]
 **Learning:** Using `Object.getOwnPropertyDescriptor` inside a high-frequency function like a network fetch interceptor causes a significant performance penalty (e.g. 5-6x slower).
 **Action:** Always cache reflection results or descriptor getters outside of the hot path for reuse.
+## 2024-05-24 - Hoist static RegExp objects outside of loops
+**Learning:** Instantiating `RegExp` literals (like `/\d+/g`) inside a loop causes memory allocation and subsequent garbage collection overhead on every iteration.
+**Action:** Extract literal RegExp objects to module-level constants. Methods like `String.prototype.match()` and `String.prototype.replace()` are safe to use with global hoisted regexes because they do not rely on or mutate the regex's `.lastIndex` property (unlike `RegExp.prototype.exec()` and `RegExp.prototype.test()`).

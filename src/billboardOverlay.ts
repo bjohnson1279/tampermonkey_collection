@@ -24,16 +24,20 @@ interface ExtendedHTMLElement extends HTMLElement {
         '.ad_desktop_placeholder',
         '.ad_desktop_wrapper',
         '.ad_desktop',
-        '.ad_clarity'
+        '.ad_clarity',
     ];
 
     // ⚡ Bolt: Use a combined selector to reduce multiple O(N) DOM traversals to a single O(1) traversal
-    document.querySelectorAll<HTMLElement>(adSelectors.join(',')).forEach((ad: HTMLElement): void => {
-        ad.remove();
-    });
+    document
+        .querySelectorAll<HTMLElement>(adSelectors.join(','))
+        .forEach((ad: HTMLElement): void => {
+            ad.remove();
+        });
 
     // Set up mutation observer for the chart overlay
-    const chartOverlay = document.querySelector<HTMLElement>('.chart-piano-overlay__attachment-point');
+    const chartOverlay = document.querySelector<HTMLElement>(
+        '.chart-piano-overlay__attachment-point'
+    );
     if (!chartOverlay) {
         return;
     }
@@ -42,7 +46,7 @@ interface ExtendedHTMLElement extends HTMLElement {
     const config: MutationObserverInit = {
         attributes: false,
         childList: true,
-        subtree: true
+        subtree: true,
     };
 
     const handleMutations: MutationCallback = (mutationsList: MutationRecord[]): void => {
