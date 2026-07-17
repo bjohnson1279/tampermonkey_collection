@@ -34,8 +34,11 @@ describe('searchEngineFilter', () => {
         // Require the file so the IIFE executes
         require('./searchEngineFilter');
 
-        expect(consoleErrorSpy).toHaveBeenCalledWith('Error processing search:', expect.any(Error));
-        expect(consoleErrorSpy.mock.calls[0][1].message).toBe('Simulated URLSearchParams error');
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+            'Error processing search:',
+            expect.any(String)
+        );
+        expect(consoleErrorSpy.mock.calls[0][1]).toBe('Simulated URLSearchParams error');
 
         // Restore URLSearchParams
         global.URLSearchParams = OriginalURLSearchParams;
