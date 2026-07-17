@@ -227,16 +227,20 @@
     function skipVideoAds(): void {
         if (!enabled) return;
 
-        const video: HTMLVideoElement | null = document.querySelector('video');
+        // ⚡ Bolt: Replace querySelector (O(N) traversal) with getElementsByTagName (O(1) live collection)
+        // inside this 500ms setInterval to minimize main thread CPU usage on a heavy YouTube DOM.
+        const video: HTMLVideoElement | null = document.getElementsByTagName('video')[0] ?? null;
         if (!video) return;
 
-        if (document.querySelector('.ad-showing')) {
+        // ⚡ Bolt: Replace querySelector('.class') with getElementsByClassName('class')[0] for O(1) live collection lookup instead of O(N) tree traversal
+        if (document.getElementsByClassName('ad-showing').length > 0) {
             if (Number.isFinite(video.duration)) {
                 video.currentTime = video.duration;
             }
         }
 
-        const skipBtn: HTMLElement | null = document.querySelector('.ytp-ad-skip-button');
+        const skipBtn = document.getElementsByClassName('ytp-ad-skip-button')[0] as
+            HTMLElement | undefined;
         if (skipBtn) skipBtn.click();
     }
 
@@ -244,9 +248,10 @@
     // Toggle button UI
     //----------------------------------------
     function addToggleButton(): void {
-        if (document.querySelector('#adblock-toggle')) return;
+        // ⚡ Bolt: Replace querySelector('#id') with getElementById('id') (O(1) hash map lookup) inside the setInterval loop
+        if (document.getElementById('adblock-toggle')) return;
 
-        const logo: HTMLElement | null = document.querySelector('#logo');
+        const logo: HTMLElement | null = document.getElementById('logo');
         if (!logo) return;
 
         const btn: HTMLButtonElement = document.createElement('button');
@@ -265,7 +270,7 @@
         logo.parentElement?.insertBefore(btn, logo.nextSibling);
 
         // Add injected styles for pseudo-classes for native, accessible hover/focus/active states
-        if (!document.querySelector('#adblock-styles')) {
+        if (!document.getElementById('adblock-styles')) {
             const style = document.createElement('style');
             style.id = 'adblock-styles';
             style.textContent = `
@@ -278,7 +283,7 @@
         }
 
         // Add visually hidden live announcer for screen readers
-        if (!document.querySelector('#adblock-announcer')) {
+        if (!document.getElementById('adblock-announcer')) {
             const announcer = document.createElement('div');
             announcer.id = 'adblock-announcer';
             announcer.setAttribute('aria-live', 'polite');
@@ -323,7 +328,7 @@
         enabled = !enabled;
         saveState();
 
-        const btn: HTMLElement | null = document.querySelector('#adblock-toggle');
+        const btn: HTMLElement | null = document.getElementById('adblock-toggle');
         if (btn) {
             btn.textContent = `${enabled ? '🛡️' : '⚠️'} AdBlock: ${enabled ? 'ON' : 'OFF'}`;
             btn.setAttribute('aria-pressed', enabled.toString());
@@ -331,7 +336,7 @@
             styleButtonDynamic(btn as HTMLButtonElement);
         }
 
-        const announcer: HTMLElement | null = document.querySelector('#adblock-announcer');
+        const announcer: HTMLElement | null = document.getElementById('adblock-announcer');
         if (announcer) {
             // Update announcer text to ensure screen readers read the new state, especially useful when toggled via hotkey
             announcer.textContent = `AdBlock is now ${enabled ? 'ON' : 'OFF'}`;
