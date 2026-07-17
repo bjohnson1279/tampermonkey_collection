@@ -251,7 +251,7 @@
 
         const btn: HTMLButtonElement = document.createElement('button');
         btn.id = 'adblock-toggle';
-        btn.textContent = `AdBlock: ${enabled ? 'ON' : 'OFF'}`;
+        btn.textContent = `${enabled ? '🛡️' : '⚠️'} AdBlock: ${enabled ? 'ON' : 'OFF'}`;
         // Palette: Use static aria-label since aria-pressed already indicates the current state
         btn.setAttribute('aria-label', `Toggle AdBlock`);
         btn.setAttribute('aria-pressed', enabled.toString());
@@ -300,7 +300,9 @@
         btn.style.cssText = `
             margin-left: 12px;
             padding: 4px 8px;
-            font-size: 12px;
+            font-size: 14px;
+            font-family: "Roboto", "Arial", sans-serif;
+            font-weight: 500;
             color: white;
             border: none;
             border-radius: 4px;
@@ -323,7 +325,7 @@
 
         const btn: HTMLElement | null = document.querySelector('#adblock-toggle');
         if (btn) {
-            btn.textContent = `AdBlock: ${enabled ? 'ON' : 'OFF'}`;
+            btn.textContent = `${enabled ? '🛡️' : '⚠️'} AdBlock: ${enabled ? 'ON' : 'OFF'}`;
             btn.setAttribute('aria-pressed', enabled.toString());
             btn.setAttribute('title', `${enabled ? 'Disable' : 'Enable'} AdBlock (Shift+A)`);
             styleButtonDynamic(btn as HTMLButtonElement);
