@@ -91,3 +91,7 @@
 ## 2024-11-29 - Dynamic Item Counts in Actions
 **Learning:** Adding dynamic item counts (e.g., "(5 episodes)") to action buttons like "Copy JSON" gives users immediate, helpful context about the scope of the action they are about to take, reducing cognitive load and preventing surprises.
 **Action:** When injecting buttons that perform actions on a collection of scraped or parsed data, dynamically update the button text to include the count of items being acted upon.
+
+## 2024-11-29 - Visual Status Icons on Toggle Buttons
+**Learning:** Text-heavy toggle buttons (e.g., "AdBlock: ON") require users to read and process the text to understand the current state, increasing cognitive load. Adding stateful status icons (e.g., "🛡️" for ON, "⚠️" for OFF) provides immediate visual recognition, allowing users to parse the state at a glance.
+**Action:** When creating text-based toggle buttons, incorporate distinct, semantically appropriate icons that change based on the active state to improve quick visual parsing and add a touch of delight.
