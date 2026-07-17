@@ -91,6 +91,10 @@ _global.__kslTestExports = _global.__kslTestExports || {};
             allComments.forEach(processComment);
         }
     } catch (error) {
-        console.error('Error initializing comment observer:', error);
+        // 🛡️ Sentinel: Removed error object from console.error to prevent stack trace exposure
+        console.error(
+            'Error initializing comment observer:',
+            error instanceof Error ? error.message : String(error)
+        );
     }
 })();

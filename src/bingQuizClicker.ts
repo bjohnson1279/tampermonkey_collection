@@ -88,7 +88,11 @@ class BingQuizClicker {
             });
             element.dispatchEvent(event);
         } catch (error) {
-            console.error('Error dispatching click event:', error);
+            // 🛡️ Sentinel: Removed error object from console.error to prevent stack trace exposure
+            console.error(
+                'Error dispatching click event:',
+                error instanceof Error ? error.message : String(error)
+            );
         }
     }
 

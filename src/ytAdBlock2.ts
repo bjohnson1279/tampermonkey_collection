@@ -22,7 +22,11 @@
             enabled = JSON.parse(stored) ?? true;
         }
     } catch (e) {
-        console.warn('Failed to parse ytAdblockEnabled from localStorage', e);
+        // 🛡️ Sentinel: Removed error object from console.warn to prevent stack trace exposure
+        console.warn(
+            'Failed to parse ytAdblockEnabled from localStorage',
+            e instanceof Error ? e.message : String(e)
+        );
         enabled = true;
     }
 

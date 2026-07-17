@@ -69,6 +69,10 @@ interface ExtendedHTMLElement extends HTMLElement {
         const observer = new MutationObserver(handleMutations);
         observer.observe(chartOverlay, config);
     } catch (error) {
-        console.error('Error initializing Billboard overlay observer:', error);
+        // 🛡️ Sentinel: Removed error object from console.error to prevent stack trace exposure
+        console.error(
+            'Error initializing Billboard overlay observer:',
+            error instanceof Error ? error.message : String(error)
+        );
     }
 })();

@@ -55,7 +55,8 @@ export function scrapeTVDBData(): Episode[] {
                     itemDate = date.toISOString().split('T')[0];
                 }
             } catch (e) {
-                console.error('Error parsing date:', e);
+                // 🛡️ Sentinel: Removed error object from console.error to prevent stack trace exposure
+                console.error('Error parsing date:', e instanceof Error ? e.message : String(e));
             }
         });
 

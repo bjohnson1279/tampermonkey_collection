@@ -78,6 +78,10 @@ interface SponsoredElement extends HTMLElement {
         const observer = new MutationObserver(handleMutations);
         observer.observe(loadMoreContainer, config);
     } catch (error) {
-        console.error('Error initializing mutation observer:', error);
+        // 🛡️ Sentinel: Removed error object from console.error to prevent stack trace exposure
+        console.error(
+            'Error initializing mutation observer:',
+            error instanceof Error ? error.message : String(error)
+        );
     }
 })();
