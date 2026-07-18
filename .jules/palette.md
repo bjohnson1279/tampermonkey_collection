@@ -89,9 +89,16 @@
 **Action:** Instead of the native `disabled` attribute, use `aria-disabled="true"` to communicate the disabled state semantically without removing focusability. Ensure the click handler explicitly ignores clicks when `aria-disabled="true"` is set, and update the associated CSS pseudo-classes (`:disabled`, `:not(:disabled)`) to match the aria attribute.
 
 ## 2024-11-29 - Dynamic Item Counts in Actions
+
 **Learning:** Adding dynamic item counts (e.g., "(5 episodes)") to action buttons like "Copy JSON" gives users immediate, helpful context about the scope of the action they are about to take, reducing cognitive load and preventing surprises.
 **Action:** When injecting buttons that perform actions on a collection of scraped or parsed data, dynamically update the button text to include the count of items being acted upon.
 
 ## 2024-11-29 - Visual Status Icons on Toggle Buttons
+
 **Learning:** Text-heavy toggle buttons (e.g., "AdBlock: ON") require users to read and process the text to understand the current state, increasing cognitive load. Adding stateful status icons (e.g., "🛡️" for ON, "⚠️" for OFF) provides immediate visual recognition, allowing users to parse the state at a glance.
 **Action:** When creating text-based toggle buttons, incorporate distinct, semantically appropriate icons that change based on the active state to improve quick visual parsing and add a touch of delight.
+
+## 2026-07-18 - Dynamic Item Counts in ARIA Labels
+
+**Learning:** When a button's visual text is updated to include dynamic context (like an item count), using a static `aria-label` causes screen readers to completely miss this crucial context, as `aria-label` overrides the element's text content.
+**Action:** Always ensure that any dynamic, contextual data added to visual text is also reflected in the element's `aria-label` so that assistive technology users receive the same level of detail.
