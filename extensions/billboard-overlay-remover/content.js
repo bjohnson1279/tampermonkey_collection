@@ -7,9 +7,11 @@
         '.ad_desktop_placeholder',
         '.ad_desktop_wrapper',
         '.ad_desktop',
-        '.ad_clarity'
+        '.ad_clarity',
     ];
-    document.querySelectorAll(adSelectors.join(',')).forEach((ad) => {
+    document
+        .querySelectorAll(adSelectors.join(','))
+        .forEach((ad) => {
         ad.remove();
     });
     const chartOverlay = document.querySelector('.chart-piano-overlay__attachment-point');
@@ -19,7 +21,7 @@
     const config = {
         attributes: false,
         childList: true,
-        subtree: true
+        subtree: true,
     };
     const handleMutations = (mutationsList) => {
         mutationsList.forEach((mutation) => {
@@ -39,7 +41,7 @@
         observer.observe(chartOverlay, config);
     }
     catch (error) {
-        console.error('Error initializing Billboard overlay observer:', error);
+        console.error('Error initializing Billboard overlay observer:', error instanceof Error ? error.message : String(error));
     }
 })();
 //# sourceMappingURL=billboardOverlay.js.map
