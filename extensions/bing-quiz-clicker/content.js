@@ -2,7 +2,7 @@
 class BingQuizClicker {
     constructor() {
         this.GOT_THIS_RIGHT_TEXT = 'got this right';
-        this.NEXT_BUTTON_SELECTOR = '.wk_button';
+        this.NEXT_BUTTON_CLASS = 'wk_button';
         this.BUTTON_ROW = '.btq_row';
         this.BUTTON_OPTIONS = '.btq_opt';
         this.ANSWER_ROW = '.btq_ansRow';
@@ -13,6 +13,12 @@ class BingQuizClicker {
         this.initialize();
     }
     initialize() {
+        const style = document.createElement('style');
+        style.textContent = `
+            .wk_hideCompulsary { visibility: visible !important; }
+            .wk_choiceMaxWidth:has(.wk_hideCompulsary) { color: green !important; }
+        `;
+        (document.head || document.documentElement).appendChild(style);
         this.startWatching();
     }
     startWatching() {
@@ -21,8 +27,8 @@ class BingQuizClicker {
     }
     getQuizElements() {
         return {
-            gotThisRight: document.querySelectorAll('.wk_hideCompulsary'),
-            nextButton: document.querySelector(this.NEXT_BUTTON_SELECTOR)
+            gotThisRight: Array.from(document.getElementsByClassName('wk_hideCompulsary')),
+            nextButton: document.getElementsByClassName(this.NEXT_BUTTON_CLASS)[0] || null,
         };
     }
     handleQuizElements(elements) {
@@ -35,13 +41,11 @@ class BingQuizClicker {
         }
     }
     handleCorrectAnswers(elements) {
-        elements.forEach(element => {
+        elements.forEach((element) => {
             const parent = element.parentElement;
             if (!parent)
                 return;
-            element.style.visibility = 'visible';
             if (parent.classList.contains('wk_choiceMaxWidth')) {
-                parent.style.color = 'green';
                 this.safeClick(parent);
             }
         });
@@ -56,7 +60,7 @@ class BingQuizClicker {
             element.dispatchEvent(event);
         }
         catch (error) {
-            console.error('Error dispatching click event:', error);
+            console.error('Error dispatching click event:', error instanceof Error ? error.message : String(error));
         }
     }
     checkAndClick() {

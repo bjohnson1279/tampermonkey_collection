@@ -102,3 +102,11 @@
 
 **Learning:** When a button's visual text is updated to include dynamic context (like an item count), using a static `aria-label` causes screen readers to completely miss this crucial context, as `aria-label` overrides the element's text content.
 **Action:** Always ensure that any dynamic, contextual data added to visual text is also reflected in the element's `aria-label` so that assistive technology users receive the same level of detail.
+
+## 2024-05-24 - Prevent text selection on custom UI buttons
+**Learning:** When injecting custom interactive elements (like buttons) into existing pages, rapid clicking or double-clicking can inadvertently select the button's text, which breaks the native UI feel and feels unpolished.
+**Action:** Always apply `user-select: none` (and `-webkit-user-select: none` for compatibility) to custom injected buttons to ensure they behave like native application controls.
+
+## 2024-05-24 - Prevent text selection on custom UI buttons
+**Learning:** When injecting custom interactive elements (like buttons) into existing pages, rapid clicking or double-clicking can inadvertently select the button's text, which breaks the native UI feel and feels unpolished.
+**Action:** Always apply `user-select: none` (and `-webkit-user-select: none` for compatibility) to custom injected buttons to ensure they behave like native application controls.
