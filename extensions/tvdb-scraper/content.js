@@ -1,14 +1,17 @@
+// ⚡ Bolt: Hoist static RegExp objects outside the loop to prevent repeated allocation and garbage collection overhead
+const EPISODE_NUM_REGEX = /\d+/g;
+const NETWORK_CLEANUP_REGEX = /ABC|CBS|FOX|NBC|PBS|History|H2|\(US\)|A&E/gi;
+
 export function scrapeTVDBData() {
     'use strict';
     const episodesData = [];
     const episodes = document.querySelectorAll('.list-group .list-group-item');
     episodes.forEach((ep) => {
         const heading = ep.querySelector('.list-group-item-heading');
-        if (!heading)
-            return;
+        if (!heading) return;
         const epLabelElement = heading.querySelector('.episode-label');
         const epLabel = epLabelElement?.textContent?.trim() || '';
-        const matches = epLabel.match(/\d+/g) || [];
+        const matches = epLabel.match(EPISODE_NUM_REGEX) || [];
         const titleLink = heading.querySelector('a');
         const epTitle = titleLink?.textContent?.trim() || '';
         const itemTextElement = ep.querySelector('.list-group-item-text');
@@ -16,16 +19,13 @@ export function scrapeTVDBData() {
         let itemDate = '';
         const listInline = ep.querySelectorAll('.list-inline');
         listInline.forEach((listItem) => {
-            const dateText = listItem.textContent
-                ?.replace(/ABC|CBS|FOX|NBC|PBS|History|H2|\(US\)|A&E/gi, '')
-                .trim() || '';
+            const dateText = listItem.textContent?.replace(NETWORK_CLEANUP_REGEX, '').trim() || '';
             try {
                 const date = new Date(dateText);
                 if (!isNaN(date.getTime())) {
                     itemDate = date.toISOString().split('T')[0];
                 }
-            }
-            catch (e) {
+            } catch (e) {
                 console.error('Error parsing date:', e);
             }
         });
@@ -54,8 +54,14 @@ export function scrapeTVDBData() {
         const hasData = episodesData.length > 0;
         btn.textContent = hasData ? '📋 Copy JSON' : '📋 No Data';
         btn.disabled = !hasData;
-        btn.setAttribute('aria-label', hasData ? 'Copy episodes data to clipboard' : 'No episodes data found');
-        btn.setAttribute('title', hasData ? 'Copy JSON to clipboard (Shift+C)' : 'No episodes found to copy');
+        btn.setAttribute(
+            'aria-label',
+            hasData ? 'Copy episodes data to clipboard' : 'No episodes data found'
+        );
+        btn.setAttribute(
+            'title',
+            hasData ? 'Copy JSON to clipboard (Shift+C)' : 'No episodes found to copy'
+        );
         if (hasData) {
             btn.setAttribute('aria-keyshortcuts', 'Shift+C');
         }
@@ -65,8 +71,7 @@ export function scrapeTVDBData() {
             'position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0;';
         let timeoutId;
         btn.addEventListener('click', async () => {
-            if (btn.disabled)
-                return;
+            if (btn.disabled) return;
             clearTimeout(timeoutId);
             btn.disabled = true;
             btn.setAttribute('data-feedback', 'true');
@@ -81,8 +86,7 @@ export function scrapeTVDBData() {
                 btn.setAttribute('title', 'Successfully copied');
                 btn.setAttribute('aria-label', 'Successfully copied');
                 announcer.textContent = 'Copied to clipboard';
-            }
-            catch {
+            } catch {
                 btn.textContent = '❌ Error';
                 btn.style.backgroundColor = '#b02a37';
                 btn.setAttribute('title', 'Failed to copy');
@@ -102,7 +106,8 @@ export function scrapeTVDBData() {
         document.body.append(announcer, btn);
         document.addEventListener('keydown', (e) => {
             const target = e.target;
-            const isInput = target.tagName === 'INPUT' ||
+            const isInput =
+                target.tagName === 'INPUT' ||
                 target.tagName === 'TEXTAREA' ||
                 target.isContentEditable;
             if (!isInput && e.shiftKey && e.key.toLowerCase() === 'c') {
