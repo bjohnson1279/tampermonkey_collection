@@ -31,3 +31,28 @@
 **Vulnerability:** The adblocker interceptors in `ytAdBlock2.ts` used duck typing (`'url' in req`) to extract URLs, which allowed malicious POJOs with dynamic getters to evade blocking. A POJO could return a safe URL during the `shouldBlock` check but an ad URL when the native API later accessed the property.
 **Learning:** Checking for properties via duck typing in interceptors and leaving the object unmodified enables a Time-Of-Check to Time-Of-Use (TOCTOU) vulnerability if the property getter is dynamic.
 **Prevention:** Use WebIDL brand checking (e.g., `Object.getOwnPropertyDescriptor(Request.prototype, 'url')?.get?.call(req)`) to securely identify native `Request` and `URL` objects. For any non-native object, immediately evaluate and replace the argument with the coerced string URL to eliminate the time gap.
+
+## 2024-07-06 - [Fetch Evasion via TOCTOU in POJO getters]
+**Vulnerability:** The fetch monkeypatch in `src/ytAdBlock2.ts` used simple duck typing (`'url' in req`) to identify Request objects. This allowed malicious POJOs to spoof properties to evade checks via dynamic getters, leading to a Time-Of-Check to Time-Of-Use (TOCTOU) vulnerability where the ad URL passed the `shouldBlock` filter but hit the native fetch intact.
+**Learning:** Simple duck typing on object properties is easily spoofable by getters. Moreover, intercepting native `Request` objects and replacing them with coerced strings destroys other request metadata (like `method` or `body`). Native `Request` objects are immune to TOCTOU for `url` since their internal slot is immutable.
+**Prevention:** Use WebIDL brand-checking (e.g., `Object.getOwnPropertyDescriptor(Request.prototype, 'url')?.get?.call(req)`) to securely and reliably identify Native `Request` objects across all JavaScript realms. Only overwrite `args[0]` with the safe URL string if the object is a POJO.
+
+## 2024-07-15 - [Hostname Confusion in Search Engine Filter]
+**Vulnerability:** Subdomain and prefix spoofing vulnerability found in `src/searchEngineFilter.ts` where `hostname.includes(domain)` was used to match search engines.
+**Learning:** Using `.includes()` on a hostname allows malicious domains like `notgoogle.com` or `google.com.attacker.com` to falsely match the target domain, potentially triggering unintended script logic or exposing sensitive user search queries.
+**Prevention:** Always use exact matching (`hostname === domain`) or proper suffix matching (`hostname.endsWith('.' + domain)`) when validating hostnames against a list of trusted domains.
+
+## 2026-07-14 - [Tracking Evasion via sendBeacon]
+**Vulnerability:** YouTube AdBlocker (`ytAdBlock2`) intercepted `fetch` and `XMLHttpRequest`, but left `navigator.sendBeacon` unprotected. This allowed tracking and ad analytics requests (like those hitting `/api/stats/ads`) to bypass the network filter, exposing the user to tracking and potentially triggering secondary ad mechanisms.
+**Learning:** Modern web applications often use `navigator.sendBeacon` for analytics and telemetry because it guarantees request delivery even during page unload. Adblockers that only hook `fetch` and `XHR` are blind to these requests.
+**Prevention:** When building network interceptors for privacy or adblocking, always secure all outbound network APIs, including `navigator.sendBeacon`. Apply the same WebIDL/TOCTOU preventions as used in `fetch` and `XHR`.
+
+## 2024-07-20 - [Network Filter Evasion via Relative URLs]
+**Vulnerability:** Adblocker/tracker blocking logic using fetch interception was vulnerable to evasion when requests were made using relative URLs (e.g., `fetch('/api/stats/ads')`). The URL was tested directly against a regex that expected full domain matches (like `youtube.com\/api\/stats`), causing relative URLs to silently bypass the filter.
+**Learning:** Network APIs like `fetch` and `XMLHttpRequest` accept relative URLs, which the browser automatically resolves against the current origin. Network filters relying on full URL patterns will fail to block these unless the relative URLs are resolved first.
+**Prevention:** When intercepting network requests to evaluate against a URL blocklist (e.g., via regex), always normalize the input URL to an absolute URL (e.g., `new URL(url, window.location.href).href`) before testing. Use a `try/catch` block to safely fallback to the original URL if parsing fails.
+
+## 2024-07-28 - [Network Filter Evasion via WebSocket]
+**Vulnerability:** Trackers can bypass `fetch`, `XMLHttpRequest`, and `navigator.sendBeacon` interceptors by using `WebSocket` connections for telemetry and ads, allowing them to evade network filters entirely.
+**Learning:** `WebSocket` is another network API that must be secured in privacy and adblocking extensions to prevent evasion. Like other network hooks, it is also vulnerable to TOCTOU and cross-realm object spoofing.
+**Prevention:** When building network interceptors for privacy or adblocking, always secure `WebSocket` connections. Apply the same WebIDL brand-checking and TOCTOU preventions as used in `fetch` and `XHR` when evaluating the connection URL.

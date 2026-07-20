@@ -127,7 +127,8 @@ describe('scrapeTVDBData', () => {
         const btn = document.getElementById('tvdb-copy-json-btn') as HTMLButtonElement;
         expect(btn).not.toBeNull();
         expect(btn?.textContent).toBe('📋 No Data');
-        expect(btn?.disabled).toBe(true);
+        expect(btn?.getAttribute('aria-label')).toBe('No episodes data found');
+        expect(btn?.getAttribute('aria-disabled')).toBe('true');
     });
 
     it('should inject copy JSON button with correct state when data exists', () => {
@@ -146,8 +147,9 @@ describe('scrapeTVDBData', () => {
 
         const btn = document.getElementById('tvdb-copy-json-btn') as HTMLButtonElement;
         expect(btn).not.toBeNull();
-        expect(btn?.textContent).toBe('📋 Copy JSON');
-        expect(btn?.disabled).toBe(false);
+        expect(btn?.textContent).toBe('📋 Copy JSON (1 episode)');
+        expect(btn?.getAttribute('aria-label')).toBe('Copy 1 episode data to clipboard');
+        expect(btn?.getAttribute('aria-disabled')).toBeNull();
     });
 
     it('should not inject multiple copy JSON buttons', () => {

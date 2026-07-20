@@ -34,8 +34,11 @@ describe('searchEngineFilter', () => {
         // Require the file so the IIFE executes
         require('./searchEngineFilter');
 
-        expect(consoleErrorSpy).toHaveBeenCalledWith('Error processing search:', expect.any(Error));
-        expect(consoleErrorSpy.mock.calls[0][1].message).toBe('Simulated URLSearchParams error');
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+            'Error processing search:',
+            expect.any(String)
+        );
+        expect(consoleErrorSpy.mock.calls[0][1]).toBe('Simulated URLSearchParams error');
 
         // Restore URLSearchParams
         global.URLSearchParams = OriginalURLSearchParams;
@@ -47,6 +50,22 @@ describe('searchEngineFilter', () => {
         window.location.href = 'https://example.com/';
         require('./searchEngineFilter');
         expect(window.location.href).toBe('https://example.com/');
+    });
+
+    it('should do nothing if hostname contains but does not end with search engine', () => {
+        window.location.hostname = 'google.com.attacker.com';
+        window.location.search = '?q=hello+asdf+world';
+        window.location.href = 'https://google.com.attacker.com/?q=hello+asdf+world';
+        require('./searchEngineFilter');
+        expect(window.location.href).toBe('https://google.com.attacker.com/?q=hello+asdf+world');
+    });
+
+    it('should do nothing if hostname is a prefix of search engine', () => {
+        window.location.hostname = 'notgoogle.com';
+        window.location.search = '?q=hello+asdf+world';
+        window.location.href = 'https://notgoogle.com/?q=hello+asdf+world';
+        require('./searchEngineFilter');
+        expect(window.location.href).toBe('https://notgoogle.com/?q=hello+asdf+world');
     });
 
     it('should do nothing if hostname matches but no query param', () => {

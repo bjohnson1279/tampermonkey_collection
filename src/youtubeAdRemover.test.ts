@@ -79,12 +79,12 @@ describe('YouTubeAdRemover', () => {
             });
             // verify initial check is called
             expect(global.document.querySelectorAll).toHaveBeenCalledWith(
-                'ytd-rich-item-renderer, ytd-video-renderer'
+                'ytd-rich-item-renderer .ytd-ad-slot-renderer, ytd-video-renderer .ytd-ad-slot-renderer'
             );
         });
 
         describe('Fallback Querying', () => {
-            it('should query video items and process them when no addedNodes are provided', () => {
+            it('should query ad items and process them when no addedNodes are provided', () => {
                 const contents = { id: 'contents' };
                 (global.document.querySelector as jest.Mock).mockReturnValue(contents);
 
@@ -93,53 +93,40 @@ describe('YouTubeAdRemover', () => {
                     disconnect = jest.fn();
                 };
 
-                const mockAdItem = { remove: jest.fn() };
-                const mockContentDiv = {
+                const mockContentDiv1 = {
                     remove: jest.fn(),
-                    querySelector: jest.fn().mockImplementation((selector) => {
-                        if (selector === '.ytd-ad-slot-renderer') return mockAdItem;
-                        return null;
-                    }),
+                    contains: jest.fn().mockReturnValue(true),
                 };
 
                 const mockVideoItem1 = {
                     remove: jest.fn(),
                     querySelector: jest.fn().mockImplementation((selector) => {
-                        if (selector === '#content, #dismissible') return mockContentDiv;
+                        if (selector === '#content, #dismissible') return mockContentDiv1;
                         return null;
                     }),
                 };
 
-                const mockVideoItem2 = {
+                const mockAdItem1 = {
                     remove: jest.fn(),
-                    querySelector: jest.fn().mockImplementation((selector) => {
-                        if (selector === '#content, #dismissible') return null; // No content div
+                    closest: jest.fn().mockImplementation((selector) => {
+                        if (selector === 'ytd-rich-item-renderer, ytd-video-renderer')
+                            return mockVideoItem1;
                         return null;
                     }),
                 };
 
-                (global.document.querySelectorAll as jest.Mock).mockReturnValue([
-                    mockVideoItem1,
-                    mockVideoItem2,
-                ]);
+                (global.document.querySelectorAll as jest.Mock).mockReturnValue([mockAdItem1]);
 
                 adRemover = new ytModule.YouTubeAdRemover();
                 // initialize triggers removeAds() internally
 
                 expect(global.document.querySelectorAll).toHaveBeenCalledWith(
-                    'ytd-rich-item-renderer, ytd-video-renderer'
+                    'ytd-rich-item-renderer .ytd-ad-slot-renderer, ytd-video-renderer .ytd-ad-slot-renderer'
                 );
 
-                // Verify processVideoItem logic on item 1 (has ad)
-                expect(mockVideoItem1.querySelector).toHaveBeenCalledWith('#content, #dismissible');
-                expect(mockContentDiv.querySelector).toHaveBeenCalledWith('.ytd-ad-slot-renderer');
-                expect(mockAdItem.remove).toHaveBeenCalled();
-                expect(mockContentDiv.remove).toHaveBeenCalled();
+                expect(mockAdItem1.remove).toHaveBeenCalled();
+                expect(mockContentDiv1.remove).toHaveBeenCalled();
                 expect(mockVideoItem1.remove).toHaveBeenCalled();
-
-                // Verify processVideoItem logic on item 2 (no content div)
-                expect(mockVideoItem2.querySelector).toHaveBeenCalledWith('#content, #dismissible');
-                expect(mockVideoItem2.remove).not.toHaveBeenCalled();
             });
         });
 
@@ -164,16 +151,17 @@ describe('YouTubeAdRemover', () => {
                 const mockAdItem = { remove: jest.fn() };
                 const mockContentDiv = {
                     remove: jest.fn(),
-                    querySelector: jest.fn().mockImplementation((selector) => {
-                        if (selector === '.ytd-ad-slot-renderer') return mockAdItem;
-                        return null;
-                    }),
+                    contains: jest.fn().mockReturnValue(true),
                 };
 
                 const mockVideoNode = {
                     nodeType: (global as any).Node.ELEMENT_NODE,
                     matches: jest.fn().mockReturnValue(true),
-                    querySelector: jest.fn().mockReturnValue(mockContentDiv),
+                    querySelector: jest.fn().mockImplementation((selector) => {
+                        if (selector === '.ytd-ad-slot-renderer') return mockAdItem;
+                        if (selector === '#content, #dismissible') return mockContentDiv;
+                        return null;
+                    }),
                     remove: jest.fn(),
                 };
 
@@ -186,32 +174,40 @@ describe('YouTubeAdRemover', () => {
                 expect(mockVideoNode.matches).toHaveBeenCalledWith(
                     'ytd-rich-item-renderer, ytd-video-renderer'
                 );
-                expect(mockVideoNode.querySelector).toHaveBeenCalledWith('#content, #dismissible');
+                expect(mockVideoNode.querySelector).toHaveBeenCalledWith('.ytd-ad-slot-renderer');
                 expect(mockAdItem.remove).toHaveBeenCalled();
                 expect(mockContentDiv.remove).toHaveBeenCalled();
                 expect(mockVideoNode.remove).toHaveBeenCalled();
             });
 
             it('should process children of addedNodes if they are elements (bolt fast path)', () => {
-                const mockAdItem = { remove: jest.fn() };
                 const mockContentDiv = {
                     remove: jest.fn(),
+                    contains: jest.fn().mockReturnValue(true),
+                };
+
+                const mockVideoItem = {
+                    remove: jest.fn(),
                     querySelector: jest.fn().mockImplementation((selector) => {
-                        if (selector === '.ytd-ad-slot-renderer') return mockAdItem;
+                        if (selector === '#content, #dismissible') return mockContentDiv;
                         return null;
                     }),
                 };
 
-                const mockChildVideo = {
-                    querySelector: jest.fn().mockReturnValue(mockContentDiv),
+                const mockAdItem = {
                     remove: jest.fn(),
+                    closest: jest.fn().mockImplementation((selector) => {
+                        if (selector === 'ytd-rich-item-renderer, ytd-video-renderer')
+                            return mockVideoItem;
+                        return null;
+                    }),
                 };
 
                 const mockContainerNode = {
                     nodeType: (global as any).Node.ELEMENT_NODE,
                     matches: jest.fn().mockReturnValue(false),
                     firstElementChild: true, // Simulate having children
-                    querySelectorAll: jest.fn().mockReturnValue([mockChildVideo]),
+                    querySelectorAll: jest.fn().mockReturnValue([mockAdItem]),
                 };
 
                 const mockTextNode = {
@@ -242,10 +238,11 @@ describe('YouTubeAdRemover', () => {
 
                 // Container with children should trigger querySelectorAll
                 expect(mockContainerNode.querySelectorAll).toHaveBeenCalledWith(
-                    'ytd-rich-item-renderer, ytd-video-renderer'
+                    'ytd-rich-item-renderer .ytd-ad-slot-renderer, ytd-video-renderer .ytd-ad-slot-renderer'
                 );
-                expect(mockChildVideo.querySelector).toHaveBeenCalledWith('#content, #dismissible');
-                expect(mockChildVideo.remove).toHaveBeenCalled();
+                expect(mockAdItem.remove).toHaveBeenCalled();
+                expect(mockContentDiv.remove).toHaveBeenCalled();
+                expect(mockVideoItem.remove).toHaveBeenCalled();
 
                 // Text node is ignored
                 // Empty container avoids querySelectorAll call (bolt path)
