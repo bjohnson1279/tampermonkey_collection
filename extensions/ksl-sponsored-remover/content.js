@@ -51,7 +51,7 @@
         observer.observe(loadMoreContainer, config);
     }
     catch (error) {
-        console.error('Error initializing mutation observer:', error);
+        console.error('Error initializing mutation observer:', error instanceof Error ? error.message : String(error));
     }
 })();
 //# sourceMappingURL=kslSponsoredHide.js.map

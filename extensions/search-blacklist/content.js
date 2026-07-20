@@ -31,7 +31,7 @@
             }
         }
         catch (error) {
-            console.error('Error processing search:', error);
+            console.error('Error processing search:', error instanceof Error ? error.message : String(error));
         }
     };
     processSearch();

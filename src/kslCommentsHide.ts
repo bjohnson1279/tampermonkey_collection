@@ -22,10 +22,9 @@ _global.__kslTestExports = _global.__kslTestExports || {};
 (function (): void {
     'use strict';
 
+    // ⚡ Bolt: Replace querySelector('#id') with getElementById('id') (O(1) hash map lookup) to minimize overhead during initialization
     const container =
-        typeof document !== 'undefined'
-            ? document.querySelector<HTMLElement>('#commentsContainer')
-            : null;
+        typeof document !== 'undefined' ? document.getElementById('commentsContainer') : null;
 
     // ⚡ Bolt: Disable attributes to prevent unnecessary callbacks on every attribute change
     const config: MutationObserverInit = {
@@ -42,7 +41,9 @@ _global.__kslTestExports = _global.__kslTestExports || {};
     _global.__kslTestExports.blockedUsers = blockedUsers;
 
     const processComment = (comment: HTMLElement): void => {
-        const usernameElement = comment.querySelector<HTMLElement>('.CommentsList__userName');
+        // ⚡ Bolt: Replace querySelector('.class') with getElementsByClassName('class')[0] for O(1) live collection lookup instead of O(N) tree traversal inside the MutationObserver
+        const usernameElement = comment.getElementsByClassName('CommentsList__userName')[0] as
+            HTMLElement | undefined;
         if (!usernameElement?.textContent) return;
 
         const username = usernameElement.textContent.trim();
@@ -91,6 +92,10 @@ _global.__kslTestExports = _global.__kslTestExports || {};
             allComments.forEach(processComment);
         }
     } catch (error) {
-        console.error('Error initializing comment observer:', error);
+        // 🛡️ Sentinel: Removed error object from console.error to prevent stack trace exposure
+        console.error(
+            'Error initializing comment observer:',
+            error instanceof Error ? error.message : String(error)
+        );
     }
 })();
