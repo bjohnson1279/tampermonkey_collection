@@ -44,6 +44,9 @@
 **Learning:** Performing multiple sequential `querySelector` or `querySelectorAll` operations on the DOM tree creates multiple O(N) traversal passes, which is inefficient.
 **Action:** Combine multiple distinct CSS selectors into a single comma-separated string (e.g., `document.querySelectorAll('.a, .b, .c')`) to perform a single O(1) pass through the DOM, significantly improving performance when extracting multiple disparate elements.
 
+## 2024-07-10 - [Avoid N+1 DOM Queries]
+When filtering nodes, avoid querying the DOM inside a loop (N+1 queries). Instead, use a single composite selector (e.g. `querySelectorAll('.parent .child')`) to fetch target elements in one pass.
+
 ## 2024-07-10 - O(1) Style Injection vs O(N) DOM Loops
 When replacing default browser behaviors or hiding elements on page load, avoid iterating over collections returned by `querySelectorAll()` and applying inline styles (`el.style.display = 'block'`). This triggers synchronous layout calculation and O(N) overhead. Instead, create a single `<style>` element, inject the necessary CSS rules (using `!important` to override inline styles if necessary), and append it to `document.head || document.documentElement`. This turns an O(N) DOM modification into an O(1) operation and prevents forced reflows.
 
