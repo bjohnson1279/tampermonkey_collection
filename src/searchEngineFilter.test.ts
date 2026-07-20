@@ -89,6 +89,6 @@ describe('searchEngineFilter', () => {
         window.location.search = '?q=hello+asdf+world';
         window.location.href = 'https://www.google.com/?q=hello+asdf+world';
         require('./searchEngineFilter');
-        expect(window.location.href).toBe('https://www.google.com'); // This URL matches the searchEngines config
+        expect(window.location.href).toBe('https://www.google.com/'); // This URL matches the searchEngines config with a trailing slash from new URL().href
     });
 });
