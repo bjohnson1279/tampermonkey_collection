@@ -9,19 +9,17 @@
 // @grant        none
 // ==/UserScript==
 
-(function() {
+(function () {
     'use strict';
 
     // Your code here...
-    const cbk = (ml, obs) => {
+    const cbk = () => {
         console.log(`cbk`);
-        // console.log({ ml });
-        // console.log({ obs });
         const sponsoredContent = loadMoreContainer.querySelectorAll('.sponsored');
         console.log({ sponsoredContent });
 
         if (sponsoredContent) {
-            sponsoredContent.forEach(sponsored => {
+            sponsoredContent.forEach((sponsored) => {
                 const sponsoredContainer = sponsored.closest('.queue_story');
                 console.log({ sponsoredContainer });
                 if (sponsoredContainer) {
@@ -33,7 +31,7 @@
 
     const sponsoredContent = document.querySelectorAll('.sponsored');
     if (sponsoredContent) {
-        sponsoredContent.forEach(sponsored => {
+        sponsoredContent.forEach((sponsored) => {
             const sponsoredContainer = sponsored.closest('.queue');
             if (sponsoredContainer) {
                 sponsoredContainer.remove();

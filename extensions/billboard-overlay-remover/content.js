@@ -7,12 +7,12 @@
         '.ad_desktop_placeholder',
         '.ad_desktop_wrapper',
         '.ad_desktop',
-        '.ad_clarity'
+        '.ad_clarity',
     ];
-    adSelectors.forEach((selector) => {
-        document.querySelectorAll(selector).forEach((ad) => {
-            ad.remove();
-        });
+    document
+        .querySelectorAll(adSelectors.join(','))
+        .forEach((ad) => {
+        ad.remove();
     });
     const chartOverlay = document.querySelector('.chart-piano-overlay__attachment-point');
     if (!chartOverlay) {
@@ -21,7 +21,7 @@
     const config = {
         attributes: false,
         childList: true,
-        subtree: true
+        subtree: true,
     };
     const handleMutations = (mutationsList) => {
         mutationsList.forEach((mutation) => {
@@ -29,19 +29,20 @@
                 mutation.target.remove();
             }
         });
-        const chartItems = document.querySelectorAll('.chart-list-item');
-        chartItems.forEach((chartItem) => {
+        const chartItems = document.getElementsByClassName('chart-list-item');
+        for (let i = 0; i < chartItems.length; i++) {
+            const chartItem = chartItems[i];
             chartItem.visible = true;
             chartItem.height = 102;
             chartItem.classList.remove('hidden');
-        });
+        }
     };
     try {
         const observer = new MutationObserver(handleMutations);
         observer.observe(chartOverlay, config);
     }
     catch (error) {
-        console.error('Error initializing Billboard overlay observer:', error);
+        console.error('Error initializing Billboard overlay observer:', error instanceof Error ? error.message : String(error));
     }
 })();
 //# sourceMappingURL=billboardOverlay.js.map

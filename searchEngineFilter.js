@@ -5,7 +5,7 @@
 // @grant    none
 // ==/UserScript==
 
-(function() {
+(function () {
     'use strict';
 
     const blacklist = ['asdf']; // Add terms to blacklist here
@@ -14,23 +14,23 @@
         'bing.com': { queryParam: 'q', url: 'https://www.bing.com' },
         'google.com': { queryParam: 'q', url: 'https://www.google.com' },
         'duckduckgo.com': { queryParam: 'q', url: 'https://duckduckgo.com' },
-        'yahoo.com': { queryParam: 'p', url: 'https://www.yahoo.com' }
+        'yahoo.com': { queryParam: 'p', url: 'https://www.yahoo.com' },
     };
 
-    const href = window.location.href;
+    // 🛡️ Sentinel: Use hostname instead of href to prevent path/query confusion evasion
+    const hostname = window.location.hostname;
     const params = new URLSearchParams(window.location.search);
 
     for (const domain in searchEngines) {
-        if (href.includes(domain)) {
-            console.log(`Search engine detected: ${domain}`);
+        // 🛡️ Sentinel: Fix subdomain and prefix spoofing by using exact or suffix matching
+        if (hostname === domain || hostname.endsWith('.' + domain)) {
             const engine = searchEngines[domain];
             const query = params.get(engine.queryParam);
 
             if (query) {
                 const searchQuery = query.replaceAll('+', ' ');
-                console.log(`Search query: "${searchQuery}"`);
 
-                const isBlacklisted = blacklist.some(phrase => searchQuery.includes(phrase));
+                const isBlacklisted = blacklist.some((phrase) => searchQuery.includes(phrase));
 
                 if (isBlacklisted) {
                     window.location.href = engine.url;

@@ -163,33 +163,18 @@
         styleButtonStatic(btn);
         styleButtonDynamic(btn);
         btn.addEventListener('click', toggleAdblock);
-        btn.addEventListener('mouseover', () => (btn.style.opacity = '0.8'));
-        btn.addEventListener('mouseout', () => {
-            btn.style.opacity = '1';
-            btn.style.transform = 'scale(1)';
-        });
-        btn.addEventListener('focus', () => {
-            btn.style.outline = '2px solid var(--yt-spec-text-primary, CanvasText)';
-            btn.style.outlineOffset = '2px';
-        });
-        btn.addEventListener('blur', () => {
-            btn.style.outline = 'none';
-            btn.style.outlineOffset = '0px';
-            btn.style.transform = 'scale(1)';
-        });
-        btn.addEventListener('mousedown', () => (btn.style.transform = 'scale(0.95)'));
-        btn.addEventListener('mouseup', () => (btn.style.transform = 'scale(1)'));
-        btn.addEventListener('keydown', (e) => {
-            if (e.key === ' ' || e.key === 'Enter') {
-                btn.style.transform = 'scale(0.95)';
-            }
-        });
-        btn.addEventListener('keyup', (e) => {
-            if (e.key === ' ' || e.key === 'Enter') {
-                btn.style.transform = 'scale(1)';
-            }
-        });
         logo.parentElement?.insertBefore(btn, logo.nextSibling);
+        if (!document.querySelector('#adblock-styles')) {
+            const style = document.createElement('style');
+            style.id = 'adblock-styles';
+            style.textContent = `
+                #adblock-toggle { outline: none; }
+                #adblock-toggle:hover { opacity: 0.8; }
+                #adblock-toggle:focus-visible { outline: 2px solid var(--yt-spec-text-primary, CanvasText); outline-offset: 2px; }
+                #adblock-toggle:active { transform: scale(0.95); }
+            `;
+            document.head.appendChild(style);
+        }
         if (!document.querySelector('#adblock-announcer')) {
             const announcer = document.createElement('div');
             announcer.id = 'adblock-announcer';
@@ -217,7 +202,6 @@
             border-radius: 4px;
             cursor: pointer;
             transition: opacity 0.2s, outline 0.2s, background-color 0.2s, transform 0.1s;
-            outline: none;
             transform-origin: center;
         `;
     }

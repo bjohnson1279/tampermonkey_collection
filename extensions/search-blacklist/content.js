@@ -2,7 +2,11 @@
 (function () {
     'use strict';
     const blacklist = ['asdf'];
-    const lowercaseBlacklist = blacklist.map((phrase) => phrase.toLowerCase());
+    const blacklistRegex = blacklist.length > 0
+        ? new RegExp(blacklist
+            .map((phrase) => phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+            .join('|'), 'i')
+        : null;
     const searchEngines = {
         'bing.com': { queryParam: 'q', url: 'https://www.bing.com' },
         'google.com': { queryParam: 'q', url: 'https://www.google.com' },
@@ -11,28 +15,23 @@
     };
     const processSearch = () => {
         try {
-            const href = window.location.href;
+            const hostname = window.location.hostname;
             const params = new URLSearchParams(window.location.search);
-            const engineEntry = Object.entries(searchEngines).find(([domain]) => href.includes(domain));
+            const engineEntry = Object.entries(searchEngines).find(([domain]) => hostname === domain || hostname.endsWith('.' + domain));
             if (!engineEntry) {
-                console.log('No matching search engine found');
                 return;
             }
-            const [domain, engine] = engineEntry;
-            console.log(`Search engine detected: ${domain}`);
+            const [, engine] = engineEntry;
             const query = params.get(engine.queryParam);
             if (query) {
                 const searchQuery = query.replace(/\+/g, ' ');
-                console.log(`Search query: "${searchQuery}"`);
-                const searchQueryLower = searchQuery.toLowerCase();
-                const isBlacklisted = lowercaseBlacklist.some((phrase) => searchQueryLower.includes(phrase));
-                if (isBlacklisted) {
+                if (blacklistRegex && blacklistRegex.test(searchQuery)) {
                     window.location.href = engine.url;
                 }
             }
         }
         catch (error) {
-            console.error('Error processing search:', error);
+            console.error('Error processing search:', error instanceof Error ? error.message : String(error));
         }
     };
     processSearch();

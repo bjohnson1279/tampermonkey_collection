@@ -9,7 +9,11 @@
 // @grant        none
 // ==/UserScript==
 
-(function () {
+// ⚡ Bolt: Hoist static RegExp objects outside the loop to prevent repeated allocation and garbage collection overhead
+const EPISODE_NUM_REGEX = /\d+/g;
+const NETWORK_CLEANUP_REGEX = /ABC|CBS|FOX|NBC|PBS|History|H2|\(US\)|A&E/gi;
+
+function scrapeTVDBData() {
     'use strict';
 
     const episodesData = [];
@@ -20,7 +24,7 @@
         episodes.forEach((ep) => {
             const heading = ep.querySelector('.list-group-item-heading');
             const epLabel = heading.querySelector('.episode-label').innerText;
-            const matches = epLabel.match(/\d+/g) || [];
+            const matches = epLabel.match(EPISODE_NUM_REGEX) || [];
             const epTitle = heading.querySelector('a').innerText || '';
             const itemText = ep.querySelector('.list-group-item-text')?.innerText || '';
 
@@ -28,12 +32,10 @@
             const listInline = ep.querySelectorAll('.list-inline');
 
             listInline.forEach((listItem) => {
-                let dateText = listItem.innerText
-                    .replace(/ABC|CBS|FOX|NBC|PBS|History|H2|\(US\)|A&E/gi, '')
-                    .trim();
+                let dateText = listItem.innerText.replace(NETWORK_CLEANUP_REGEX, '').trim();
                 try {
                     itemDate = new Date(dateText).toISOString().split('T')[0];
-                } catch (e) {
+                } catch {
                     itemDate = '';
                 }
             });
@@ -53,7 +55,7 @@
     if (!document.getElementById('tvdb-copy-json-btn')) {
         const style = document.createElement('style');
         style.textContent = `
-            #tvdb-copy-json-btn { position: fixed; bottom: 24px; right: 24px; z-index: 9999; background: #007bff; color: white; border: none; border-radius: 8px; padding: 12px 20px; font: 600 14px system-ui, sans-serif; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s; }
+            #tvdb-copy-json-btn { outline: none; position: fixed; bottom: 24px; right: 24px; z-index: 9999; background: #007bff; color: white; border: none; border-radius: 8px; padding: 12px 20px; font: 600 14px system-ui, sans-serif; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s; }
             #tvdb-copy-json-btn:hover { opacity: 0.9; }
             #tvdb-copy-json-btn:focus-visible { outline: 3px solid #0056b3; outline-offset: 2px; }
             #tvdb-copy-json-btn:not(:disabled):active { transform: scale(0.95); }
@@ -65,7 +67,8 @@
         btn.id = 'tvdb-copy-json-btn';
         btn.textContent = '📋 Copy JSON';
         btn.setAttribute('aria-label', 'Copy episodes data to clipboard');
-        btn.setAttribute('title', 'Copy JSON to clipboard');
+        btn.setAttribute('title', 'Copy JSON to clipboard (Shift+C)');
+        btn.setAttribute('aria-keyshortcuts', 'Shift+C');
 
         const announcer = document.createElement('div');
         announcer.setAttribute('aria-live', 'polite');
@@ -85,7 +88,7 @@
                 btn.style.backgroundColor = '#146c43';
                 btn.setAttribute('title', 'Successfully copied');
                 announcer.textContent = 'Copied to clipboard';
-            } catch (err) {
+            } catch {
                 btn.textContent = '❌ Error';
                 btn.style.backgroundColor = '#b02a37';
                 btn.setAttribute('title', 'Failed to copy');
@@ -101,7 +104,23 @@
         });
 
         document.body.append(announcer, btn);
+
+        document.addEventListener('keydown', (e) => {
+            const target = e.target;
+            const isInput =
+                target.tagName === 'INPUT' ||
+                target.tagName === 'TEXTAREA' ||
+                target.isContentEditable;
+
+            if (!isInput && e.shiftKey && e.key.toLowerCase() === 'c') {
+                btn.click();
+            }
+        });
     }
 
     return episodesData;
-})();
+}
+
+if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+    scrapeTVDBData();
+}

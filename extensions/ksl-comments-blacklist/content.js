@@ -1,27 +1,28 @@
 "use strict";
+const _global = typeof window !== 'undefined' ? window : global;
+_global.__kslTestExports = _global.__kslTestExports || {};
 (function () {
     'use strict';
-    const container = document.querySelector('#commentsContainer');
-    if (!container) {
-        return;
-    }
+    const container = typeof document !== 'undefined' ? document.getElementById('commentsContainer') : null;
     const config = {
         attributes: false,
         childList: true,
         subtree: true,
     };
+    _global.__kslTestExports.config = config;
     const blockedUsers = new Set([]);
+    _global.__kslTestExports.blockedUsers = blockedUsers;
     const processComment = (comment) => {
-        const usernameElement = comment.querySelector('.CommentsList__userName');
+        const usernameElement = comment.getElementsByClassName('CommentsList__userName')[0];
         if (!usernameElement?.textContent)
             return;
         const username = usernameElement.textContent.trim();
         if (blockedUsers.has(username)) {
-            console.log(`Hiding comment from user: ${username}`);
             comment.style.display = 'none';
         }
     };
-    const handleMutations = (mutationsList, observer) => {
+    _global.__kslTestExports.processComment = processComment;
+    const handleMutations = (mutationsList) => {
         for (const mutation of mutationsList) {
             mutation.addedNodes.forEach((node) => {
                 if (node.nodeType === Node.ELEMENT_NODE) {
@@ -37,6 +38,10 @@
             });
         }
     };
+    _global.__kslTestExports.handleMutations = handleMutations;
+    if (!container) {
+        return;
+    }
     try {
         const observer = new MutationObserver(handleMutations);
         observer.observe(container, config);
@@ -47,7 +52,7 @@
         }
     }
     catch (error) {
-        console.error('Error initializing comment observer:', error);
+        console.error('Error initializing comment observer:', error instanceof Error ? error.message : String(error));
     }
 })();
 //# sourceMappingURL=kslCommentsHide.js.map

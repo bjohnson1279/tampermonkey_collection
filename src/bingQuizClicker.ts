@@ -10,13 +10,13 @@
 // ==/UserScript==
 
 interface QuizElements {
-    gotThisRight: NodeListOf<HTMLElement>;
+    gotThisRight: HTMLElement[];
     nextButton: HTMLElement | null;
 }
 
 class BingQuizClicker {
     private readonly GOT_THIS_RIGHT_TEXT = 'got this right';
-    private readonly NEXT_BUTTON_SELECTOR = '.wk_button';
+    private readonly NEXT_BUTTON_CLASS = 'wk_button';
     private readonly BUTTON_ROW = '.btq_row';
     private readonly BUTTON_OPTIONS = '.btq_opt';
     private readonly ANSWER_ROW = '.btq_ansRow';
@@ -30,24 +30,34 @@ class BingQuizClicker {
     }
 
     private initialize(): void {
+        // ⚡ Bolt: Replace O(N) inline style assignments with O(1) injected stylesheet
+        const style = document.createElement('style');
+        style.textContent = `
+            .wk_hideCompulsary { visibility: visible !important; }
+            .wk_choiceMaxWidth:has(.wk_hideCompulsary) { color: #146c43 !important; font-weight: 600 !important; }
+            .wk_choiceMaxWidth:has(.wk_hideCompulsary)::before { content: "✅ " !important; }
+        `;
+        (document.head || document.documentElement).appendChild(style);
         this.startWatching();
     }
 
     private startWatching(): void {
         // Initial check
         this.checkAndClick();
-        
+
         // Set up interval for continuous checking
-        this.intervalId = window.setInterval(
-            () => this.checkAndClick(), 
-            this.CHECK_INTERVAL_MS
-        );
+        this.intervalId = window.setInterval(() => this.checkAndClick(), this.CHECK_INTERVAL_MS);
     }
 
     private getQuizElements(): QuizElements {
+        // ⚡ Bolt: Replace querySelector('.class') with getElementsByClassName('class') for O(1) live collection lookup instead of O(N) tree traversal inside the 1000ms setInterval loop.
         return {
-            gotThisRight: document.querySelectorAll('.wk_hideCompulsary'),
-            nextButton: document.querySelector(this.NEXT_BUTTON_SELECTOR)
+            gotThisRight: Array.from(
+                document.getElementsByClassName('wk_hideCompulsary')
+            ) as HTMLElement[],
+            nextButton:
+                (document.getElementsByClassName(this.NEXT_BUTTON_CLASS)[0] as
+                    HTMLElement | undefined) || null,
         };
     }
 
@@ -64,15 +74,12 @@ class BingQuizClicker {
         }
     }
 
-    private handleCorrectAnswers(elements: NodeListOf<HTMLElement>): void {
-        elements.forEach(element => {
+    private handleCorrectAnswers(elements: HTMLElement[]): void {
+        elements.forEach((element) => {
             const parent = element.parentElement;
             if (!parent) return;
 
-            element.style.visibility = 'visible';
-            
             if (parent.classList.contains('wk_choiceMaxWidth')) {
-                parent.style.color = 'green';
                 this.safeClick(parent);
             }
         });
@@ -87,7 +94,11 @@ class BingQuizClicker {
             });
             element.dispatchEvent(event);
         } catch (error) {
-            console.error('Error dispatching click event:', error);
+            // 🛡️ Sentinel: Removed error object from console.error to prevent stack trace exposure
+            console.error(
+                'Error dispatching click event:',
+                error instanceof Error ? error.message : String(error)
+            );
         }
     }
 

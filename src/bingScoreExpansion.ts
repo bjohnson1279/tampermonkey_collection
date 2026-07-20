@@ -12,36 +12,16 @@
 (function (): void {
     'use strict';
 
-    // Show all score cards
-    const scoreCards = document.querySelectorAll<HTMLElement>('.spl-card');
-    scoreCards.forEach((card: HTMLElement): void => {
-        card.style.display = 'block';
-    });
+    // ⚡ Bolt: Replace O(N) DOM mutations with O(1) injected stylesheet
+    // Avoids forced reflows and loop iteration entirely
+    const style = document.createElement('style');
+    style.textContent = `
+        /* Show all score cards */
+        .spl-card { display: block !important; }
+        /* Expand schedule, standings, and filter content sections */
+        .spl-schedule .b_hide, .spl-standingTbl .b_hide, .tfil-content .b_hide { display: table-row !important; }
+    `;
 
-    // Expand schedule section
-    const schedule = document.querySelector<HTMLElement>('.spl-schedule');
-    if (schedule) {
-        const scheduleHiddenRows = schedule.querySelectorAll<HTMLElement>('.b_hide');
-        scheduleHiddenRows.forEach((row: HTMLElement): void => {
-            row.style.display = 'table-row';
-        });
-    }
-
-    // Expand standings section
-    const standings = document.querySelector<HTMLElement>('.spl-standingTbl');
-    if (standings) {
-        const standingsHiddenRows = standings.querySelectorAll<HTMLElement>('.b_hide');
-        standingsHiddenRows.forEach((row: HTMLElement): void => {
-            row.style.display = 'table-row';
-        });
-    }
-
-    // Expand filter content section
-    const filContent = document.querySelector<HTMLElement>('.tfil-content');
-    if (filContent) {
-        const contentHiddenRows = filContent.querySelectorAll<HTMLElement>('.b_hide');
-        contentHiddenRows.forEach((row: HTMLElement): void => {
-            row.style.display = 'table-row';
-        });
-    }
+    // Fallback to documentElement if head is not available yet
+    (document.head || document.documentElement).appendChild(style);
 })();

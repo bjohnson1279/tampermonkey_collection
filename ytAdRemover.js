@@ -9,7 +9,7 @@
 // @grant        none
 // ==/UserScript==
 
-"use strict";
+'use strict';
 class YouTubeAdRemover {
     constructor() {
         this.TARGET_NODE_SELECTOR = '#contents';
@@ -28,7 +28,7 @@ class YouTubeAdRemover {
                 console.error(`Could not find the target node: ${this.TARGET_NODE_SELECTOR}`);
                 return;
             }
-            const callback = (mutationsList, observer) => {
+            const callback = (mutationsList) => {
                 for (const mutation of mutationsList) {
                     if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
                         this.removeAds(mutation.addedNodes);
@@ -47,8 +47,7 @@ class YouTubeAdRemover {
     }
     processVideoItem(videoItem) {
         const contentDiv = videoItem.querySelector('#content, #dismissible');
-        if (!contentDiv)
-            return;
+        if (!contentDiv) return;
         const adItem = contentDiv.querySelector(this.AD_SELECTOR);
         if (adItem) {
             console.log('Removing ad:', adItem);
@@ -59,18 +58,20 @@ class YouTubeAdRemover {
     }
     removeAds(addedNodes) {
         if (!addedNodes) {
-            const videoItems = document.querySelectorAll('ytd-rich-item-renderer, ytd-video-renderer');
+            const videoItems = document.querySelectorAll(
+                'ytd-rich-item-renderer, ytd-video-renderer'
+            );
             videoItems.forEach((videoItem) => this.processVideoItem(videoItem));
-        }
-        else {
+        } else {
             addedNodes.forEach((node) => {
                 if (node.nodeType === Node.ELEMENT_NODE) {
                     const element = node;
                     if (element.matches('ytd-rich-item-renderer, ytd-video-renderer')) {
                         this.processVideoItem(element);
-                    }
-                    else if (element.firstElementChild) {
-                        const videoItems = element.querySelectorAll('ytd-rich-item-renderer, ytd-video-renderer');
+                    } else if (element.firstElementChild) {
+                        const videoItems = element.querySelectorAll(
+                            'ytd-rich-item-renderer, ytd-video-renderer'
+                        );
                         videoItems.forEach((videoItem) => this.processVideoItem(videoItem));
                     }
                 }
@@ -84,15 +85,13 @@ class YouTubeAdRemover {
         }
     }
 }
-let adRemover = null;
 function initAdRemover() {
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
-            adRemover = new YouTubeAdRemover();
+            new YouTubeAdRemover();
         });
-    }
-    else {
-        adRemover = new YouTubeAdRemover();
+    } else {
+        new YouTubeAdRemover();
     }
 }
 initAdRemover();

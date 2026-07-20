@@ -31,8 +31,8 @@ export const getQueryParams = (urlString: string): QueryParams => {
 
         return result;
     } catch (error) {
-        console.error('Error parsing URL:', error);
+        // 🛡️ Sentinel: Removed error object from console.error to prevent stack trace exposure
+        console.error('Error parsing URL:', error instanceof Error ? error.message : String(error));
         return Object.create(null);
     }
 };
-

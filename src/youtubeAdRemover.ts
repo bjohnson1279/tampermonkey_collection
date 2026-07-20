@@ -34,7 +34,7 @@ class YouTubeAdRemover {
             }
 
             // Callback function to execute when mutations are observed
-            const callback: MutationCallback = (mutationsList, observer) => {
+            const callback: MutationCallback = (mutationsList) => {
                 for (const mutation of mutationsList) {
                     if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
                         this.removeAds(mutation.addedNodes);
@@ -60,29 +60,26 @@ class YouTubeAdRemover {
         }, this.INITIAL_DELAY_MS);
     }
 
-    private processVideoItem(videoItem: Element): void {
-        // Find the content div that might contain ads
-        const contentDiv = videoItem.querySelector('#content, #dismissible');
-        if (!contentDiv) return;
-
-        // Check for ad elements
-        const adItem = contentDiv.querySelector(this.AD_SELECTOR);
-        if (adItem) {
-
-            adItem.remove();
-            contentDiv.remove();
-            videoItem.remove();
-        }
-    }
-
     private removeAds(addedNodes?: NodeList | Node[]): void {
+        // ⚡ Bolt: Replace O(N) internal DOM traversals inside the loop with a single O(1) pass
+        // using a descendant CSS selector, significantly reducing main thread parsing overhead.
+        const combinedSelector =
+            'ytd-rich-item-renderer .ytd-ad-slot-renderer, ytd-video-renderer .ytd-ad-slot-renderer';
+
         if (!addedNodes) {
             // Fallback for initial check or if no specific nodes are provided
-            // Find all video items
-            const videoItems = document.querySelectorAll(
-                'ytd-rich-item-renderer, ytd-video-renderer'
-            );
-            videoItems.forEach((videoItem) => this.processVideoItem(videoItem));
+            const adItems = document.querySelectorAll(combinedSelector);
+            adItems.forEach((adItem) => {
+                const videoItem = adItem.closest('ytd-rich-item-renderer, ytd-video-renderer');
+                if (videoItem) {
+                    const contentDiv = videoItem.querySelector('#content, #dismissible');
+                    adItem.remove();
+                    if (contentDiv && contentDiv.contains(adItem)) {
+                        contentDiv.remove();
+                    }
+                    videoItem.remove();
+                }
+            });
         } else {
             // Process only the added nodes to improve performance
             addedNodes.forEach((node) => {
@@ -90,13 +87,31 @@ class YouTubeAdRemover {
                     const element = node as Element;
 
                     if (element.matches('ytd-rich-item-renderer, ytd-video-renderer')) {
-                        this.processVideoItem(element);
+                        const adItem = element.querySelector(this.AD_SELECTOR);
+                        if (adItem) {
+                            const contentDiv = element.querySelector('#content, #dismissible');
+
+                            adItem.remove();
+                            if (contentDiv && contentDiv.contains(adItem)) contentDiv.remove();
+                            element.remove();
+                        }
                     } else if (element.firstElementChild) {
                         // ⚡ Bolt: Fast path for leaf nodes - avoid querySelectorAll parsing overhead if no children exist
-                        const videoItems = element.querySelectorAll(
-                            'ytd-rich-item-renderer, ytd-video-renderer'
-                        );
-                        videoItems.forEach((videoItem) => this.processVideoItem(videoItem));
+                        const adItems = element.querySelectorAll(combinedSelector);
+                        adItems.forEach((adItem) => {
+                            const videoItem = adItem.closest(
+                                'ytd-rich-item-renderer, ytd-video-renderer'
+                            );
+                            if (videoItem) {
+                                const contentDiv =
+                                    videoItem.querySelector('#content, #dismissible');
+                                adItem.remove();
+                                if (contentDiv && contentDiv.contains(adItem)) {
+                                    contentDiv.remove();
+                                }
+                                videoItem.remove();
+                            }
+                        });
                     }
                 }
             });
@@ -112,16 +127,22 @@ class YouTubeAdRemover {
 }
 
 // Initialize the ad remover when the page is fully loaded
-let adRemover: YouTubeAdRemover | null = null;
-
 function initAdRemover() {
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
-            adRemover = new YouTubeAdRemover();
+            new YouTubeAdRemover();
         });
     } else {
-        adRemover = new YouTubeAdRemover();
+        new YouTubeAdRemover();
     }
 }
 
-initAdRemover();
+if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+    initAdRemover();
+}
+
+// Export for testing
+if (typeof exports !== 'undefined') {
+    exports.YouTubeAdRemover = YouTubeAdRemover;
+    exports.initAdRemover = initAdRemover;
+}
