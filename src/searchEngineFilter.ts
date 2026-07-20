@@ -43,12 +43,17 @@ interface SearchEngines {
             const hostname: string = window.location.hostname;
             const params: URLSearchParams = new URLSearchParams(window.location.search);
 
-            // Find the matching search engine configuration
-            const engineEntry = Object.entries(searchEngines).find(
-                ([domain]) => hostname === domain || hostname.endsWith('.' + domain)
-            );
+            // ⚡ Bolt: Replace Object.entries().find() with a for...in loop to avoid
+            // O(N) array allocation and callback overhead on every search query.
+            let engine: SearchEngineConfig | undefined;
+            for (const domain in searchEngines) {
+                if (hostname === domain || hostname.endsWith('.' + domain)) {
+                    engine = searchEngines[domain];
+                    break;
+                }
+            }
 
-            if (!engineEntry) {
+            if (!engine) {
                 return;
             }
 
@@ -70,7 +75,11 @@ interface SearchEngines {
                 }
             }
         } catch (error) {
-            console.error('Error processing search:', error);
+            // 🛡️ Sentinel: Removed error object from console.error to prevent stack trace exposure
+            console.error(
+                'Error processing search:',
+                error instanceof Error ? error.message : String(error)
+            );
         }
     };
 

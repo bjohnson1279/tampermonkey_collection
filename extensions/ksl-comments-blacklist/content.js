@@ -3,9 +3,7 @@ const _global = typeof window !== 'undefined' ? window : global;
 _global.__kslTestExports = _global.__kslTestExports || {};
 (function () {
     'use strict';
-    const container = typeof document !== 'undefined'
-        ? document.querySelector('#commentsContainer')
-        : null;
+    const container = typeof document !== 'undefined' ? document.getElementById('commentsContainer') : null;
     const config = {
         attributes: false,
         childList: true,
@@ -15,7 +13,7 @@ _global.__kslTestExports = _global.__kslTestExports || {};
     const blockedUsers = new Set([]);
     _global.__kslTestExports.blockedUsers = blockedUsers;
     const processComment = (comment) => {
-        const usernameElement = comment.querySelector('.CommentsList__userName');
+        const usernameElement = comment.getElementsByClassName('CommentsList__userName')[0];
         if (!usernameElement?.textContent)
             return;
         const username = usernameElement.textContent.trim();
@@ -54,7 +52,7 @@ _global.__kslTestExports = _global.__kslTestExports || {};
         }
     }
     catch (error) {
-        console.error('Error initializing comment observer:', error);
+        console.error('Error initializing comment observer:', error instanceof Error ? error.message : String(error));
     }
 })();
 //# sourceMappingURL=kslCommentsHide.js.map

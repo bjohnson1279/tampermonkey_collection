@@ -9,7 +9,7 @@
         }
     }
     catch (e) {
-        console.warn('Failed to parse ytAdblockEnabled from localStorage', e);
+        console.warn('Failed to parse ytAdblockEnabled from localStorage', e instanceof Error ? e.message : String(e));
         enabled = true;
     }
     function saveState() {
@@ -17,52 +17,113 @@
     }
     const blockedPatternRegex = /doubleclick\.net|youtube\.com\/api\/stats\/ads|youtube\.com\/api\/stats\/atr|youtube\.com\/get_midroll|youtube\.com\/pagead|ytimg\.com\/ads\//;
     function shouldBlock(url) {
-        return enabled && blockedPatternRegex.test(url);
+        if (!enabled)
+            return false;
+        try {
+            const absoluteUrl = new URL(url, window.location.href).href;
+            return blockedPatternRegex.test(absoluteUrl);
+        }
+        catch {
+            return blockedPatternRegex.test(url);
+        }
     }
     const origFetch = window.fetch;
+    const nativeReqUrlGetter = Object.getOwnPropertyDescriptor(Request.prototype, 'url')?.get;
     window.fetch = (async (...args) => {
         const req = args[0];
         let url = '';
-        let isNativeRequest = false;
+        let isNative = false;
+        try {
+            url = Object.getOwnPropertyDescriptor(Request.prototype, 'url')?.get?.call(req);
+            if (url !== undefined)
+                isNative = true;
+        }
+        catch {
+        }
+        if (!isNative) {
+            try {
+                url = Object.getOwnPropertyDescriptor(URL.prototype, 'href')?.get?.call(req);
+                if (url !== undefined)
+                    isNative = true;
+            }
+            catch {
+            }
+        }
+        if (!isNative) {
+            url = req?.toString() || '';
+        }
         if (req && typeof req === 'object') {
-            const reqUrlGetter = Object.getOwnPropertyDescriptor(Request.prototype, 'url')?.get;
-            if (reqUrlGetter) {
-                try {
-                    url = reqUrlGetter.call(req);
+            let isNativeRequest = false;
+            try {
+                if (typeof Request !== 'undefined') {
+                    Object.getOwnPropertyDescriptor(Request.prototype, 'url')?.get?.call(req);
                     isNativeRequest = true;
                 }
-                catch {
+            }
+            catch (e) {
+                isNativeRequest = false;
+            }
+            if (!isNativeRequest) {
+                try {
+                    args[0] = new Request(url, { duplex: 'half', ...req });
+                }
+                catch (e) {
+                    try {
+                        Object.defineProperty(req, 'url', {
+                            value: url,
+                            configurable: true,
+                            enumerable: true,
+                            writable: true,
+                        });
+                    }
+                    catch (e2) { }
                 }
             }
         }
-        if (!isNativeRequest) {
-            if (req &&
-                typeof req === 'object' &&
-                'href' in req &&
-                typeof req.href === 'string') {
-                url = req.href;
-            }
-            else {
-                url = req?.toString() || '';
-            }
+        else {
             args[0] = url;
         }
-        if (shouldBlock(url)) {
+        if (url !== undefined && shouldBlock(url)) {
             return new Response('', { status: 204 });
         }
         return origFetch(...args);
     });
     const origOpen = XMLHttpRequest.prototype.open;
     XMLHttpRequest.prototype.open = function (method, url, async, username, password) {
-        const urlStr = url && typeof url === 'object' && 'href' in url && typeof url.href === 'string'
-            ? url.href
-            : url?.toString() || '';
-        if (shouldBlock(urlStr)) {
+        let urlStr = '';
+        let isNative = false;
+        try {
+            urlStr = Object.getOwnPropertyDescriptor(URL.prototype, 'href')?.get?.call(url);
+            if (urlStr !== undefined)
+                isNative = true;
+        }
+        catch {
+        }
+        if (!isNative) {
+            urlStr = url?.toString() || '';
+            url = urlStr;
+        }
+        if (urlStr && shouldBlock(urlStr)) {
             this.abort();
             return;
         }
-        return origOpen.apply(this, [method, urlStr, async ?? true, username, password]);
+        return origOpen.apply(this, [method, url, async ?? true, username, password]);
     };
+    const origSendBeacon = navigator.sendBeacon;
+    if (origSendBeacon) {
+        navigator.sendBeacon = function (url, data) {
+            const urlStr = url &&
+                typeof url === 'object' &&
+                'href' in url &&
+                typeof url.href === 'string'
+                ? url.href
+                : url?.toString() || '';
+            if (shouldBlock(urlStr)) {
+                return true;
+            }
+            return origSendBeacon.apply(this, [urlStr, data]);
+        };
+    }
     const adSelectors = [
         'ytd-promoted-sparkles-text-search-renderer',
         'ytd-display-ad-renderer',
@@ -127,27 +188,27 @@
     function skipVideoAds() {
         if (!enabled)
             return;
-        const video = document.querySelector('video');
+        const video = document.getElementsByTagName('video')[0] ?? null;
         if (!video)
             return;
-        if (document.querySelector('.ad-showing')) {
+        if (document.getElementsByClassName('ad-showing').length > 0) {
             if (Number.isFinite(video.duration)) {
                 video.currentTime = video.duration;
             }
         }
-        const skipBtn = document.querySelector('.ytp-ad-skip-button');
+        const skipBtn = document.getElementsByClassName('ytp-ad-skip-button')[0];
         if (skipBtn)
             skipBtn.click();
     }
     function addToggleButton() {
-        if (document.querySelector('#adblock-toggle'))
+        if (document.getElementById('adblock-toggle'))
             return;
-        const logo = document.querySelector('#logo');
+        const logo = document.getElementById('logo');
         if (!logo)
             return;
         const btn = document.createElement('button');
         btn.id = 'adblock-toggle';
-        btn.textContent = `AdBlock: ${enabled ? 'ON' : 'OFF'}`;
+        btn.textContent = `${enabled ? '🛡️' : '⚠️'} AdBlock: ${enabled ? 'ON' : 'OFF'}`;
         btn.setAttribute('aria-label', `Toggle AdBlock`);
         btn.setAttribute('aria-pressed', enabled.toString());
         btn.setAttribute('title', `${enabled ? 'Disable' : 'Enable'} AdBlock (Shift+A)`);
@@ -156,7 +217,7 @@
         styleButtonDynamic(btn);
         btn.addEventListener('click', toggleAdblock);
         logo.parentElement?.insertBefore(btn, logo.nextSibling);
-        if (!document.querySelector('#adblock-styles')) {
+        if (!document.getElementById('adblock-styles')) {
             const style = document.createElement('style');
             style.id = 'adblock-styles';
             style.textContent = `
@@ -167,7 +228,7 @@
             `;
             document.head.appendChild(style);
         }
-        if (!document.querySelector('#adblock-announcer')) {
+        if (!document.getElementById('adblock-announcer')) {
             const announcer = document.createElement('div');
             announcer.id = 'adblock-announcer';
             announcer.setAttribute('aria-live', 'polite');
@@ -188,11 +249,15 @@
         btn.style.cssText = `
             margin-left: 12px;
             padding: 4px 8px;
-            font-size: 12px;
+            font-size: 14px;
+            font-family: "Roboto", "Arial", sans-serif;
+            font-weight: 500;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
             transition: opacity 0.2s, outline 0.2s, background-color 0.2s, transform 0.1s;
             transform-origin: center;
         `;
@@ -203,14 +268,14 @@
     function toggleAdblock() {
         enabled = !enabled;
         saveState();
-        const btn = document.querySelector('#adblock-toggle');
+        const btn = document.getElementById('adblock-toggle');
         if (btn) {
-            btn.textContent = `AdBlock: ${enabled ? 'ON' : 'OFF'}`;
+            btn.textContent = `${enabled ? '🛡️' : '⚠️'} AdBlock: ${enabled ? 'ON' : 'OFF'}`;
             btn.setAttribute('aria-pressed', enabled.toString());
             btn.setAttribute('title', `${enabled ? 'Disable' : 'Enable'} AdBlock (Shift+A)`);
             styleButtonDynamic(btn);
         }
-        const announcer = document.querySelector('#adblock-announcer');
+        const announcer = document.getElementById('adblock-announcer');
         if (announcer) {
             announcer.textContent = `AdBlock is now ${enabled ? 'ON' : 'OFF'}`;
         }

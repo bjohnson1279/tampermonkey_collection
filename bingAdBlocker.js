@@ -9,21 +9,19 @@
 // @grant        none
 // ==/UserScript==
 
-(function() {
+(function () {
     'use strict';
 
-    const slideContainer = document.querySelector(".tob_calcontainer");
+    const slideContainer = document.querySelector('.tob_calcontainer');
 
     if (slideContainer) {
-        const boxes = slideContainer.querySelectorAll(".tobitem");
-
-        if (boxes.length > 0) {
-            boxes.forEach(box => {
-                const ad = box.querySelector(".b_adSlug");
-                if (ad) {
-                    box.remove();
-                }
-            });
-        }
+        // ⚡ Performance: Use a single query for all ads to avoid O(N) redundant DOM searches
+        const ads = slideContainer.querySelectorAll('.tobitem .b_adSlug');
+        ads.forEach((ad) => {
+            const box = ad.closest('.tobitem');
+            if (box) {
+                box.remove();
+            }
+        });
     }
 })();
