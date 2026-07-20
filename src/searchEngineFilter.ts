@@ -52,7 +52,7 @@ interface SearchEngines {
                 return;
             }
 
-            const [, engine] = engineEntry;
+            const [domain, engine] = engineEntry;
 
             const query: string | null = params.get(engine.queryParam);
 
@@ -60,7 +60,13 @@ interface SearchEngines {
                 const searchQuery: string = query.replace(/\+/g, ' ');
 
                 if (blacklistRegex && blacklistRegex.test(searchQuery)) {
-                    window.location.href = engine.url;
+                    const parsedUrl = new URL(engine.url, window.location.href);
+                    if (
+                        parsedUrl.protocol === 'https:' &&
+                        (parsedUrl.hostname === domain || parsedUrl.hostname.endsWith('.' + domain))
+                    ) {
+                        window.location.href = parsedUrl.href;
+                    }
                 }
             }
         } catch (error) {
