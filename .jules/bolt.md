@@ -55,6 +55,10 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 **Learning:** Selecting all container nodes and executing `.querySelector()` on each of them in a loop (e.g., `containers.forEach(c => c.querySelector('.ad'))`) causes N independent DOM traversals, which scales poorly and blocks the main thread.
 **Action:** Use a single descendant CSS selector (e.g., `document.querySelectorAll('.container .ad')`) and step up the DOM tree via `.closest('.container')`. This reduces N traversals into a single O(1) pass and is significantly faster.
 
+## 2024-07-28 - O(N) loop queries vs Single O(1) descendant CSS selector
+**Learning:** Selecting all container nodes and executing `.querySelector()` on each of them in a loop (e.g., `containers.forEach(c => c.querySelector('.ad'))`) causes N independent DOM traversals, which scales poorly and blocks the main thread.
+**Action:** Use a single descendant CSS selector (e.g., `document.querySelectorAll('.container .ad')`) and step up the DOM tree via `.closest('.container')`. This reduces N traversals into a single O(1) pass and is significantly faster.
+
 ## 2024-07-28 - O(N) loop queries vs Single O(1) descendant CSS selector (Nested Queries)
 **Learning:** In `tvdbScraper.ts`, there was a nested loop querying `.list-group` and then `.list-group-item` inside. This is effectively the same anti-pattern as above but with an extra loop level, causing even more unnecessary parsing overhead.
 **Action:** Use a single descendant CSS selector (e.g., `document.querySelectorAll('.list-group .list-group-item')`) to significantly reduce main thread parsing overhead and loop complexity.

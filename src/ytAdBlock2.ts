@@ -59,40 +59,35 @@
 
     window.fetch = (async (...args: Parameters<typeof window.fetch>): Promise<Response> => {
         const req = args[0];
-        // 🛡️ Sentinel: Use duck typing for Request/URL objects to prevent cross-realm (iframe) adblock evasion
-        // where `instanceof` fails and `.toString()` returns "[object Request]"
-        let url: string = '';
-        let isNativeRequest = false;
+        // 🛡️ Sentinel: Use WebIDL brand checking for Request/URL objects to prevent cross-realm (iframe) adblock evasion
+        // and avoid TOCTOU vulnerabilities from malicious POJOs exploiting duck-typing getters.
+        let url: string | undefined;
+        let isNative = false;
 
-        if (req && typeof req === 'object') {
-            if (nativeReqUrlGetter) {
-                try {
-                    // WebIDL brand check safely extracts the URL even across realms
-                    url = nativeReqUrlGetter.call(req) as string;
-                    isNativeRequest = true;
-                } catch {
-                    // Throws if not a true native Request object (fails brand check)
-                }
+        try {
+            url = Object.getOwnPropertyDescriptor(Request.prototype, 'url')?.get?.call(req);
+            if (url !== undefined) isNative = true;
+        } catch {
+            /* Not a Request */
+        }
+
+        if (!isNative) {
+            try {
+                url = Object.getOwnPropertyDescriptor(URL.prototype, 'href')?.get?.call(req);
+                if (url !== undefined) isNative = true;
+            } catch {
+                /* Not a URL */
             }
         }
 
-        if (!isNativeRequest) {
-            if (
-                req &&
-                typeof req === 'object' &&
-                'href' in req &&
-                typeof (req as any).href === 'string'
-            ) {
-                url = (req as any).href;
-            } else {
-                url = req?.toString() || '';
-            }
-            // 🛡️ Sentinel: Overwrite args[0] with evaluated string if relying on toString()
-            // or POJO properties to prevent TOCTOU evasion from dynamic returns.
+        if (!isNative) {
+            url = req?.toString() || '';
+            // 🛡️ Sentinel: Overwrite args[0] with evaluated string for POJOs/strings
+            // to prevent TOCTOU evasion from an object returning safe string first and ad string later.
             args[0] = url;
         }
 
-        if (shouldBlock(url)) {
+        if (url !== undefined && shouldBlock(url)) {
             return new Response('', { status: 204 });
         }
         return origFetch(...args);
@@ -108,17 +103,31 @@
         username?: string | null,
         password?: string | null
     ): void {
-        // 🛡️ Sentinel: Use duck typing for URL objects to prevent cross-realm adblock evasion
-        const urlStr =
-            url && typeof url === 'object' && 'href' in url && typeof (url as any).href === 'string'
-                ? (url as any).href
-                : url?.toString() || '';
-        if (shouldBlock(urlStr)) {
+        // 🛡️ Sentinel: Use WebIDL brand checking for URL objects to prevent cross-realm adblock evasion
+        // and avoid TOCTOU vulnerabilities from malicious POJOs exploiting duck-typing getters.
+        let urlStr: string | undefined;
+        let isNative = false;
+
+        try {
+            urlStr = Object.getOwnPropertyDescriptor(URL.prototype, 'href')?.get?.call(url);
+            if (urlStr !== undefined) isNative = true;
+        } catch {
+            /* Not a URL */
+        }
+
+        if (!isNative) {
+            urlStr = url?.toString() || '';
+            // 🛡️ Sentinel: Overwrite URL parameter with evaluated string for POJOs/strings
+            // to prevent TOCTOU evasion.
+            url = urlStr;
+        }
+
+        if (urlStr && shouldBlock(urlStr)) {
             this.abort();
             return;
         }
-        // 🛡️ Sentinel: Pass the evaluated URL string to prevent TOCTOU evasion via dynamic toString() or getters
-        return origOpen.apply(this, [method, urlStr, async ?? true, username, password]);
+
+        return origOpen.apply(this, [method, url as any, async ?? true, username, password]);
     };
 
     // Patch navigator.sendBeacon
