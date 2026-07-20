@@ -15,13 +15,7 @@ interface QuizElements {
 }
 
 class BingQuizClicker {
-    private readonly GOT_THIS_RIGHT_TEXT = 'got this right';
     private readonly NEXT_BUTTON_SELECTOR = '.wk_button';
-    private readonly BUTTON_ROW = '.btq_row';
-    private readonly BUTTON_OPTIONS = '.btq_opt';
-    private readonly ANSWER_ROW = '.btq_ansRow';
-    private readonly NEXT_BUTTON_CLICKABLE = '.acf-button-standard__btn';
-    private readonly NEXT_QUESTION_BUTTON = '.btq_nxtQues';
     private readonly CHECK_INTERVAL_MS = 1000;
     private intervalId: number | null = null;
 
