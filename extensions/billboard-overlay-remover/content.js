@@ -29,12 +29,13 @@
                 mutation.target.remove();
             }
         });
-        const chartItems = document.querySelectorAll('.chart-list-item');
-        chartItems.forEach((chartItem) => {
+        const chartItems = document.getElementsByClassName('chart-list-item');
+        for (let i = 0; i < chartItems.length; i++) {
+            const chartItem = chartItems[i];
             chartItem.visible = true;
             chartItem.height = 102;
             chartItem.classList.remove('hidden');
-        });
+        }
     };
     try {
         const observer = new MutationObserver(handleMutations);
