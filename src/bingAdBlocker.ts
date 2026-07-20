@@ -15,12 +15,10 @@
     const slideContainer: HTMLElement | null = document.querySelector('.tob_calcontainer');
 
     if (slideContainer) {
-        // ⚡ Bolt: Replace O(N) internal DOM traversals inside the loop with a single O(1) pass
-        // using a descendant CSS selector, significantly reducing main thread parsing overhead.
+        // ⚡ Performance: Use a single query for all ads to avoid O(N) redundant DOM searches
         const ads: NodeListOf<HTMLElement> = slideContainer.querySelectorAll('.tobitem .b_adSlug');
-
         ads.forEach((ad: HTMLElement) => {
-            const box = ad.closest('.tobitem');
+            const box: HTMLElement | null = ad.closest('.tobitem');
             if (box) {
                 box.remove();
             }
