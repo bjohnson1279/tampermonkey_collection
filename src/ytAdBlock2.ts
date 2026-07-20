@@ -61,7 +61,7 @@
         const req = args[0];
         // 🛡️ Sentinel: Use WebIDL brand checking for Request/URL objects to prevent cross-realm (iframe) adblock evasion
         // and avoid TOCTOU vulnerabilities from malicious POJOs exploiting duck-typing getters.
-        let url: string | undefined;
+        let url: string = '';
         let isNative = false;
 
         try {
@@ -99,7 +99,18 @@
                 isNativeRequest = false;
             }
             if (!isNativeRequest) {
-                args[0] = url;
+                try {
+                    args[0] = new Request(url, { duplex: 'half', ...(req as RequestInit) } as any);
+                } catch (e) {
+                    try {
+                        Object.defineProperty(req, 'url', {
+                            value: url,
+                            configurable: true,
+                            enumerable: true,
+                            writable: true,
+                        });
+                    } catch (e2) {}
+                }
             }
         } else {
             args[0] = url;
@@ -123,7 +134,7 @@
     ): void {
         // 🛡️ Sentinel: Use WebIDL brand checking for URL objects to prevent cross-realm adblock evasion
         // and avoid TOCTOU vulnerabilities from malicious POJOs exploiting duck-typing getters.
-        let urlStr: string | undefined;
+        let urlStr: string = '';
         let isNative = false;
 
         try {
