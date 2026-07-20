@@ -61,7 +61,7 @@
         const req = args[0];
         // 🛡️ Sentinel: Use WebIDL brand checking for Request/URL objects to prevent cross-realm (iframe) adblock evasion
         // and avoid TOCTOU vulnerabilities from malicious POJOs exploiting duck-typing getters.
-        let url: string | undefined;
+        let url: string = '';
         let isNative = false;
 
         try {
@@ -123,7 +123,7 @@
     ): void {
         // 🛡️ Sentinel: Use WebIDL brand checking for URL objects to prevent cross-realm adblock evasion
         // and avoid TOCTOU vulnerabilities from malicious POJOs exploiting duck-typing getters.
-        let urlStr: string | undefined;
+        let urlStr: string = '';
         let isNative = false;
 
         try {

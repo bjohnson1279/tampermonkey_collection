@@ -32,18 +32,24 @@
     window.fetch = (async (...args) => {
         const req = args[0];
         let url = '';
-        let isNativeRequest = false;
-        if (req && typeof req === 'object') {
-            if (nativeReqUrlGetter) {
-                try {
-                    url = nativeReqUrlGetter.call(req);
-                    isNativeRequest = true;
-                }
-                catch {
-                }
+        let isNative = false;
+        try {
+            url = Object.getOwnPropertyDescriptor(Request.prototype, 'url')?.get?.call(req);
+            if (url !== undefined)
+                isNative = true;
+        }
+        catch {
+        }
+        if (!isNative) {
+            try {
+                url = Object.getOwnPropertyDescriptor(URL.prototype, 'href')?.get?.call(req);
+                if (url !== undefined)
+                    isNative = true;
+            }
+            catch {
             }
         }
-        else {
+        if (!isNative) {
             url = req?.toString() || '';
         }
         if (req && typeof req === 'object') {
@@ -64,21 +70,31 @@
         else {
             args[0] = url;
         }
-        if (shouldBlock(url)) {
+        if (url !== undefined && shouldBlock(url)) {
             return new Response('', { status: 204 });
         }
         return origFetch(...args);
     });
     const origOpen = XMLHttpRequest.prototype.open;
     XMLHttpRequest.prototype.open = function (method, url, async, username, password) {
-        const urlStr = url && typeof url === 'object' && 'href' in url && typeof url.href === 'string'
-            ? url.href
-            : url?.toString() || '';
-        if (shouldBlock(urlStr)) {
+        let urlStr = '';
+        let isNative = false;
+        try {
+            urlStr = Object.getOwnPropertyDescriptor(URL.prototype, 'href')?.get?.call(url);
+            if (urlStr !== undefined)
+                isNative = true;
+        }
+        catch {
+        }
+        if (!isNative) {
+            urlStr = url?.toString() || '';
+            url = urlStr;
+        }
+        if (urlStr && shouldBlock(urlStr)) {
             this.abort();
             return;
         }
-        return origOpen.apply(this, [method, urlStr, async ?? true, username, password]);
+        return origOpen.apply(this, [method, url, async ?? true, username, password]);
     };
     const origSendBeacon = navigator.sendBeacon;
     if (origSendBeacon) {
