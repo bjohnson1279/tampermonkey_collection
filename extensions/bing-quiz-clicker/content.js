@@ -16,7 +16,8 @@ class BingQuizClicker {
         const style = document.createElement('style');
         style.textContent = `
             .wk_hideCompulsary { visibility: visible !important; }
-            .wk_choiceMaxWidth:has(.wk_hideCompulsary) { color: green !important; }
+            .wk_choiceMaxWidth:has(.wk_hideCompulsary) { color: #146c43 !important; font-weight: 600 !important; }
+            .wk_choiceMaxWidth:has(.wk_hideCompulsary)::before { content: "✅ " !important; }
         `;
         (document.head || document.documentElement).appendChild(style);
         this.startWatching();

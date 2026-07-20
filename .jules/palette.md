@@ -110,3 +110,6 @@
 ## 2024-05-24 - Prevent text selection on custom UI buttons
 **Learning:** When injecting custom interactive elements (like buttons) into existing pages, rapid clicking or double-clicking can inadvertently select the button's text, which breaks the native UI feel and feels unpolished.
 **Action:** Always apply `user-select: none` (and `-webkit-user-select: none` for compatibility) to custom injected buttons to ensure they behave like native application controls.
+## 2024-06-25 - Relying purely on color for status (WCAG 1.4.1)
+**Learning:** Indicating a correct or active status solely by changing text color (e.g., `color: green`) violates WCAG 1.4.1 (Use of Color), as colorblind users may not perceive the difference. Additionally, default color keywords like "green" often fail contrast requirements.
+**Action:** When updating styling for a state change, always introduce a non-color visual indicator. Examples include adding a shape/emoji (like a checkmark ✅ via `::before`), changing the font-weight, or adding an underline. Always use a specific hex/rgb value that meets AA contrast guidelines rather than raw color keywords.
