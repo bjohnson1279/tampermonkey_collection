@@ -43,16 +43,19 @@ interface SearchEngines {
             const hostname: string = window.location.hostname;
             const params: URLSearchParams = new URLSearchParams(window.location.search);
 
-            // Find the matching search engine configuration
-            const engineEntry = Object.entries(searchEngines).find(
-                ([domain]) => hostname === domain || hostname.endsWith('.' + domain)
-            );
-
-            if (!engineEntry) {
-                return;
+            // ⚡ Bolt: Replace Object.entries().find() with a for...in loop to avoid
+            // O(N) array allocation and callback overhead on every search query.
+            let engine: SearchEngineConfig | undefined;
+            for (const domain in searchEngines) {
+                if (hostname === domain || hostname.endsWith('.' + domain)) {
+                    engine = searchEngines[domain];
+                    break;
+                }
             }
 
-            const [, engine] = engineEntry;
+            if (!engine) {
+                return;
+            }
 
             const query: string | null = params.get(engine.queryParam);
 
