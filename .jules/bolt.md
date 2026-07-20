@@ -74,3 +74,6 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2024-07-19 - Fast DOM querying in MutationObservers
 **Learning:** Using `document.querySelectorAll` inside high-frequency callbacks like `MutationObserver` or `setInterval` triggers expensive O(N) DOM parsing on every call.
 **Action:** Always replace `querySelectorAll('.class')` with `getElementsByClassName('class')` in frequent update loops to utilize O(1) live collection lookups and significantly reduce main-thread CPU overhead.
+## 2024-07-28 - Replace querySelector with getElementsByClassName/TagName in loops
+**Learning:** Calling `.querySelector` and `.querySelectorAll` inside a loop evaluating multiple nodes forces the browser to re-parse the CSS selector string and traverse the DOM subtree O(N) times. This is significantly slower than using dedicated methods like `getElementsByClassName` or `getElementsByTagName`, which perform O(1) live collection lookups or highly optimized tree walks.
+**Action:** Always replace `.querySelector('.class')` with `.getElementsByClassName('class')[0]` and `.querySelector('tag')` with `.getElementsByTagName('tag')[0]` when iterating over a list of elements to reduce CPU overhead and parsing time.

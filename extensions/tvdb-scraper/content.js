@@ -5,19 +5,20 @@ export function scrapeTVDBData() {
     const episodesData = [];
     const episodes = document.querySelectorAll('.list-group .list-group-item');
     episodes.forEach((ep) => {
-        const heading = ep.querySelector('.list-group-item-heading');
+        const heading = ep.getElementsByClassName('list-group-item-heading')[0];
         if (!heading)
             return;
-        const epLabelElement = heading.querySelector('.episode-label');
+        const epLabelElement = heading.getElementsByClassName('episode-label')[0];
         const epLabel = epLabelElement?.textContent?.trim() || '';
         const matches = epLabel.match(EPISODE_NUM_REGEX) || [];
-        const titleLink = heading.querySelector('a');
+        const titleLink = heading.getElementsByTagName('a')[0];
         const epTitle = titleLink?.textContent?.trim() || '';
-        const itemTextElement = ep.querySelector('.list-group-item-text');
+        const itemTextElement = ep.getElementsByClassName('list-group-item-text')[0];
         const itemText = itemTextElement?.textContent?.trim() || '';
         let itemDate = '';
-        const listInline = ep.querySelectorAll('.list-inline');
-        listInline.forEach((listItem) => {
+        const listInline = ep.getElementsByClassName('list-inline');
+        for (let i = 0; i < listInline.length; i++) {
+            const listItem = listInline[i];
             const dateText = listItem.textContent?.replace(NETWORK_CLEANUP_REGEX, '').trim() || '';
             try {
                 const date = new Date(dateText);
@@ -28,7 +29,7 @@ export function scrapeTVDBData() {
             catch (e) {
                 console.error('Error parsing date:', e instanceof Error ? e.message : String(e));
             }
-        });
+        }
         const episode = {
             season: matches[0] || '',
             episode: matches[1] || '',

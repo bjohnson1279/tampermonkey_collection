@@ -30,23 +30,28 @@ export function scrapeTVDBData(): Episode[] {
     const episodes = document.querySelectorAll<HTMLElement>('.list-group .list-group-item');
 
     episodes.forEach((ep: HTMLElement): void => {
-        const heading = ep.querySelector<HTMLElement>('.list-group-item-heading');
+        // ⚡ Bolt: Replace querySelector('.class') with getElementsByClassName('class')[0] for O(1) live collection lookup
+        const heading = ep.getElementsByClassName('list-group-item-heading')[0] as
+            HTMLElement | undefined;
         if (!heading) return;
 
-        const epLabelElement = heading.querySelector<HTMLElement>('.episode-label');
+        const epLabelElement = heading.getElementsByClassName('episode-label')[0] as
+            HTMLElement | undefined;
         const epLabel = epLabelElement?.textContent?.trim() || '';
         const matches = epLabel.match(EPISODE_NUM_REGEX) || [];
 
-        const titleLink = heading.querySelector<HTMLAnchorElement>('a');
+        const titleLink = heading.getElementsByTagName('a')[0] as HTMLAnchorElement | undefined;
         const epTitle = titleLink?.textContent?.trim() || '';
 
-        const itemTextElement = ep.querySelector<HTMLElement>('.list-group-item-text');
+        const itemTextElement = ep.getElementsByClassName('list-group-item-text')[0] as
+            HTMLElement | undefined;
         const itemText = itemTextElement?.textContent?.trim() || '';
 
         let itemDate = '';
-        const listInline = ep.querySelectorAll<HTMLElement>('.list-inline');
+        const listInline = ep.getElementsByClassName('list-inline');
 
-        listInline.forEach((listItem: HTMLElement): void => {
+        for (let i = 0; i < listInline.length; i++) {
+            const listItem = listInline[i] as HTMLElement;
             const dateText = listItem.textContent?.replace(NETWORK_CLEANUP_REGEX, '').trim() || '';
 
             try {
@@ -58,7 +63,7 @@ export function scrapeTVDBData(): Episode[] {
                 // 🛡️ Sentinel: Removed error object from console.error to prevent stack trace exposure
                 console.error('Error parsing date:', e instanceof Error ? e.message : String(e));
             }
-        });
+        }
 
         const episode: Episode = {
             season: matches[0] || '',
