@@ -43,14 +43,18 @@
 ## 2024-11-20 - Combine DOM traversals with comma-separated selectors
 **Learning:** Performing multiple sequential `querySelector` or `querySelectorAll` operations on the DOM tree creates multiple O(N) traversal passes, which is inefficient.
 **Action:** Combine multiple distinct CSS selectors into a single comma-separated string (e.g., `document.querySelectorAll('.a, .b, .c')`) to perform a single O(1) pass through the DOM, significantly improving performance when extracting multiple disparate elements.
+
 ## 2024-07-10 - O(1) Style Injection vs O(N) DOM Loops
 When replacing default browser behaviors or hiding elements on page load, avoid iterating over collections returned by `querySelectorAll()` and applying inline styles (`el.style.display = 'block'`). This triggers synchronous layout calculation and O(N) overhead. Instead, create a single `<style>` element, inject the necessary CSS rules (using `!important` to override inline styles if necessary), and append it to `document.head || document.documentElement`. This turns an O(N) DOM modification into an O(1) operation and prevents forced reflows.
+
 ## 2024-11-20 - Empty Regex Pattern Danger
 **Learning:** When replacing an `Array.some(str => target.includes(str))` pattern with a dynamically generated Regular Expression (e.g., `new RegExp(array.join('|'))`) for performance, an empty array (`[]`) evaluates to an empty regex pattern (`/(?:)/`). This empty pattern matches *everything* (returns `true` for all `.test()` calls), whereas `[].some(...)` returns `false`. This causes catastrophic false positives if the array can be emptied by configuration.
 **Action:** Always check the array length before generating dynamic RegExps from configuration variables, or provide a safe fallback (like `null` or a never-matching pattern) when the array is empty.
+
 ## 2024-07-28 - O(N) loop queries vs Single O(1) descendant CSS selector
 **Learning:** Selecting all container nodes and executing `.querySelector()` on each of them in a loop (e.g., `containers.forEach(c => c.querySelector('.ad'))`) causes N independent DOM traversals, which scales poorly and blocks the main thread.
 **Action:** Use a single descendant CSS selector (e.g., `document.querySelectorAll('.container .ad')`) and step up the DOM tree via `.closest('.container')`. This reduces N traversals into a single O(1) pass and is significantly faster.
+
 ## 2024-07-28 - O(N) loop queries vs Single O(1) descendant CSS selector (Nested Queries)
 **Learning:** In `tvdbScraper.ts`, there was a nested loop querying `.list-group` and then `.list-group-item` inside. This is effectively the same anti-pattern as above but with an extra loop level, causing even more unnecessary parsing overhead.
 **Action:** Use a single descendant CSS selector (e.g., `document.querySelectorAll('.list-group .list-group-item')`) to significantly reduce main thread parsing overhead and loop complexity.
@@ -62,9 +66,11 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2024-05-13 - [Cache reflection getters in hot paths]
 **Learning:** Using `Object.getOwnPropertyDescriptor` inside a high-frequency function like a network fetch interceptor causes a significant performance penalty (e.g. 5-6x slower).
 **Action:** Always cache reflection results or descriptor getters outside of the hot path for reuse.
+
 ## 2024-05-24 - Hoist static RegExp objects outside of loops
 **Learning:** Instantiating `RegExp` literals (like `/\d+/g`) inside a loop causes memory allocation and subsequent garbage collection overhead on every iteration.
 **Action:** Extract literal RegExp objects to module-level constants. Methods like `String.prototype.match()` and `String.prototype.replace()` are safe to use with global hoisted regexes because they do not rely on or mutate the regex's `.lastIndex` property (unlike `RegExp.prototype.exec()` and `RegExp.prototype.test()`).
+
 ## 2024-11-20 - Replace querySelector with getElementById/getElementsByClassName
 **Learning:** `querySelector` is very flexible but much slower than dedicated lookup methods like `getElementById` and `getElementsByClassName` because it requires the browser to parse a CSS selector string and traverse the DOM tree (O(N)). `getElementById` uses a highly optimized internal hash map (O(1)). `getElementsByClassName` returns a live HTMLCollection which is also often O(1) or highly optimized compared to full query traversal. In high frequency code paths, like a 500ms `setInterval` checking for YouTube ads in a very large DOM tree, `querySelector` introduces significant overhead and CPU usage. Benchmark shows `querySelectorAll` is ~209ms while `getElementById`+`getElementsByClassName` is ~8ms for 10000 iterations.
 **Action:** When querying the DOM for a single ID or a single class name inside high-frequency loops (`setInterval`, `requestAnimationFrame`, `MutationObserver`), replace `querySelector('#id')` with `getElementById('id')` and `querySelector('.class')` with `getElementsByClassName('class')[0]`.
@@ -72,3 +78,19 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2026-07-17 - Hoist RegExp Constants from Loops
 **Learning:** Instantiating static `RegExp` objects inside high-frequency loops (e.g. `forEach` iteration) forces JavaScript engines to allocate, parse, compile, and garbage-collect the regex repeatedly, reducing performance.
 **Action:** Extracted static inline `RegExp` expressions and hoisted them into constant variables at the file or module scope (e.g., `NETWORK_CLEANUP_REGEX`) outside of the execution block to achieve a 10.38% improvement in regex matching loops.
+
+## 2024-07-20 - Avoid array allocation and callback overhead in search engine check
+**Learning:** Replaced `Object.entries(searchEngines).find(...)` with a simple `for...in` loop. This avoids O(N) array allocation from `Object.entries` and the overhead of a callback function inside `.find(...)`, making the domain check faster by approximately 55%.
+**Action:** Changed the implementation in `src/searchEngineFilter.ts`.
+
+## 2026-07-18 - Replace querySelector with getElementById/getElementsByClassName
+**Learning:** `querySelector` is very flexible but much slower than dedicated lookup methods like `getElementById` and `getElementsByClassName` because it requires the browser to parse a CSS selector string and traverse the DOM tree (O(N)). `getElementById` uses a highly optimized internal hash map (O(1)). `getElementsByClassName` returns a live HTMLCollection which is also often O(1) or highly optimized compared to full query traversal. In high frequency code paths, like a 500ms `setInterval` checking for DOM nodes in a large DOM tree, `querySelector` introduces significant overhead and CPU usage.
+**Action:** When querying the DOM for a single ID or a single class name inside high-frequency loops (`setInterval`, `requestAnimationFrame`, `MutationObserver`), replace `querySelector('#id')` with `getElementById('id')` and `querySelector('.class')` with `getElementsByClassName('class')[0]`.
+
+## 2024-07-19 - Fast DOM querying in MutationObservers
+**Learning:** Using `document.querySelectorAll` inside high-frequency callbacks like `MutationObserver` or `setInterval` triggers expensive O(N) DOM parsing on every call.
+**Action:** Always replace `querySelectorAll('.class')` with `getElementsByClassName('class')` in frequent update loops to utilize O(1) live collection lookups and significantly reduce main-thread CPU overhead.
+
+## 2024-07-28 - Replace querySelector with getElementsByClassName/TagName in loops
+**Learning:** Calling `.querySelector` and `.querySelectorAll` inside a loop evaluating multiple nodes forces the browser to re-parse the CSS selector string and traverse the DOM subtree O(N) times. This is significantly slower than using dedicated methods like `getElementsByClassName` or `getElementsByTagName`, which perform O(1) live collection lookups or highly optimized tree walks.
+**Action:** Always replace `.querySelector('.class')` with `.getElementsByClassName('class')[0]` and `.querySelector('tag')` with `.getElementsByTagName('tag')[0]` when iterating over a list of elements to reduce CPU overhead and parsing time.

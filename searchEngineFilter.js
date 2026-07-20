@@ -22,7 +22,8 @@
     const params = new URLSearchParams(window.location.search);
 
     for (const domain in searchEngines) {
-        if (hostname.includes(domain)) {
+        // 🛡️ Sentinel: Fix subdomain and prefix spoofing by using exact or suffix matching
+        if (hostname === domain || hostname.endsWith('.' + domain)) {
             const engine = searchEngines[domain];
             const query = params.get(engine.queryParam);
 

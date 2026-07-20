@@ -57,18 +57,24 @@ interface ExtendedHTMLElement extends HTMLElement {
         });
 
         // Update chart items
-        const chartItems = document.querySelectorAll<ExtendedHTMLElement>('.chart-list-item');
-        chartItems.forEach((chartItem: ExtendedHTMLElement): void => {
+        // ⚡ Bolt: Replace querySelectorAll('.class') with getElementsByClassName('class') for O(1) live collection lookup instead of O(N) tree traversal inside the MutationObserver
+        const chartItems = document.getElementsByClassName('chart-list-item');
+        for (let i = 0; i < chartItems.length; i++) {
+            const chartItem = chartItems[i] as ExtendedHTMLElement;
             chartItem.visible = true;
             chartItem.height = 102;
             chartItem.classList.remove('hidden');
-        });
+        }
     };
 
     try {
         const observer = new MutationObserver(handleMutations);
         observer.observe(chartOverlay, config);
     } catch (error) {
-        console.error('Error initializing Billboard overlay observer:', error);
+        // 🛡️ Sentinel: Removed error object from console.error to prevent stack trace exposure
+        console.error(
+            'Error initializing Billboard overlay observer:',
+            error instanceof Error ? error.message : String(error)
+        );
     }
 })();
