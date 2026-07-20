@@ -22,7 +22,11 @@
             enabled = JSON.parse(stored) ?? true;
         }
     } catch (e) {
-        console.warn('Failed to parse ytAdblockEnabled from localStorage', e);
+        // 🛡️ Sentinel: Removed error object from console.warn to prevent stack trace exposure
+        console.warn(
+            'Failed to parse ytAdblockEnabled from localStorage',
+            e instanceof Error ? e.message : String(e)
+        );
         enabled = true;
     }
 
@@ -312,6 +316,8 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
             transition: opacity 0.2s, outline 0.2s, background-color 0.2s, transform 0.1s;
             transform-origin: center;
         `;

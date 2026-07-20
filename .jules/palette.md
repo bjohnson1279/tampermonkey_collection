@@ -89,9 +89,27 @@
 **Action:** Instead of the native `disabled` attribute, use `aria-disabled="true"` to communicate the disabled state semantically without removing focusability. Ensure the click handler explicitly ignores clicks when `aria-disabled="true"` is set, and update the associated CSS pseudo-classes (`:disabled`, `:not(:disabled)`) to match the aria attribute.
 
 ## 2024-11-29 - Dynamic Item Counts in Actions
+
 **Learning:** Adding dynamic item counts (e.g., "(5 episodes)") to action buttons like "Copy JSON" gives users immediate, helpful context about the scope of the action they are about to take, reducing cognitive load and preventing surprises.
 **Action:** When injecting buttons that perform actions on a collection of scraped or parsed data, dynamically update the button text to include the count of items being acted upon.
 
 ## 2024-11-29 - Visual Status Icons on Toggle Buttons
+
 **Learning:** Text-heavy toggle buttons (e.g., "AdBlock: ON") require users to read and process the text to understand the current state, increasing cognitive load. Adding stateful status icons (e.g., "🛡️" for ON, "⚠️" for OFF) provides immediate visual recognition, allowing users to parse the state at a glance.
 **Action:** When creating text-based toggle buttons, incorporate distinct, semantically appropriate icons that change based on the active state to improve quick visual parsing and add a touch of delight.
+
+## 2026-07-18 - Dynamic Item Counts in ARIA Labels
+
+**Learning:** When a button's visual text is updated to include dynamic context (like an item count), using a static `aria-label` causes screen readers to completely miss this crucial context, as `aria-label` overrides the element's text content.
+**Action:** Always ensure that any dynamic, contextual data added to visual text is also reflected in the element's `aria-label` so that assistive technology users receive the same level of detail.
+
+## 2024-05-24 - Prevent text selection on custom UI buttons
+**Learning:** When injecting custom interactive elements (like buttons) into existing pages, rapid clicking or double-clicking can inadvertently select the button's text, which breaks the native UI feel and feels unpolished.
+**Action:** Always apply `user-select: none` (and `-webkit-user-select: none` for compatibility) to custom injected buttons to ensure they behave like native application controls.
+
+## 2024-05-24 - Prevent text selection on custom UI buttons
+**Learning:** When injecting custom interactive elements (like buttons) into existing pages, rapid clicking or double-clicking can inadvertently select the button's text, which breaks the native UI feel and feels unpolished.
+**Action:** Always apply `user-select: none` (and `-webkit-user-select: none` for compatibility) to custom injected buttons to ensure they behave like native application controls.
+## 2024-06-25 - Relying purely on color for status (WCAG 1.4.1)
+**Learning:** Indicating a correct or active status solely by changing text color (e.g., `color: green`) violates WCAG 1.4.1 (Use of Color), as colorblind users may not perceive the difference. Additionally, default color keywords like "green" often fail contrast requirements.
+**Action:** When updating styling for a state change, always introduce a non-color visual indicator. Examples include adding a shape/emoji (like a checkmark ✅ via `::before`), changing the font-weight, or adding an underline. Always use a specific hex/rgb value that meets AA contrast guidelines rather than raw color keywords.

@@ -67,7 +67,11 @@ interface SearchEngines {
                 }
             }
         } catch (error) {
-            console.error('Error processing search:', error);
+            // 🛡️ Sentinel: Removed error object from console.error to prevent stack trace exposure
+            console.error(
+                'Error processing search:',
+                error instanceof Error ? error.message : String(error)
+            );
         }
     };
 
