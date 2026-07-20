@@ -43,16 +43,25 @@
                 }
             }
         }
-        if (!isNativeRequest) {
-            if (req &&
-                typeof req === 'object' &&
-                'href' in req &&
-                typeof req.href === 'string') {
-                url = req.href;
+        else {
+            url = req?.toString() || '';
+        }
+        if (req && typeof req === 'object') {
+            let isNativeRequest = false;
+            try {
+                if (typeof Request !== 'undefined') {
+                    Object.getOwnPropertyDescriptor(Request.prototype, 'url')?.get?.call(req);
+                    isNativeRequest = true;
+                }
             }
-            else {
-                url = req?.toString() || '';
+            catch (e) {
+                isNativeRequest = false;
             }
+            if (!isNativeRequest) {
+                args[0] = url;
+            }
+        }
+        else {
             args[0] = url;
         }
         if (shouldBlock(url)) {

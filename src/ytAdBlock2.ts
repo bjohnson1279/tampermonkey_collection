@@ -82,8 +82,26 @@
 
         if (!isNative) {
             url = req?.toString() || '';
-            // 🛡️ Sentinel: Overwrite args[0] with evaluated string for POJOs/strings
-            // to prevent TOCTOU evasion from an object returning safe string first and ad string later.
+        }
+
+        // 🛡️ Sentinel: Overwrite args[0] with the evaluated URL string only if it's a POJO.
+        // Native Request objects are immune to TOCTOU as their internal URL slot is immutable.
+        // We use brand-checking via the internal [[Request]] slot to reliably distinguish between
+        // Native Requests (even from cross-realms) and malicious POJOs spoofing as Requests.
+        if (req && typeof req === 'object') {
+            let isNativeRequest = false;
+            try {
+                if (typeof Request !== 'undefined') {
+                    Object.getOwnPropertyDescriptor(Request.prototype, 'url')?.get?.call(req);
+                    isNativeRequest = true;
+                }
+            } catch (e) {
+                isNativeRequest = false;
+            }
+            if (!isNativeRequest) {
+                args[0] = url;
+            }
+        } else {
             args[0] = url;
         }
 
