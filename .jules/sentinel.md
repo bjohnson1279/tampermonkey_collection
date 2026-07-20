@@ -46,3 +46,8 @@
 **Vulnerability:** Adblocker/tracker blocking logic using fetch interception was vulnerable to evasion when requests were made using relative URLs (e.g., `fetch('/api/stats/ads')`). The URL was tested directly against a regex that expected full domain matches (like `youtube.com\/api\/stats`), causing relative URLs to silently bypass the filter.
 **Learning:** Network APIs like `fetch` and `XMLHttpRequest` accept relative URLs, which the browser automatically resolves against the current origin. Network filters relying on full URL patterns will fail to block these unless the relative URLs are resolved first.
 **Prevention:** When intercepting network requests to evaluate against a URL blocklist (e.g., via regex), always normalize the input URL to an absolute URL (e.g., `new URL(url, window.location.href).href`) before testing. Use a `try/catch` block to safely fallback to the original URL if parsing fails.
+
+## 2024-07-28 - [Network Filter Evasion via WebSocket]
+**Vulnerability:** Trackers can bypass `fetch`, `XMLHttpRequest`, and `navigator.sendBeacon` interceptors by using `WebSocket` connections for telemetry and ads, allowing them to evade network filters entirely.
+**Learning:** `WebSocket` is another network API that must be secured in privacy and adblocking extensions to prevent evasion. Like other network hooks, it is also vulnerable to TOCTOU and cross-realm object spoofing.
+**Prevention:** When building network interceptors for privacy or adblocking, always secure `WebSocket` connections. Apply the same WebIDL brand-checking and TOCTOU preventions as used in `fetch` and `XHR` when evaluating the connection URL.
