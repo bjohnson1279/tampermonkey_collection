@@ -32,7 +32,7 @@
             )
                 return false;
             return true;
-        } catch (e) {
+        } catch {
             return false;
         }
     }
@@ -68,7 +68,11 @@
         }
 
         // Another fallback: look for a visible element with textContent like "Skip Ad" / "Skip ads"
-        const candidates = Array.from(document.querySelectorAll('button,div'))
+        // Optimization: Avoid querying all divs which is very expensive on large pages.
+        // Instead, query buttons and elements containing "skip" in their class or id.
+        const candidates = Array.from(
+            document.querySelectorAll('button, [class*="skip" i], [id*="skip" i]')
+        )
             .filter((n) => n && n.textContent)
             .filter((n) => /\bskip ad(s)?\b/i.test(n.textContent.trim()));
         for (const c of candidates) {
@@ -82,7 +86,7 @@
     findAndClickSkip();
 
     // MutationObserver to catch dynamic UI changes quickly
-    const observer = new MutationObserver((mutations) => {
+    const observer = new MutationObserver(() => {
         // Quick check for common added nodes could be added, but doing a lightweight unconditional check is fine here.
         findAndClickSkip();
     });
@@ -103,7 +107,7 @@
         try {
             clearInterval(intervalId);
             observer.disconnect();
-        } catch (e) {}
+        } catch {}
     });
 
     // Helpful console message

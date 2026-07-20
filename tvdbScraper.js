@@ -9,7 +9,11 @@
 // @grant        none
 // ==/UserScript==
 
-(function () {
+// ⚡ Bolt: Hoist static RegExp objects outside the loop to prevent repeated allocation and garbage collection overhead
+const EPISODE_NUM_REGEX = /\d+/g;
+const NETWORK_CLEANUP_REGEX = /ABC|CBS|FOX|NBC|PBS|History|H2|\(US\)|A&E/gi;
+
+function scrapeTVDBData() {
     'use strict';
 
     const episodesData = [];
@@ -20,7 +24,7 @@
         episodes.forEach((ep) => {
             const heading = ep.querySelector('.list-group-item-heading');
             const epLabel = heading.querySelector('.episode-label').innerText;
-            const matches = epLabel.match(/\d+/g) || [];
+            const matches = epLabel.match(EPISODE_NUM_REGEX) || [];
             const epTitle = heading.querySelector('a').innerText || '';
             const itemText = ep.querySelector('.list-group-item-text')?.innerText || '';
 
@@ -28,12 +32,10 @@
             const listInline = ep.querySelectorAll('.list-inline');
 
             listInline.forEach((listItem) => {
-                let dateText = listItem.innerText
-                    .replace(/ABC|CBS|FOX|NBC|PBS|History|H2|\(US\)|A&E/gi, '')
-                    .trim();
+                let dateText = listItem.innerText.replace(NETWORK_CLEANUP_REGEX, '').trim();
                 try {
                     itemDate = new Date(dateText).toISOString().split('T')[0];
-                } catch (e) {
+                } catch {
                     itemDate = '';
                 }
             });
@@ -86,7 +88,7 @@
                 btn.style.backgroundColor = '#146c43';
                 btn.setAttribute('title', 'Successfully copied');
                 announcer.textContent = 'Copied to clipboard';
-            } catch (err) {
+            } catch {
                 btn.textContent = '❌ Error';
                 btn.style.backgroundColor = '#b02a37';
                 btn.setAttribute('title', 'Failed to copy');
@@ -117,4 +119,8 @@
     }
 
     return episodesData;
-})();
+}
+
+if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+    scrapeTVDBData();
+}

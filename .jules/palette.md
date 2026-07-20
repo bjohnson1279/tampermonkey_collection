@@ -44,14 +44,72 @@
 **Action:** When adding global keyboard shortcuts, always check the `e.target` of the keydown event. Ensure it is not an `<input>`, `<textarea>`, or an element with `isContentEditable` before executing the shortcut action.
 
 ## 2026-07-07 - [Invisible Focus Rings with currentColor]
+
 **Learning:** Using `currentColor` for focus rings (e.g. `outline: 2px solid currentColor`) can cause accessibility failures (WCAG 2.4.7 Focus Visible) when the element's text color perfectly matches its dynamically themed container background. For example, a button with white text on a dynamically themed dark-or-light header will have a white focus ring, rendering it invisible in light mode.
 **Action:** When styling injected components over third-party, dynamically-themed layouts (like YouTube), avoid `currentColor` for focus outlines unless the element has its own isolated background. Instead, use the site's native high-contrast CSS variables (e.g., `var(--yt-spec-text-primary)`) with a fallback (e.g. `CanvasText`) to ensure contrast across all themes.
+
 ## 2026-07-08 - Custom Focus Styles Specificity
 
-**Learning:** When applying custom  styles via an injected `<style>` block (e.g. for accessibility), setting an inline style of `outline: none;` directly on the element (e.g., via `element.style.cssText`) will override the injected stylesheet's `:focus-visible` rule due to CSS specificity rules, leaving keyboard users with an entirely invisible focus ring.
+**Learning:** When applying custom styles via an injected `<style>` block (e.g. for accessibility), setting an inline style of `outline: none;` directly on the element (e.g., via `element.style.cssText`) will override the injected stylesheet's `:focus-visible` rule due to CSS specificity rules, leaving keyboard users with an entirely invisible focus ring.
 **Action:** Place the `outline: none;` reset rule inside the injected `<style>` block alongside the custom `:focus-visible` rule to ensure the CSS cascading rules evaluate the pseudo-class state correctly without being overridden by inline properties.
 
 ## 2024-11-12 - Custom Focus Styles Specificity
 
 **Learning:** When applying custom `:focus-visible` styles via an injected `<style>` block (e.g. for accessibility), setting an inline style of `outline: none;` directly on the element (e.g., via `element.style.cssText`) will override the injected stylesheet's `:focus-visible` rule due to CSS specificity rules, leaving keyboard users with an entirely invisible focus ring.
 **Action:** Place the `outline: none;` reset rule inside the injected `<style>` block alongside the custom `:focus-visible` rule to ensure the CSS cascading rules evaluate the pseudo-class state correctly without being overridden by inline properties.
+
+## 2024-11-12 - Empty states and persistent shortcuts on action buttons
+
+**Learning:** When a page-level action button is injected (like a "Copy JSON" button for scraped data), it fails UX expectations if it allows interaction when no data is actually present on the page. Also, if a button uses its `title` to provide keyboard shortcut hints (like `(Shift+C)`), resetting the title after a temporary feedback state without restoring the hint removes crucial accessibility cues.
+**Action:** Always implement a clear empty state (e.g., changing text to "No Data" and setting `disabled=true`) when injected actions rely on page data that may be missing. Ensure that state restoration logic (e.g. `setTimeout` for temporary feedback) perfectly mirrors the original initialization state, including shortcut hints in tooltips.
+
+## 2024-11-20 - Disabled states vs Feedback states
+
+**Learning:** When using `disabled=true` on a button temporarily to prevent duplicate submissions during an async action (like a copy to clipboard success feedback message), applying generic `:disabled` CSS rules (`opacity: 0.7`, `cursor: not-allowed`) will make the success message look faded out, forbidden, or broken. Furthermore, failing to update the `aria-label` during this feedback state means screen readers will announce stale action text instead of the success message.
+**Action:** When a button is disabled specifically for async feedback, add a custom attribute like `data-feedback="true"` to opt-out of generic `:disabled` opacity/cursor styles, and explicitly update both the `aria-label` and `title` to match the feedback state.
+
+## 2024-11-20 - Default Button Color Contrast Accessibility
+
+**Learning:** Common default button colors (like Bootstrap's default blue `#007bff`) often fail WCAG AA contrast guidelines (4.5:1) when paired with white text, which can make them difficult to read for users with visual impairments.
+**Action:** Always verify color contrast on primary action buttons, even if using standard design system colors. Use darker shades (like `#0056b3` or Bootstrap 5's darker variants) to ensure compliant readability.
+
+## 2024-11-28 - Actionable tooltips for toggle states
+
+**Learning:** Static tooltips on toggle buttons (e.g., "Toggle Feature") provide less clarity than dynamic, actionable tooltips. Updating the title attribute to reflect the action that will occur upon clicking (e.g., "Disable Feature" when currently ON) significantly improves user confidence and reduces cognitive load for sighted mouse users.
+**Action:** Always use actionable, dynamic tooltips for toggle states instead of generic "Toggle" text, ensuring the tooltip explicitly describes the result of the interaction based on the current state.
+
+## 2024-05-30 - Explicit loading states for Clipboard API
+
+**Learning:** The `navigator.clipboard.writeText()` API is asynchronous and can sometimes pause to prompt the user for clipboard permissions. Without an explicit loading state, the button appears frozen and unresponsive during this pause, leading to confusion.
+**Action:** Always implement an explicit loading state (e.g., updating button text to "⏳ Copying...") immediately before awaiting the Clipboard API.
+
+## 2024-11-29 - Use aria-disabled to prevent focus loss on async buttons
+
+**Learning:** When a button disables itself (`disabled=true`) upon clicking (e.g., during an async operation like copying to clipboard), it loses focus. This causes screen readers to unexpectedly drop focus to the `<body>`, disorienting keyboard and assistive technology users.
+**Action:** Instead of the native `disabled` attribute, use `aria-disabled="true"` to communicate the disabled state semantically without removing focusability. Ensure the click handler explicitly ignores clicks when `aria-disabled="true"` is set, and update the associated CSS pseudo-classes (`:disabled`, `:not(:disabled)`) to match the aria attribute.
+
+## 2024-11-29 - Dynamic Item Counts in Actions
+
+**Learning:** Adding dynamic item counts (e.g., "(5 episodes)") to action buttons like "Copy JSON" gives users immediate, helpful context about the scope of the action they are about to take, reducing cognitive load and preventing surprises.
+**Action:** When injecting buttons that perform actions on a collection of scraped or parsed data, dynamically update the button text to include the count of items being acted upon.
+
+## 2024-11-29 - Visual Status Icons on Toggle Buttons
+
+**Learning:** Text-heavy toggle buttons (e.g., "AdBlock: ON") require users to read and process the text to understand the current state, increasing cognitive load. Adding stateful status icons (e.g., "🛡️" for ON, "⚠️" for OFF) provides immediate visual recognition, allowing users to parse the state at a glance.
+**Action:** When creating text-based toggle buttons, incorporate distinct, semantically appropriate icons that change based on the active state to improve quick visual parsing and add a touch of delight.
+
+## 2026-07-18 - Dynamic Item Counts in ARIA Labels
+
+**Learning:** When a button's visual text is updated to include dynamic context (like an item count), using a static `aria-label` causes screen readers to completely miss this crucial context, as `aria-label` overrides the element's text content.
+**Action:** Always ensure that any dynamic, contextual data added to visual text is also reflected in the element's `aria-label` so that assistive technology users receive the same level of detail.
+
+## 2024-05-24 - Prevent text selection on custom UI buttons
+**Learning:** When injecting custom interactive elements (like buttons) into existing pages, rapid clicking or double-clicking can inadvertently select the button's text, which breaks the native UI feel and feels unpolished.
+**Action:** Always apply `user-select: none` (and `-webkit-user-select: none` for compatibility) to custom injected buttons to ensure they behave like native application controls.
+
+## 2024-05-24 - Prevent text selection on custom UI buttons
+**Learning:** When injecting custom interactive elements (like buttons) into existing pages, rapid clicking or double-clicking can inadvertently select the button's text, which breaks the native UI feel and feels unpolished.
+**Action:** Always apply `user-select: none` (and `-webkit-user-select: none` for compatibility) to custom injected buttons to ensure they behave like native application controls.
+## 2024-06-25 - Relying purely on color for status (WCAG 1.4.1)
+**Learning:** Indicating a correct or active status solely by changing text color (e.g., `color: green`) violates WCAG 1.4.1 (Use of Color), as colorblind users may not perceive the difference. Additionally, default color keywords like "green" often fail contrast requirements.
+**Action:** When updating styling for a state change, always introduce a non-color visual indicator. Examples include adding a shape/emoji (like a checkmark ✅ via `::before`), changing the font-weight, or adding an underline. Always use a specific hex/rgb value that meets AA contrast guidelines rather than raw color keywords.

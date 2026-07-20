@@ -12,13 +12,19 @@ interface CommentElement extends Element {
     style: CSSStyleDeclaration;
 }
 
+// Exporting for Jest testing, but in a way that Tampermonkey won't crash on
+// if `export` keyword is processed via bundlers/tsc. We assign to a global object
+// so we don't use raw `export` keywords that emit `exports.foo` which breaks the browser script
+// if executed standalone.
+const _global = typeof window !== 'undefined' ? (window as any) : (global as any);
+_global.__kslTestExports = _global.__kslTestExports || {};
+
 (function (): void {
     'use strict';
 
-    const container = document.querySelector<HTMLElement>('#commentsContainer');
-    if (!container) {
-        return;
-    }
+    // ⚡ Bolt: Replace querySelector('#id') with getElementById('id') (O(1) hash map lookup) to minimize overhead during initialization
+    const container =
+        typeof document !== 'undefined' ? document.getElementById('commentsContainer') : null;
 
     // ⚡ Bolt: Disable attributes to prevent unnecessary callbacks on every attribute change
     const config: MutationObserverInit = {
@@ -26,28 +32,30 @@ interface CommentElement extends Element {
         childList: true,
         subtree: true,
     };
+    _global.__kslTestExports.config = config;
 
     // ⚡ Bolt: Extract array allocations out of high-frequency observer loops
     // and convert to Set to improve lookup to O(1)
     // Add usernames to the array below to hide their comments
     const blockedUsers = new Set<string>([]);
+    _global.__kslTestExports.blockedUsers = blockedUsers;
 
     const processComment = (comment: HTMLElement): void => {
-        const usernameElement = comment.querySelector<HTMLElement>('.CommentsList__userName');
+        // ⚡ Bolt: Replace querySelector('.class') with getElementsByClassName('class')[0] for O(1) live collection lookup instead of O(N) tree traversal inside the MutationObserver
+        const usernameElement = comment.getElementsByClassName('CommentsList__userName')[0] as
+            HTMLElement | undefined;
         if (!usernameElement?.textContent) return;
 
         const username = usernameElement.textContent.trim();
 
         if (blockedUsers.has(username)) {
-            console.log(`Hiding comment from user: ${username}`);
+            // 🛡️ Sentinel: Removed console.log to prevent User Identifier Exposure
             (comment as CommentElement).style.display = 'none';
         }
     };
+    _global.__kslTestExports.processComment = processComment;
 
-    const handleMutations: MutationCallback = (
-        mutationsList: MutationRecord[],
-        observer: MutationObserver
-    ): void => {
+    const handleMutations: MutationCallback = (mutationsList: MutationRecord[]): void => {
         // ⚡ Bolt: Only process added nodes instead of re-querying the entire DOM list on every mutation
         // This avoids O(N²) scaling as more comments are loaded dynamically
         for (const mutation of mutationsList) {
@@ -67,6 +75,11 @@ interface CommentElement extends Element {
             });
         }
     };
+    _global.__kslTestExports.handleMutations = handleMutations;
+
+    if (!container) {
+        return;
+    }
 
     try {
         const observer = new MutationObserver(handleMutations);
@@ -79,6 +92,10 @@ interface CommentElement extends Element {
             allComments.forEach(processComment);
         }
     } catch (error) {
-        console.error('Error initializing comment observer:', error);
+        // 🛡️ Sentinel: Removed error object from console.error to prevent stack trace exposure
+        console.error(
+            'Error initializing comment observer:',
+            error instanceof Error ? error.message : String(error)
+        );
     }
 })();

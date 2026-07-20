@@ -9,26 +9,20 @@
 // @grant        none
 // ==/UserScript==
 
-(function() {
+(function () {
     'use strict';
 
     // Your code here...
-    const clickEvent = new CustomEvent('click');
-    const event = new MouseEvent("click", {
-        view: window,
-        bubbles: true,
-        cancelable: true,
-    });
 
     const gotThisRight = document.querySelectorAll('.wk_hideCompulsary');
     if (gotThisRight) {
         const gtrText = 'got this right';
-        gotThisRight.forEach(right => {
+        gotThisRight.forEach((right) => {
             const { innerText } = right;
             if (innerText.indexOf(gtrText)) {
                 right.style.visibility = 'visible';
                 if (right.parentElement.classList.contains('wk_choiceMaxWidth')) {
-                    right.parentElement.style.color = "green";
+                    right.parentElement.style.color = 'green';
                     right.parentElement.click();
                 }
             }
@@ -49,7 +43,7 @@
     }
 
     for (let i = 0; i < 10; i++) {
-        const nextQuestion = document.querySelector('#nextQuestionbtn'+i);
+        const nextQuestion = document.querySelector('#nextQuestionbtn' + i);
         if (nextQuestion) {
             console.log({ nextQuestion });
             nextQuestion.click();

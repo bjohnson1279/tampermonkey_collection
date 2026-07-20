@@ -17,7 +17,7 @@ class YouTubeAdRemover {
                 console.error(`Could not find the target node: ${this.TARGET_NODE_SELECTOR}`);
                 return;
             }
-            const callback = (mutationsList, observer) => {
+            const callback = (mutationsList) => {
                 for (const mutation of mutationsList) {
                     if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
                         this.removeAds(mutation.addedNodes);
@@ -34,32 +34,49 @@ class YouTubeAdRemover {
             this.removeAds();
         }, this.INITIAL_DELAY_MS);
     }
-    processVideoItem(videoItem) {
-        const contentDiv = videoItem.querySelector('#content, #dismissible');
-        if (!contentDiv)
-            return;
-        const adItem = contentDiv.querySelector(this.AD_SELECTOR);
-        if (adItem) {
-            adItem.remove();
-            contentDiv.remove();
-            videoItem.remove();
-        }
-    }
     removeAds(addedNodes) {
+        const combinedSelector = 'ytd-rich-item-renderer .ytd-ad-slot-renderer, ytd-video-renderer .ytd-ad-slot-renderer';
         if (!addedNodes) {
-            const videoItems = document.querySelectorAll('ytd-rich-item-renderer, ytd-video-renderer');
-            videoItems.forEach((videoItem) => this.processVideoItem(videoItem));
+            const adItems = document.querySelectorAll(combinedSelector);
+            adItems.forEach((adItem) => {
+                const videoItem = adItem.closest('ytd-rich-item-renderer, ytd-video-renderer');
+                if (videoItem) {
+                    const contentDiv = videoItem.querySelector('#content, #dismissible');
+                    adItem.remove();
+                    if (contentDiv && contentDiv.contains(adItem)) {
+                        contentDiv.remove();
+                    }
+                    videoItem.remove();
+                }
+            });
         }
         else {
             addedNodes.forEach((node) => {
                 if (node.nodeType === Node.ELEMENT_NODE) {
                     const element = node;
                     if (element.matches('ytd-rich-item-renderer, ytd-video-renderer')) {
-                        this.processVideoItem(element);
+                        const adItem = element.querySelector(this.AD_SELECTOR);
+                        if (adItem) {
+                            const contentDiv = element.querySelector('#content, #dismissible');
+                            adItem.remove();
+                            if (contentDiv && contentDiv.contains(adItem))
+                                contentDiv.remove();
+                            element.remove();
+                        }
                     }
                     else if (element.firstElementChild) {
-                        const videoItems = element.querySelectorAll('ytd-rich-item-renderer, ytd-video-renderer');
-                        videoItems.forEach((videoItem) => this.processVideoItem(videoItem));
+                        const adItems = element.querySelectorAll(combinedSelector);
+                        adItems.forEach((adItem) => {
+                            const videoItem = adItem.closest('ytd-rich-item-renderer, ytd-video-renderer');
+                            if (videoItem) {
+                                const contentDiv = videoItem.querySelector('#content, #dismissible');
+                                adItem.remove();
+                                if (contentDiv && contentDiv.contains(adItem)) {
+                                    contentDiv.remove();
+                                }
+                                videoItem.remove();
+                            }
+                        });
                     }
                 }
             });
@@ -72,16 +89,21 @@ class YouTubeAdRemover {
         }
     }
 }
-let adRemover = null;
 function initAdRemover() {
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
-            adRemover = new YouTubeAdRemover();
+            new YouTubeAdRemover();
         });
     }
     else {
-        adRemover = new YouTubeAdRemover();
+        new YouTubeAdRemover();
     }
 }
-initAdRemover();
+if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+    initAdRemover();
+}
+if (typeof exports !== 'undefined') {
+    exports.YouTubeAdRemover = YouTubeAdRemover;
+    exports.initAdRemover = initAdRemover;
+}
 //# sourceMappingURL=youtubeAdRemover.js.map

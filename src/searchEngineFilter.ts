@@ -18,7 +18,17 @@ interface SearchEngines {
     'use strict';
 
     const blacklist: string[] = ['asdf']; // Add terms to blacklist here
-    const lowercaseBlacklist: string[] = blacklist.map((phrase: string) => phrase.toLowerCase());
+    // ⚡ Bolt: Replace O(N) Array.some() and redundant string allocations with a single
+    // pre-compiled Regex for significantly faster URL query checks.
+    const blacklistRegex =
+        blacklist.length > 0
+            ? new RegExp(
+                  blacklist
+                      .map((phrase) => phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+                      .join('|'),
+                  'i'
+              )
+            : null;
 
     const searchEngines: SearchEngines = {
         'bing.com': { queryParam: 'q', url: 'https://www.bing.com' },
@@ -33,33 +43,35 @@ interface SearchEngines {
             const hostname: string = window.location.hostname;
             const params: URLSearchParams = new URLSearchParams(window.location.search);
 
-            // Find the matching search engine configuration
-            const engineEntry = Object.entries(searchEngines).find(([domain]) =>
-                hostname.includes(domain)
-            );
-
-            if (!engineEntry) {
-                return;
+            // ⚡ Bolt: Replace Object.entries().find() with a for...in loop to avoid
+            // O(N) array allocation and callback overhead on every search query.
+            let engine: SearchEngineConfig | undefined;
+            for (const domain in searchEngines) {
+                if (hostname === domain || hostname.endsWith('.' + domain)) {
+                    engine = searchEngines[domain];
+                    break;
+                }
             }
 
-            const [, engine] = engineEntry;
+            if (!engine) {
+                return;
+            }
 
             const query: string | null = params.get(engine.queryParam);
 
             if (query) {
                 const searchQuery: string = query.replace(/\+/g, ' ');
 
-                const searchQueryLower = searchQuery.toLowerCase();
-                const isBlacklisted: boolean = lowercaseBlacklist.some((phrase: string): boolean =>
-                    searchQueryLower.includes(phrase)
-                );
-
-                if (isBlacklisted) {
+                if (blacklistRegex && blacklistRegex.test(searchQuery)) {
                     window.location.href = engine.url;
                 }
             }
         } catch (error) {
-            console.error('Error processing search:', error);
+            // 🛡️ Sentinel: Removed error object from console.error to prevent stack trace exposure
+            console.error(
+                'Error processing search:',
+                error instanceof Error ? error.message : String(error)
+            );
         }
     };
 
