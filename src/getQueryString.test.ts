@@ -67,7 +67,7 @@ describe('getQueryParams', () => {
         const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
         const url = 'invalid-url';
         expect(getQueryParams(url)).toEqual({});
-        expect(consoleSpy).toHaveBeenCalledWith('Error parsing URL:', expect.anything());
+        expect(consoleSpy).toHaveBeenCalledWith('Error parsing URL:', expect.any(String));
         consoleSpy.mockRestore();
     });
 
@@ -75,7 +75,7 @@ describe('getQueryParams', () => {
         const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
         const url = 'plain text';
         expect(getQueryParams(url)).toEqual({});
-        expect(consoleSpy).toHaveBeenCalledWith('Error parsing URL:', expect.anything());
+        expect(consoleSpy).toHaveBeenCalledWith('Error parsing URL:', expect.any(String));
         consoleSpy.mockRestore();
     });
 
@@ -83,7 +83,7 @@ describe('getQueryParams', () => {
         const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
         const url = 'example.com/page?foo=bar';
         expect(getQueryParams(url)).toEqual({});
-        expect(consoleSpy).toHaveBeenCalledWith('Error parsing URL:', expect.anything());
+        expect(consoleSpy).toHaveBeenCalledWith('Error parsing URL:', expect.any(String));
         consoleSpy.mockRestore();
     });
     it('should handle invalid URLs by catching the error and returning an empty object', () => {
@@ -97,7 +97,7 @@ describe('getQueryParams', () => {
         expect(params).toEqual({});
         expect(consoleSpy).toHaveBeenCalled();
         expect(consoleSpy.mock.calls[0][0]).toBe('Error parsing URL:');
-        expect(consoleSpy.mock.calls[0][1].message).toBe('Invalid URL');
+        expect(consoleSpy.mock.calls[0][1]).toBe('TypeError: Invalid URL');
 
         consoleSpy.mockRestore();
     });
