@@ -15,7 +15,7 @@ interface QuizElements {
 }
 
 class BingQuizClicker {
-    private readonly NEXT_BUTTON_CLASS = 'wk_button';
+    private readonly NEXT_BUTTON_SELECTOR = '.wk_button';
     private readonly CHECK_INTERVAL_MS = 1000;
     private intervalId: number | null = null;
 
