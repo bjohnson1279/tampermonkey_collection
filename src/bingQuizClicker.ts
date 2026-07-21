@@ -50,8 +50,8 @@ class BingQuizClicker {
                 document.getElementsByClassName('wk_hideCompulsary')
             ) as HTMLElement[],
             nextButton:
-                (document.getElementsByClassName(this.NEXT_BUTTON_CLASS)[0] as
-                    HTMLElement | undefined) || null,
+                (document.querySelector(this.NEXT_BUTTON_SELECTOR) as HTMLElement | undefined) ||
+                null,
         };
     }
 

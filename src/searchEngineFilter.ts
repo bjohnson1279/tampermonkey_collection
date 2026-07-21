@@ -46,18 +46,18 @@ interface SearchEngines {
             // ⚡ Bolt: Replace Object.entries().find() with a for...in loop to avoid
             // O(N) array allocation and callback overhead on every search query.
             let engine: SearchEngineConfig | undefined;
+            let matchedDomain: string | undefined;
             for (const domain in searchEngines) {
                 if (hostname === domain || hostname.endsWith('.' + domain)) {
                     engine = searchEngines[domain];
+                    matchedDomain = domain;
                     break;
                 }
             }
 
-            if (!engine) {
+            if (!engine || !matchedDomain) {
                 return;
             }
-
-            const [domain, engine] = engineEntry;
 
             const query: string | null = params.get(engine.queryParam);
 
@@ -68,7 +68,8 @@ interface SearchEngines {
                     const parsedUrl = new URL(engine.url, window.location.href);
                     if (
                         parsedUrl.protocol === 'https:' &&
-                        (parsedUrl.hostname === domain || parsedUrl.hostname.endsWith('.' + domain))
+                        (parsedUrl.hostname === matchedDomain ||
+                            parsedUrl.hostname.endsWith('.' + matchedDomain))
                     ) {
                         window.location.href = parsedUrl.href;
                     }

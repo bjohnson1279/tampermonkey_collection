@@ -113,3 +113,7 @@
 ## 2024-06-25 - Relying purely on color for status (WCAG 1.4.1)
 **Learning:** Indicating a correct or active status solely by changing text color (e.g., `color: green`) violates WCAG 1.4.1 (Use of Color), as colorblind users may not perceive the difference. Additionally, default color keywords like "green" often fail contrast requirements.
 **Action:** When updating styling for a state change, always introduce a non-color visual indicator. Examples include adding a shape/emoji (like a checkmark ✅ via `::before`), changing the font-weight, or adding an underline. Always use a specific hex/rgb value that meets AA contrast guidelines rather than raw color keywords.
+
+## 2025-02-18 - Restore Dynamic Context in UI Feedback Resets
+**Learning:** When temporarily updating a button's visual text and `aria-label` to provide feedback (e.g., "Copied!"), reverting back to a static string ("Copy data") rather than the originally computed dynamic string ("Copy 12 items data") causes screen readers to lose crucial contextual data about the underlying page state on subsequent interactions.
+**Action:** When updating a UI component's text that includes dynamic data, always ensure that any reset/restoration logic (such as `setTimeout` feedback resets) and corresponding unit tests are also updated to expect the newly formatted dynamic string rather than a static default.
