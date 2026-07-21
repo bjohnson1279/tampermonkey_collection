@@ -146,7 +146,7 @@ export function scrapeTVDBData(): Episode[] {
                 btn.textContent = `📋 Copy JSON (${countText})`;
                 btn.style.backgroundColor = '#0056b3';
                 btn.setAttribute('title', 'Copy JSON to clipboard (Shift+C)');
-                btn.setAttribute('aria-label', 'Copy episodes data to clipboard');
+                btn.setAttribute('aria-label', `Copy ${countText} data to clipboard`);
                 btn.removeAttribute('data-feedback');
                 announcer.textContent = '';
                 btn.removeAttribute('aria-disabled');
