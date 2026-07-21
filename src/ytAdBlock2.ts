@@ -1,4 +1,3 @@
-// filepath: yt-adblock-ts/yt-adblock-ts/src/ytAdBlock2.ts
 // ==UserScript==
 // @name         YouTube Total Ad Cleaner + Persistent Toggle + Hotkey
 // @namespace    https://yourdomain.example
@@ -181,6 +180,30 @@
             // 🛡️ Sentinel: Pass the evaluated URL string to prevent TOCTOU evasion
             return origSendBeacon.apply(this, [urlStr, data]);
         };
+    }
+
+    // Patch WebSocket
+    const OrigWebSocket = window.WebSocket;
+    if (OrigWebSocket) {
+        window.WebSocket = new Proxy(OrigWebSocket, {
+            construct(target, args) {
+                let url = args[0];
+                let urlStr: string = '';
+
+                urlStr = url?.toString() || '';
+                // 🛡️ Sentinel: Overwrite URL parameter with evaluated string to prevent TOCTOU evasion.
+                // We coerce all inputs (even native URLs) because the underlying WebSocket constructor
+                // uses .toString() implicitly, bypassing our WebIDL brand checks if it were spoofed.
+                args[0] = urlStr;
+
+                if (urlStr && shouldBlock(urlStr)) {
+                    // Blocked connections should fail securely.
+                    throw new Error('WebSocket connection blocked by AdBlocker.');
+                }
+
+                return new target(...(args as [string | URL, (string | string[])?]));
+            },
+        });
     }
 
     //----------------------------------------
