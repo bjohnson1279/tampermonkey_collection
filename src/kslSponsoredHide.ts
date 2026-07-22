@@ -18,9 +18,9 @@ interface SponsoredElement extends HTMLElement {
 
     // Function to remove sponsored content globally
     const removeSponsoredContent = (): void => {
-        const sponsoredElements = document.querySelectorAll<SponsoredElement>('.sponsored');
+        const sponsoredElements = document.getElementsByClassName('sponsored');
 
-        sponsoredElements.forEach((sponsored: SponsoredElement): void => {
+        Array.from(sponsoredElements).forEach((sponsored: Element): void => {
             // Try to find the closest parent container to remove
             const sponsoredContainer = sponsored.closest('.queue, .queue_story');
             if (sponsoredContainer) {
@@ -52,8 +52,8 @@ interface SponsoredElement extends HTMLElement {
             }
         } else if (el.firstElementChild) {
             // ⚡ Bolt: Fast path for leaf nodes - avoid querySelectorAll parsing overhead if no children exist
-            const sponsoredElements = el.querySelectorAll<SponsoredElement>('.sponsored');
-            sponsoredElements.forEach((sponsored: SponsoredElement): void => {
+            const sponsoredElements = el.getElementsByClassName('sponsored');
+            Array.from(sponsoredElements).forEach((sponsored: Element): void => {
                 const sponsoredContainer = sponsored.closest('.queue, .queue_story');
                 if (sponsoredContainer) {
                     sponsoredContainer.remove();
