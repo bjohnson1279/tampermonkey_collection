@@ -162,6 +162,7 @@ describe('scrapeTVDBData', () => {
         expect(btns.length).toBe(1);
     });
 
+    it('should handle clipboard write failure gracefully', async () => {
     it('should restore dynamic aria-label after copy timeout', async () => {
         jest.useFakeTimers();
 
@@ -185,14 +186,30 @@ describe('scrapeTVDBData', () => {
             </div>
         `;
 
+        Object.assign(navigator, {
+            clipboard: {
+                writeText: jest.fn().mockRejectedValue(new Error('Clipboard error')),
+            },
+        });
+
         scrapeTVDBData();
 
         const btn = document.getElementById('tvdb-copy-json-btn') as HTMLButtonElement;
+        const announcer = document.querySelector('[aria-live="polite"]') as HTMLDivElement;
+
+        btn.click();
+        await new Promise(process.nextTick);
+
+        expect(navigator.clipboard.writeText).toHaveBeenCalledTimes(1);
+        expect(btn.textContent).toBe('❌ Error');
+        expect(btn.style.backgroundColor).toBe('rgb(176, 42, 55)'); // #b02a37
+        expect(btn.getAttribute('title')).toBe('Failed to copy');
+        expect(announcer.textContent).toBe('Failed to copy');
+
 
         // Assert initial dynamic label
         expect(btn?.getAttribute('aria-label')).toBe('Copy 1 episode data to clipboard');
 
-        btn.click();
 
         // We have async logic in our component: `await navigator.clipboard.writeText(...)`
         // We need to wait for microtasks so the `await` resumes, THEN run the timers.
@@ -202,12 +219,10 @@ describe('scrapeTVDBData', () => {
         jest.runAllTimers();
 
         // Assert label was restored correctly to the dynamic count instead of a static default
-        expect(btn?.getAttribute('aria-label')).toBe('Copy 1 episode data to clipboard');
 
         jest.useRealTimers();
         Object.defineProperty(navigator, 'clipboard', {
             value: originalClipboard,
             configurable: true,
-        });
     });
 });
