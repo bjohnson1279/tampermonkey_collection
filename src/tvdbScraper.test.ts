@@ -159,4 +159,37 @@ describe('scrapeTVDBData', () => {
         const btns = document.querySelectorAll('#tvdb-copy-json-btn');
         expect(btns.length).toBe(1);
     });
+
+    it('should handle clipboard write failure gracefully', async () => {
+        document.body.innerHTML = `
+            <div class="list-group">
+                <div class="list-group-item">
+                    <div class="list-group-item-heading">
+                        <span class="episode-label">S01E01</span>
+                        <a href="/some/link">Pilot</a>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        Object.assign(navigator, {
+            clipboard: {
+                writeText: jest.fn().mockRejectedValue(new Error('Clipboard error')),
+            },
+        });
+
+        scrapeTVDBData();
+
+        const btn = document.getElementById('tvdb-copy-json-btn') as HTMLButtonElement;
+        const announcer = document.querySelector('[aria-live="polite"]') as HTMLDivElement;
+
+        btn.click();
+        await new Promise(process.nextTick);
+
+        expect(navigator.clipboard.writeText).toHaveBeenCalledTimes(1);
+        expect(btn.textContent).toBe('❌ Error');
+        expect(btn.style.backgroundColor).toBe('rgb(176, 42, 55)'); // #b02a37
+        expect(btn.getAttribute('title')).toBe('Failed to copy');
+        expect(announcer.textContent).toBe('Failed to copy');
+    });
 });
