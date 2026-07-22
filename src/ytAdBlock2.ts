@@ -1,4 +1,3 @@
-// filepath: yt-adblock-ts/yt-adblock-ts/src/ytAdBlock2.ts
 // ==UserScript==
 // @name         YouTube Total Ad Cleaner + Persistent Toggle + Hotkey
 // @namespace    https://yourdomain.example
@@ -22,7 +21,11 @@
             enabled = JSON.parse(stored) ?? true;
         }
     } catch (e) {
-        console.warn('Failed to parse ytAdblockEnabled from localStorage', e);
+        // 🛡️ Sentinel: Removed error object from console.warn to prevent stack trace exposure
+        console.warn(
+            'Failed to parse ytAdblockEnabled from localStorage',
+            e instanceof Error ? e.message : String(e)
+        );
         enabled = true;
     }
 
@@ -55,40 +58,64 @@
 
     window.fetch = (async (...args: Parameters<typeof window.fetch>): Promise<Response> => {
         const req = args[0];
-        // 🛡️ Sentinel: Use duck typing for Request/URL objects to prevent cross-realm (iframe) adblock evasion
-        // where `instanceof` fails and `.toString()` returns "[object Request]"
+        // 🛡️ Sentinel: Use WebIDL brand checking for Request/URL objects to prevent cross-realm (iframe) adblock evasion
+        // and avoid TOCTOU vulnerabilities from malicious POJOs exploiting duck-typing getters.
         let url: string = '';
-        let isNativeRequest = false;
+        let isNative = false;
 
-        if (req && typeof req === 'object') {
-            if (nativeReqUrlGetter) {
-                try {
-                    // WebIDL brand check safely extracts the URL even across realms
-                    url = nativeReqUrlGetter.call(req) as string;
-                    isNativeRequest = true;
-                } catch {
-                    // Throws if not a true native Request object (fails brand check)
-                }
+        try {
+            url = Object.getOwnPropertyDescriptor(Request.prototype, 'url')?.get?.call(req);
+            if (url !== undefined) isNative = true;
+        } catch {
+            /* Not a Request */
+        }
+
+        if (!isNative) {
+            try {
+                url = Object.getOwnPropertyDescriptor(URL.prototype, 'href')?.get?.call(req);
+                if (url !== undefined) isNative = true;
+            } catch {
+                /* Not a URL */
             }
         }
 
-        if (!isNativeRequest) {
-            if (
-                req &&
-                typeof req === 'object' &&
-                'href' in req &&
-                typeof (req as any).href === 'string'
-            ) {
-                url = (req as any).href;
-            } else {
-                url = req?.toString() || '';
+        if (!isNative) {
+            url = req?.toString() || '';
+        }
+
+        // 🛡️ Sentinel: Overwrite args[0] with the evaluated URL string only if it's a POJO.
+        // Native Request objects are immune to TOCTOU as their internal URL slot is immutable.
+        // We use brand-checking via the internal [[Request]] slot to reliably distinguish between
+        // Native Requests (even from cross-realms) and malicious POJOs spoofing as Requests.
+        if (req && typeof req === 'object') {
+            let isNativeRequest = false;
+            try {
+                if (typeof Request !== 'undefined') {
+                    Object.getOwnPropertyDescriptor(Request.prototype, 'url')?.get?.call(req);
+                    isNativeRequest = true;
+                }
+            } catch (e) {
+                isNativeRequest = false;
             }
-            // 🛡️ Sentinel: Overwrite args[0] with evaluated string if relying on toString()
-            // or POJO properties to prevent TOCTOU evasion from dynamic returns.
+            if (!isNativeRequest) {
+                try {
+                    args[0] = new Request(url, { duplex: 'half', ...(req as RequestInit) } as any);
+                } catch (e) {
+                    try {
+                        Object.defineProperty(req, 'url', {
+                            value: url,
+                            configurable: true,
+                            enumerable: true,
+                            writable: true,
+                        });
+                    } catch (e2) {}
+                }
+            }
+        } else {
             args[0] = url;
         }
 
-        if (shouldBlock(url)) {
+        if (url !== undefined && shouldBlock(url)) {
             return new Response('', { status: 204 });
         }
         return origFetch(...args);
@@ -104,17 +131,31 @@
         username?: string | null,
         password?: string | null
     ): void {
-        // 🛡️ Sentinel: Use duck typing for URL objects to prevent cross-realm adblock evasion
-        const urlStr =
-            url && typeof url === 'object' && 'href' in url && typeof (url as any).href === 'string'
-                ? (url as any).href
-                : url?.toString() || '';
-        if (shouldBlock(urlStr)) {
+        // 🛡️ Sentinel: Use WebIDL brand checking for URL objects to prevent cross-realm adblock evasion
+        // and avoid TOCTOU vulnerabilities from malicious POJOs exploiting duck-typing getters.
+        let urlStr: string = '';
+        let isNative = false;
+
+        try {
+            urlStr = Object.getOwnPropertyDescriptor(URL.prototype, 'href')?.get?.call(url);
+            if (urlStr !== undefined) isNative = true;
+        } catch {
+            /* Not a URL */
+        }
+
+        if (!isNative) {
+            urlStr = url?.toString() || '';
+            // 🛡️ Sentinel: Overwrite URL parameter with evaluated string for POJOs/strings
+            // to prevent TOCTOU evasion.
+            url = urlStr;
+        }
+
+        if (urlStr && shouldBlock(urlStr)) {
             this.abort();
             return;
         }
-        // 🛡️ Sentinel: Pass the evaluated URL string to prevent TOCTOU evasion via dynamic toString() or getters
-        return origOpen.apply(this, [method, urlStr, async ?? true, username, password]);
+
+        return origOpen.apply(this, [method, url as any, async ?? true, username, password]);
     };
 
     // Patch navigator.sendBeacon
@@ -139,6 +180,30 @@
             // 🛡️ Sentinel: Pass the evaluated URL string to prevent TOCTOU evasion
             return origSendBeacon.apply(this, [urlStr, data]);
         };
+    }
+
+    // Patch WebSocket
+    const OrigWebSocket = window.WebSocket;
+    if (OrigWebSocket) {
+        window.WebSocket = new Proxy(OrigWebSocket, {
+            construct(target, args) {
+                let url = args[0];
+                let urlStr: string = '';
+
+                urlStr = url?.toString() || '';
+                // 🛡️ Sentinel: Overwrite URL parameter with evaluated string to prevent TOCTOU evasion.
+                // We coerce all inputs (even native URLs) because the underlying WebSocket constructor
+                // uses .toString() implicitly, bypassing our WebIDL brand checks if it were spoofed.
+                args[0] = urlStr;
+
+                if (urlStr && shouldBlock(urlStr)) {
+                    // Blocked connections should fail securely.
+                    throw new Error('WebSocket connection blocked by AdBlocker.');
+                }
+
+                return new target(...(args as [string | URL, (string | string[])?]));
+            },
+        });
     }
 
     //----------------------------------------
@@ -312,6 +377,8 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
             transition: opacity 0.2s, outline 0.2s, background-color 0.2s, transform 0.1s;
             transform-origin: center;
         `;

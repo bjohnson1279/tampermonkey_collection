@@ -22,7 +22,7 @@
     const params = new URLSearchParams(window.location.search);
 
     for (const domain in searchEngines) {
-        if (hostname.includes(domain)) {
+        if (hostname === domain || hostname.endsWith('.' + domain)) {
             const engine = searchEngines[domain];
             const query = params.get(engine.queryParam);
 
@@ -32,7 +32,13 @@
                 const isBlacklisted = blacklist.some((phrase) => searchQuery.includes(phrase));
 
                 if (isBlacklisted) {
-                    window.location.href = engine.url;
+                    const parsedUrl = new URL(engine.url, window.location.href);
+                    if (
+                        parsedUrl.protocol === 'https:' &&
+                        (parsedUrl.hostname === domain || parsedUrl.hostname.endsWith('.' + domain))
+                    ) {
+                        window.location.href = parsedUrl.href;
+                    }
                 }
             }
             break; // Found the matching search engine, no need to check others

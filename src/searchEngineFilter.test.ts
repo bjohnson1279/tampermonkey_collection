@@ -34,8 +34,11 @@ describe('searchEngineFilter', () => {
         // Require the file so the IIFE executes
         require('./searchEngineFilter');
 
-        expect(consoleErrorSpy).toHaveBeenCalledWith('Error processing search:', expect.any(Error));
-        expect(consoleErrorSpy.mock.calls[0][1].message).toBe('Simulated URLSearchParams error');
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+            'Error processing search:',
+            expect.any(String)
+        );
+        expect(consoleErrorSpy.mock.calls[0][1]).toBe('Simulated URLSearchParams error');
 
         // Restore URLSearchParams
         global.URLSearchParams = OriginalURLSearchParams;
@@ -86,6 +89,6 @@ describe('searchEngineFilter', () => {
         window.location.search = '?q=hello+asdf+world';
         window.location.href = 'https://www.google.com/?q=hello+asdf+world';
         require('./searchEngineFilter');
-        expect(window.location.href).toBe('https://www.google.com'); // This URL matches the searchEngines config
+        expect(window.location.href).toBe('https://www.google.com/'); // This URL matches the searchEngines config with a trailing slash from new URL().href
     });
 });

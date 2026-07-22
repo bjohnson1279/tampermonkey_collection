@@ -43,16 +43,21 @@ interface SearchEngines {
             const hostname: string = window.location.hostname;
             const params: URLSearchParams = new URLSearchParams(window.location.search);
 
-            // Find the matching search engine configuration
-            const engineEntry = Object.entries(searchEngines).find(
-                ([domain]) => hostname === domain || hostname.endsWith('.' + domain)
-            );
-
-            if (!engineEntry) {
-                return;
+            // ⚡ Bolt: Replace Object.entries().find() with a for...in loop to avoid
+            // O(N) array allocation and callback overhead on every search query.
+            let engine: SearchEngineConfig | undefined;
+            let matchedDomain: string | undefined;
+            for (const domain in searchEngines) {
+                if (hostname === domain || hostname.endsWith('.' + domain)) {
+                    engine = searchEngines[domain];
+                    matchedDomain = domain;
+                    break;
+                }
             }
 
-            const [, engine] = engineEntry;
+            if (!engine || !matchedDomain) {
+                return;
+            }
 
             const query: string | null = params.get(engine.queryParam);
 
@@ -60,11 +65,22 @@ interface SearchEngines {
                 const searchQuery: string = query.replace(/\+/g, ' ');
 
                 if (blacklistRegex && blacklistRegex.test(searchQuery)) {
-                    window.location.href = engine.url;
+                    const parsedUrl = new URL(engine.url, window.location.href);
+                    if (
+                        parsedUrl.protocol === 'https:' &&
+                        (parsedUrl.hostname === matchedDomain ||
+                            parsedUrl.hostname.endsWith('.' + matchedDomain))
+                    ) {
+                        window.location.href = parsedUrl.href;
+                    }
                 }
             }
         } catch (error) {
-            console.error('Error processing search:', error);
+            // 🛡️ Sentinel: Removed error object from console.error to prevent stack trace exposure
+            console.error(
+                'Error processing search:',
+                error instanceof Error ? error.message : String(error)
+            );
         }
     };
 

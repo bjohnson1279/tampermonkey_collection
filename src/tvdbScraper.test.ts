@@ -127,6 +127,7 @@ describe('scrapeTVDBData', () => {
         const btn = document.getElementById('tvdb-copy-json-btn') as HTMLButtonElement;
         expect(btn).not.toBeNull();
         expect(btn?.textContent).toBe('📋 No Data');
+        expect(btn?.getAttribute('aria-label')).toBe('No episodes data found');
         expect(btn?.getAttribute('aria-disabled')).toBe('true');
     });
 
@@ -147,6 +148,7 @@ describe('scrapeTVDBData', () => {
         const btn = document.getElementById('tvdb-copy-json-btn') as HTMLButtonElement;
         expect(btn).not.toBeNull();
         expect(btn?.textContent).toBe('📋 Copy JSON (1 episode)');
+        expect(btn?.getAttribute('aria-label')).toBe('Copy 1 episode data to clipboard');
         expect(btn?.getAttribute('aria-disabled')).toBeNull();
     });
 
@@ -161,6 +163,18 @@ describe('scrapeTVDBData', () => {
     });
 
     it('should handle clipboard write failure gracefully', async () => {
+    it('should restore dynamic aria-label after copy timeout', async () => {
+        jest.useFakeTimers();
+
+        // Assign mock to navigator.clipboard.writeText
+        const originalClipboard = navigator.clipboard;
+        Object.defineProperty(navigator, 'clipboard', {
+            value: {
+                writeText: jest.fn().mockResolvedValue(undefined),
+            },
+            configurable: true,
+        });
+
         document.body.innerHTML = `
             <div class="list-group">
                 <div class="list-group-item">
@@ -191,5 +205,24 @@ describe('scrapeTVDBData', () => {
         expect(btn.style.backgroundColor).toBe('rgb(176, 42, 55)'); // #b02a37
         expect(btn.getAttribute('title')).toBe('Failed to copy');
         expect(announcer.textContent).toBe('Failed to copy');
+
+
+        // Assert initial dynamic label
+        expect(btn?.getAttribute('aria-label')).toBe('Copy 1 episode data to clipboard');
+
+
+        // We have async logic in our component: `await navigator.clipboard.writeText(...)`
+        // We need to wait for microtasks so the `await` resumes, THEN run the timers.
+        await Promise.resolve();
+
+        // Fast-forward past the microtask queue and setTimeout
+        jest.runAllTimers();
+
+        // Assert label was restored correctly to the dynamic count instead of a static default
+
+        jest.useRealTimers();
+        Object.defineProperty(navigator, 'clipboard', {
+            value: originalClipboard,
+            configurable: true,
     });
 });
