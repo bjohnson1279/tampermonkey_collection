@@ -163,18 +163,6 @@ describe('scrapeTVDBData', () => {
     });
 
     it('should handle clipboard write failure gracefully', async () => {
-    it('should restore dynamic aria-label after copy timeout', async () => {
-        jest.useFakeTimers();
-
-        // Assign mock to navigator.clipboard.writeText
-        const originalClipboard = navigator.clipboard;
-        Object.defineProperty(navigator, 'clipboard', {
-            value: {
-                writeText: jest.fn().mockResolvedValue(undefined),
-            },
-            configurable: true,
-        });
-
         document.body.innerHTML = `
             <div class="list-group">
                 <div class="list-group-item">
@@ -205,24 +193,43 @@ describe('scrapeTVDBData', () => {
         expect(btn.style.backgroundColor).toBe('rgb(176, 42, 55)'); // #b02a37
         expect(btn.getAttribute('title')).toBe('Failed to copy');
         expect(announcer.textContent).toBe('Failed to copy');
+    });
 
+    it('should restore dynamic aria-label after copy timeout', async () => {
+        jest.useFakeTimers();
 
-        // Assert initial dynamic label
+        const originalClipboard = navigator.clipboard;
+        Object.defineProperty(navigator, 'clipboard', {
+            value: {
+                writeText: jest.fn().mockResolvedValue(undefined),
+            },
+            configurable: true,
+        });
+
+        document.body.innerHTML = `
+            <div class="list-group">
+                <div class="list-group-item">
+                    <div class="list-group-item-heading">
+                        <span class="episode-label">S01E01</span>
+                        <a href="/some/link">Pilot</a>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        scrapeTVDBData();
+        const btn = document.getElementById('tvdb-copy-json-btn') as HTMLButtonElement;
         expect(btn?.getAttribute('aria-label')).toBe('Copy 1 episode data to clipboard');
 
-
-        // We have async logic in our component: `await navigator.clipboard.writeText(...)`
-        // We need to wait for microtasks so the `await` resumes, THEN run the timers.
+        btn.click();
         await Promise.resolve();
-
-        // Fast-forward past the microtask queue and setTimeout
         jest.runAllTimers();
-
-        // Assert label was restored correctly to the dynamic count instead of a static default
+        expect(btn?.getAttribute('aria-label')).toBe('Copy 1 episode data to clipboard');
 
         jest.useRealTimers();
         Object.defineProperty(navigator, 'clipboard', {
             value: originalClipboard,
             configurable: true,
+        });
     });
 });
