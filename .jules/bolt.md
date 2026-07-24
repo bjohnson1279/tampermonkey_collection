@@ -108,3 +108,7 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2024-05-24 - [Optimize DOM Queries]
 **Learning:** querySelectorAll can cause significant performance penalties when used within high-frequency operations like MutationObserver.
 **Action:** Replaced querySelectorAll with getElementsByClassName to leverage optimized native lookups for DOM elements.
+
+## 2024-07-29 - Replace querySelector with getElementsByClassName/TagName in polling intervals
+**Learning:** Calling `document.querySelector` inside a high-frequency polling interval (like `setInterval`) to find elements by a single class name forces the browser to re-parse the CSS selector string and traverse the DOM tree O(N) times. This is significantly slower than using dedicated methods like `getElementsByClassName`, which perform O(1) live collection lookups.
+**Action:** When searching for an element by class name in a polling interval, replace `document.querySelector('.class')` with `document.getElementsByClassName('class')[0]` to reduce main thread CPU overhead.
