@@ -117,3 +117,7 @@
 ## 2025-02-18 - Restore Dynamic Context in UI Feedback Resets
 **Learning:** When temporarily updating a button's visual text and `aria-label` to provide feedback (e.g., "Copied!"), reverting back to a static string ("Copy data") rather than the originally computed dynamic string ("Copy 12 items data") causes screen readers to lose crucial contextual data about the underlying page state on subsequent interactions.
 **Action:** When updating a UI component's text that includes dynamic data, always ensure that any reset/restoration logic (such as `setTimeout` feedback resets) and corresponding unit tests are also updated to expect the newly formatted dynamic string rather than a static default.
+
+## 2024-12-05 - Predictable hover contrast with filter
+**Learning:** Using `opacity: 0.8` for hover states on solid buttons is an accessibility anti-pattern. Lowering opacity allows the background color to bleed through, which creates unpredictable color blending and frequently leads to WCAG contrast failures depending on the container's background.
+**Action:** Always use `filter: brightness(0.85)` (or similar values) for hover states on solid buttons to predictably darken or lighten the button uniformly without making it transparent, ensuring the text-to-button contrast ratio is preserved.
