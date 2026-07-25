@@ -11,7 +11,7 @@
 
 class YouTubeAdRemover {
     private readonly TARGET_NODE_SELECTOR = '#contents';
-    private readonly AD_SELECTOR = '.ytd-ad-slot-renderer';
+    private readonly AD_CLASS = 'ytd-ad-slot-renderer';
     private readonly INITIAL_DELAY_MS = 2000;
     private observer: MutationObserver | null = null;
 
@@ -87,7 +87,8 @@ class YouTubeAdRemover {
                     const element = node as Element;
 
                     if (element.matches('ytd-rich-item-renderer, ytd-video-renderer')) {
-                        const adItem = element.querySelector(this.AD_SELECTOR);
+                        // ⚡ Bolt: Replace querySelector('.class') with getElementsByClassName('class')[0] for O(1) live collection lookup instead of O(N) tree traversal inside the MutationObserver
+                        const adItem = element.getElementsByClassName(this.AD_CLASS)[0];
                         if (adItem) {
                             const contentDiv = element.querySelector('#content, #dismissible');
 
