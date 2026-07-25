@@ -340,7 +340,7 @@
             style.id = 'adblock-styles';
             style.textContent = `
                 #adblock-toggle { outline: none; }
-                #adblock-toggle:hover { opacity: 0.8; }
+                #adblock-toggle:hover { filter: brightness(0.85); }
                 #adblock-toggle:focus-visible { outline: 2px solid var(--yt-spec-text-primary, CanvasText); outline-offset: 2px; }
                 #adblock-toggle:active { transform: scale(0.95); }
             `;
@@ -379,7 +379,7 @@
             cursor: pointer;
             user-select: none;
             -webkit-user-select: none;
-            transition: opacity 0.2s, outline 0.2s, background-color 0.2s, transform 0.1s;
+            transition: opacity 0.2s, filter 0.2s, outline 0.2s, background-color 0.2s, transform 0.1s;
             transform-origin: center;
         `;
     }
