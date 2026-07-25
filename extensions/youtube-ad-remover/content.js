@@ -2,7 +2,7 @@
 class YouTubeAdRemover {
     constructor() {
         this.TARGET_NODE_SELECTOR = '#contents';
-        this.AD_SELECTOR = '.ytd-ad-slot-renderer';
+        this.AD_CLASS = 'ytd-ad-slot-renderer';
         this.INITIAL_DELAY_MS = 2000;
         this.observer = null;
         this.initialize();
@@ -55,7 +55,7 @@ class YouTubeAdRemover {
                 if (node.nodeType === Node.ELEMENT_NODE) {
                     const element = node;
                     if (element.matches('ytd-rich-item-renderer, ytd-video-renderer')) {
-                        const adItem = element.querySelector(this.AD_SELECTOR);
+                        const adItem = element.getElementsByClassName(this.AD_CLASS)[0];
                         if (adItem) {
                             const contentDiv = element.querySelector('#content, #dismissible');
                             adItem.remove();
