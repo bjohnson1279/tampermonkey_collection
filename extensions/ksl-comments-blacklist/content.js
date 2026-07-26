@@ -31,8 +31,8 @@ _global.__kslTestExports = _global.__kslTestExports || {};
                         processComment(el);
                     }
                     if (el.firstElementChild) {
-                        const nestedComments = el.querySelectorAll('.CommentsList__item');
-                        nestedComments.forEach(processComment);
+                        const nestedComments = el.getElementsByClassName('CommentsList__item');
+                        Array.from(nestedComments).forEach((comment) => processComment(comment));
                     }
                 }
             });
@@ -45,10 +45,10 @@ _global.__kslTestExports = _global.__kslTestExports || {};
     try {
         const observer = new MutationObserver(handleMutations);
         observer.observe(container, config);
-        const commentsList = container.querySelector('.CommentsList__root');
+        const commentsList = container.getElementsByClassName('CommentsList__root')[0];
         if (commentsList) {
-            const allComments = commentsList.querySelectorAll('.CommentsList__item');
-            allComments.forEach(processComment);
+            const allComments = commentsList.getElementsByClassName('CommentsList__item');
+            Array.from(allComments).forEach((comment) => processComment(comment));
         }
     }
     catch (error) {

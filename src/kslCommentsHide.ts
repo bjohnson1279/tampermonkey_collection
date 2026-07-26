@@ -67,9 +67,10 @@ _global.__kslTestExports = _global.__kslTestExports || {};
                     }
                     if (el.firstElementChild) {
                         // ⚡ Bolt: Fast path for leaf nodes - avoid querySelectorAll parsing overhead if no children exist
-                        const nestedComments =
-                            el.querySelectorAll<HTMLElement>('.CommentsList__item');
-                        nestedComments.forEach(processComment);
+                        const nestedComments = el.getElementsByClassName('CommentsList__item');
+                        Array.from(nestedComments).forEach((comment) =>
+                            processComment(comment as HTMLElement)
+                        );
                     }
                 }
             });
@@ -86,10 +87,11 @@ _global.__kslTestExports = _global.__kslTestExports || {};
         observer.observe(container, config);
 
         // Initial check in case comments are already loaded
-        const commentsList = container.querySelector<HTMLElement>('.CommentsList__root');
+        const commentsList = container.getElementsByClassName('CommentsList__root')[0] as
+            HTMLElement | undefined;
         if (commentsList) {
-            const allComments = commentsList.querySelectorAll<HTMLElement>('.CommentsList__item');
-            allComments.forEach(processComment);
+            const allComments = commentsList.getElementsByClassName('CommentsList__item');
+            Array.from(allComments).forEach((comment) => processComment(comment as HTMLElement));
         }
     } catch (error) {
         // 🛡️ Sentinel: Removed error object from console.error to prevent stack trace exposure
