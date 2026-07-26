@@ -55,6 +55,7 @@
     const origFetch = window.fetch;
     // ⚡ Bolt: Cache the native Request URL getter to avoid expensive reflection inside the hot path fetch interceptor loop.
     const nativeReqUrlGetter = Object.getOwnPropertyDescriptor(Request.prototype, 'url')?.get;
+    const nativeUrlHrefGetter = Object.getOwnPropertyDescriptor(URL.prototype, 'href')?.get;
 
     window.fetch = (async (...args: Parameters<typeof window.fetch>): Promise<Response> => {
         const req = args[0];
@@ -72,7 +73,7 @@
 
         if (!isNative) {
             try {
-                url = Object.getOwnPropertyDescriptor(URL.prototype, 'href')?.get?.call(req);
+                url = nativeUrlHrefGetter?.call(req);
                 if (url !== undefined) isNative = true;
             } catch {
                 /* Not a URL */
@@ -137,7 +138,7 @@
         let isNative = false;
 
         try {
-            urlStr = Object.getOwnPropertyDescriptor(URL.prototype, 'href')?.get?.call(url);
+            urlStr = nativeUrlHrefGetter?.call(url);
             if (urlStr !== undefined) isNative = true;
         } catch {
             /* Not a URL */
@@ -166,19 +167,30 @@
             url: string | URL,
             data?: BodyInit | null
         ): boolean {
-            // 🛡️ Sentinel: Use duck typing for URL objects to prevent cross-realm adblock evasion
-            const urlStr =
-                url &&
-                typeof url === 'object' &&
-                'href' in url &&
-                typeof (url as any).href === 'string'
-                    ? (url as any).href
-                    : url?.toString() || '';
-            if (shouldBlock(urlStr)) {
+            // 🛡️ Sentinel: Use WebIDL brand checking for URL objects to prevent cross-realm adblock evasion
+            // and avoid TOCTOU vulnerabilities from malicious POJOs exploiting duck-typing getters.
+            let urlStr: string = '';
+            let isNative = false;
+
+            try {
+                urlStr = nativeUrlHrefGetter?.call(url);
+                if (urlStr !== undefined) isNative = true;
+            } catch {
+                /* Not a URL */
+            }
+
+            if (!isNative) {
+                urlStr = url?.toString() || '';
+                // 🛡️ Sentinel: Overwrite URL parameter with evaluated string for POJOs/strings
+                // to prevent TOCTOU evasion.
+                url = urlStr;
+            }
+
+            if (urlStr && shouldBlock(urlStr)) {
                 return true; // Simulate success to prevent fallback mechanisms
             }
             // 🛡️ Sentinel: Pass the evaluated URL string to prevent TOCTOU evasion
-            return origSendBeacon.apply(this, [urlStr, data]);
+            return origSendBeacon.apply(this, [url as any, data]);
         };
     }
 
