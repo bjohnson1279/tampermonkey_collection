@@ -112,3 +112,7 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2024-07-29 - Replace querySelector with getElementsByClassName/TagName in polling intervals
 **Learning:** Calling `document.querySelector` inside a high-frequency polling interval (like `setInterval`) to find elements by a single class name forces the browser to re-parse the CSS selector string and traverse the DOM tree O(N) times. This is significantly slower than using dedicated methods like `getElementsByClassName`, which perform O(1) live collection lookups.
 **Action:** When searching for an element by class name in a polling interval, replace `document.querySelector('.class')` with `document.getElementsByClassName('class')[0]` to reduce main thread CPU overhead.
+
+## 2024-12-05 - HTMLCollection does not support .forEach
+**Learning:** When refactoring DOM queries to replace `querySelectorAll` (returns a `NodeList`) with `getElementsByClassName` or `getElementsByTagName` (returns an `HTMLCollection`) for performance, `HTMLCollection` does not natively support the `.forEach()` method.
+**Action:** When converting `querySelectorAll` to `getElementsByClassName`, you must update the associated iteration logic to convert the collection to an array (e.g., `Array.from(collection).forEach(...)`) or use a standard `for` loop to prevent runtime type errors.
