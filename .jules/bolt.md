@@ -116,3 +116,6 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2024-12-05 - HTMLCollection does not support .forEach
 **Learning:** When refactoring DOM queries to replace `querySelectorAll` (returns a `NodeList`) with `getElementsByClassName` or `getElementsByTagName` (returns an `HTMLCollection`) for performance, `HTMLCollection` does not natively support the `.forEach()` method.
 **Action:** When converting `querySelectorAll` to `getElementsByClassName`, you must update the associated iteration logic to convert the collection to an array (e.g., `Array.from(collection).forEach(...)`) or use a standard `for` loop to prevent runtime type errors.
+## 2024-07-27 - Avoid Array Allocations in Intervals
+**Learning:** High-frequency intervals (like `setInterval` running every 1000ms) should avoid operations that allocate new memory on every tick, such as `Array.from()`. This causes unnecessary garbage collection overhead and can lead to jank.
+**Action:** Replaced `Array.from(document.getElementsByClassName(...))` with a raw `HTMLCollectionOf<Element>` return type, and iterated using a standard `for` loop instead of `.forEach()`.

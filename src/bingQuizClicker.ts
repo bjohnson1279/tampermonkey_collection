@@ -10,7 +10,7 @@
 // ==/UserScript==
 
 interface QuizElements {
-    gotThisRight: HTMLElement[];
+    gotThisRight: HTMLCollectionOf<Element>;
     nextButton: HTMLElement | null;
 }
 
@@ -46,12 +46,11 @@ class BingQuizClicker {
     private getQuizElements(): QuizElements {
         // ⚡ Bolt: Replace querySelector('.class') with getElementsByClassName('class') for O(1) live collection lookup instead of O(N) tree traversal inside the 1000ms setInterval loop.
         return {
-            gotThisRight: Array.from(
-                document.getElementsByClassName('wk_hideCompulsary')
-            ) as HTMLElement[],
+            gotThisRight: document.getElementsByClassName('wk_hideCompulsary'),
             nextButton:
                 (document.getElementsByClassName(this.NEXT_BUTTON_CLASS)[0] as
-                    HTMLElement | undefined) || null,
+                    | HTMLElement
+                    | undefined) || null,
         };
     }
 
@@ -68,15 +67,16 @@ class BingQuizClicker {
         }
     }
 
-    private handleCorrectAnswers(elements: HTMLElement[]): void {
-        elements.forEach((element) => {
+    private handleCorrectAnswers(elements: HTMLCollectionOf<Element>): void {
+        for (let i = 0; i < elements.length; i++) {
+            const element = elements[i];
             const parent = element.parentElement;
-            if (!parent) return;
+            if (!parent) continue;
 
             if (parent.classList.contains('wk_choiceMaxWidth')) {
-                this.safeClick(parent);
+                this.safeClick(parent as HTMLElement);
             }
-        });
+        }
     }
 
     private safeClick(element: HTMLElement): void {
