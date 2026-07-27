@@ -5,7 +5,8 @@
     try {
         const stored = localStorage.getItem('ytAdblockEnabled');
         if (stored !== null) {
-            enabled = JSON.parse(stored) ?? true;
+            const parsed = JSON.parse(stored);
+            enabled = typeof parsed === 'boolean' ? parsed : true;
         }
     }
     catch (e) {
