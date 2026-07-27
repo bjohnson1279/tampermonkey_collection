@@ -18,7 +18,8 @@
     try {
         const stored = localStorage.getItem('ytAdblockEnabled');
         if (stored !== null) {
-            enabled = JSON.parse(stored) ?? true;
+            const parsed = JSON.parse(stored);
+            enabled = typeof parsed === 'boolean' ? parsed : true;
         }
     } catch (e) {
         // 🛡️ Sentinel: Removed error object from console.warn to prevent stack trace exposure
@@ -319,7 +320,8 @@
         }
 
         const skipBtn = document.getElementsByClassName('ytp-ad-skip-button')[0] as
-            HTMLElement | undefined;
+            | HTMLElement
+            | undefined;
         if (skipBtn) skipBtn.click();
     }
 
