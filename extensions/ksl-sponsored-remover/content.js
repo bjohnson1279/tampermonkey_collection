@@ -5,6 +5,7 @@
         const sponsoredElements = document.getElementsByClassName('sponsored');
         for (let i = sponsoredElements.length - 1; i >= 0; i--) {
             const sponsored = sponsoredElements[i];
+        Array.from(sponsoredElements).forEach((sponsored) => {
             const sponsoredContainer = sponsored.closest('.queue, .queue_story');
             if (sponsoredContainer) {
                 sponsoredContainer.remove();
@@ -32,6 +33,7 @@
             const sponsoredElements = el.getElementsByClassName('sponsored');
             for (let i = sponsoredElements.length - 1; i >= 0; i--) {
                 const sponsored = sponsoredElements[i];
+            Array.from(sponsoredElements).forEach((sponsored) => {
                 const sponsoredContainer = sponsored.closest('.queue, .queue_story');
                 if (sponsoredContainer) {
                     sponsoredContainer.remove();

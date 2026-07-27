@@ -1,13 +1,7 @@
 "use strict";
 class BingQuizClicker {
     constructor() {
-        this.GOT_THIS_RIGHT_TEXT = 'got this right';
         this.NEXT_BUTTON_CLASS = 'wk_button';
-        this.BUTTON_ROW = '.btq_row';
-        this.BUTTON_OPTIONS = '.btq_opt';
-        this.ANSWER_ROW = '.btq_ansRow';
-        this.NEXT_BUTTON_CLICKABLE = '.acf-button-standard__btn';
-        this.NEXT_QUESTION_BUTTON = '.btq_nxtQues';
         this.CHECK_INTERVAL_MS = 1000;
         this.intervalId = null;
         this.initialize();
@@ -28,7 +22,7 @@ class BingQuizClicker {
     }
     getQuizElements() {
         return {
-            gotThisRight: Array.from(document.getElementsByClassName('wk_hideCompulsary')),
+            gotThisRight: document.getElementsByClassName('wk_hideCompulsary'),
             nextButton: document.getElementsByClassName(this.NEXT_BUTTON_CLASS)[0] || null,
         };
     }
@@ -42,14 +36,15 @@ class BingQuizClicker {
         }
     }
     handleCorrectAnswers(elements) {
-        elements.forEach((element) => {
+        for (let i = 0; i < elements.length; i++) {
+            const element = elements[i];
             const parent = element.parentElement;
             if (!parent)
-                return;
+                continue;
             if (parent.classList.contains('wk_choiceMaxWidth')) {
                 this.safeClick(parent);
             }
-        });
+        }
     }
     safeClick(element) {
         try {
@@ -87,4 +82,9 @@ function initQuizClicker() {
     }
 }
 initQuizClicker();
+if (typeof window !== 'undefined') {
+    window.BingQuizClicker = BingQuizClicker;
+    window.initQuizClicker = initQuizClicker;
+    window.getQuizClicker = () => quizClicker;
+}
 //# sourceMappingURL=bingQuizClicker.js.map
