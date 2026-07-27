@@ -146,10 +146,11 @@
 
         if (!isNative) {
             urlStr = url?.toString() || '';
-            // 🛡️ Sentinel: Overwrite URL parameter with evaluated string for POJOs/strings
-            // to prevent TOCTOU evasion.
-            url = urlStr;
         }
+
+        // 🛡️ Sentinel: ALWAYS overwrite URL parameter with evaluated string for all inputs (including native URLs)
+        // to prevent TOCTOU evasion via overridden .toString() methods on native URL instances.
+        url = urlStr;
 
         if (urlStr && shouldBlock(urlStr)) {
             this.abort();
@@ -181,10 +182,11 @@
 
             if (!isNative) {
                 urlStr = url?.toString() || '';
-                // 🛡️ Sentinel: Overwrite URL parameter with evaluated string for POJOs/strings
-                // to prevent TOCTOU evasion.
-                url = urlStr;
             }
+
+            // 🛡️ Sentinel: ALWAYS overwrite URL parameter with evaluated string for all inputs (including native URLs)
+            // to prevent TOCTOU evasion via overridden .toString() methods on native URL instances.
+            url = urlStr;
 
             if (urlStr && shouldBlock(urlStr)) {
                 return true; // Simulate success to prevent fallback mechanisms
