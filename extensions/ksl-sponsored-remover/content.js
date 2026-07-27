@@ -2,8 +2,8 @@
 (function () {
     'use strict';
     const removeSponsoredContent = () => {
-        const sponsoredElements = document.querySelectorAll('.sponsored');
-        sponsoredElements.forEach((sponsored) => {
+        const sponsoredElements = document.getElementsByClassName('sponsored');
+        Array.from(sponsoredElements).forEach((sponsored) => {
             const sponsoredContainer = sponsored.closest('.queue, .queue_story');
             if (sponsoredContainer) {
                 sponsoredContainer.remove();
@@ -28,8 +28,8 @@
             }
         }
         else if (el.firstElementChild) {
-            const sponsoredElements = el.querySelectorAll('.sponsored');
-            sponsoredElements.forEach((sponsored) => {
+            const sponsoredElements = el.getElementsByClassName('sponsored');
+            Array.from(sponsoredElements).forEach((sponsored) => {
                 const sponsoredContainer = sponsored.closest('.queue, .queue_story');
                 if (sponsoredContainer) {
                     sponsoredContainer.remove();
