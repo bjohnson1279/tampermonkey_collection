@@ -1,32 +1,33 @@
-// ⚡ Bolt: Hoist static RegExp objects outside the loop to prevent repeated allocation and garbage collection overhead
 const EPISODE_NUM_REGEX = /\d+/g;
 const NETWORK_CLEANUP_REGEX = /ABC|CBS|FOX|NBC|PBS|History|H2|\(US\)|A&E/gi;
-
 export function scrapeTVDBData() {
     'use strict';
     const episodesData = [];
     const episodes = document.querySelectorAll('.list-group .list-group-item');
     episodes.forEach((ep) => {
-        const heading = ep.querySelector('.list-group-item-heading');
-        if (!heading) return;
-        const epLabelElement = heading.querySelector('.episode-label');
+        const heading = ep.getElementsByClassName('list-group-item-heading')[0];
+        if (!heading)
+            return;
+        const epLabelElement = heading.getElementsByClassName('episode-label')[0];
         const epLabel = epLabelElement?.textContent?.trim() || '';
         const matches = epLabel.match(EPISODE_NUM_REGEX) || [];
-        const titleLink = heading.querySelector('a');
+        const titleLink = heading.getElementsByTagName('a')[0];
         const epTitle = titleLink?.textContent?.trim() || '';
         const itemTextElement = ep.getElementsByClassName('list-group-item-text')[0];
         const itemText = itemTextElement?.textContent?.trim() || '';
         let itemDate = '';
-        const listInline = ep.querySelectorAll('.list-inline');
-        listInline.forEach((listItem) => {
+        const listInline = ep.getElementsByClassName('list-inline');
+        for (let i = 0; i < listInline.length; i++) {
+            const listItem = listInline[i];
             const dateText = listItem.textContent?.replace(NETWORK_CLEANUP_REGEX, '').trim() || '';
             try {
                 const date = new Date(dateText);
                 if (!isNaN(date.getTime())) {
                     itemDate = date.toISOString().split('T')[0];
                 }
-            } catch (e) {
-                console.error('Error parsing date:', e);
+            }
+            catch (e) {
+                console.error('Error parsing date:', e instanceof Error ? e.message : String(e));
             }
         }
         const episode = {
@@ -42,7 +43,7 @@ export function scrapeTVDBData() {
         const style = document.createElement('style');
         style.textContent = `
             #tvdb-copy-json-btn { outline: none; position: fixed; bottom: 24px; right: 24px; z-index: 9999; background: #0056b3; color: white; border: none; border-radius: 8px; padding: 12px 20px; font: 600 14px system-ui, sans-serif; cursor: pointer; user-select: none; -webkit-user-select: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s; }
-            #tvdb-copy-json-btn:hover:not([aria-disabled="true"]) { opacity: 0.9; }
+            #tvdb-copy-json-btn:hover:not([aria-disabled="true"]) { filter: brightness(0.85); }
             #tvdb-copy-json-btn:focus-visible { outline: 3px solid #0056b3; outline-offset: 2px; }
             #tvdb-copy-json-btn:not([aria-disabled="true"]):active { transform: scale(0.95); }
             #tvdb-copy-json-btn[aria-disabled="true"]:not([data-feedback="true"]) { cursor: not-allowed; opacity: 0.7; }
@@ -52,16 +53,12 @@ export function scrapeTVDBData() {
         const btn = document.createElement('button');
         btn.id = 'tvdb-copy-json-btn';
         const hasData = episodesData.length > 0;
-        btn.textContent = hasData ? '📋 Copy JSON' : '📋 No Data';
-        btn.disabled = !hasData;
-        btn.setAttribute(
-            'aria-label',
-            hasData ? 'Copy episodes data to clipboard' : 'No episodes data found'
-        );
-        btn.setAttribute(
-            'title',
-            hasData ? 'Copy JSON to clipboard (Shift+C)' : 'No episodes found to copy'
-        );
+        const countText = `${episodesData.length} episode${episodesData.length === 1 ? '' : 's'}`;
+        btn.textContent = hasData ? `📋 Copy JSON (${countText})` : '📋 No Data';
+        if (!hasData)
+            btn.setAttribute('aria-disabled', 'true');
+        btn.setAttribute('aria-label', hasData ? `Copy ${countText} data to clipboard` : 'No episodes data found');
+        btn.setAttribute('title', hasData ? 'Copy JSON to clipboard (Shift+C)' : 'No episodes found to copy');
         if (hasData) {
             btn.setAttribute('aria-keyshortcuts', 'Shift+C');
         }
@@ -71,7 +68,8 @@ export function scrapeTVDBData() {
             'position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0;';
         let timeoutId;
         btn.addEventListener('click', async () => {
-            if (btn.disabled) return;
+            if (btn.getAttribute('aria-disabled') === 'true')
+                return;
             clearTimeout(timeoutId);
             btn.setAttribute('aria-disabled', 'true');
             btn.setAttribute('data-feedback', 'true');
@@ -86,7 +84,8 @@ export function scrapeTVDBData() {
                 btn.setAttribute('title', 'Successfully copied');
                 btn.setAttribute('aria-label', 'Successfully copied');
                 announcer.textContent = 'Copied to clipboard';
-            } catch {
+            }
+            catch {
                 btn.textContent = '❌ Error';
                 btn.style.backgroundColor = '#b02a37';
                 btn.setAttribute('title', 'Failed to copy');
@@ -107,8 +106,7 @@ export function scrapeTVDBData() {
         document.body.append(announcer, btn);
         document.addEventListener('keydown', (e) => {
             const target = e.target;
-            const isInput =
-                target.tagName === 'INPUT' ||
+            const isInput = target.tagName === 'INPUT' ||
                 target.tagName === 'TEXTAREA' ||
                 target.isContentEditable;
             if (!isInput && e.shiftKey && e.key.toLowerCase() === 'c') {
