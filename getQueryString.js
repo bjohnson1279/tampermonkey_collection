@@ -9,5 +9,3 @@ const getQueryParams = (url) => {
   const urlObj = new URL(url);
   return Object.fromEntries(new URLSearchParams(urlObj.search));
 };
-
-console.log(getQueryParams(window.location.href));
