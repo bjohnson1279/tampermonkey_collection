@@ -170,6 +170,8 @@
     ];
     const combinedAdSelector = adSelectors.join(',');
     const promotedBadgeRegex = /promoted/i;
+    const badgeSelector = '#dismissible ytd-badge-supported-renderer';
+    const combinedAllSelector = `${combinedAdSelector},${badgeSelector}`;
     const adObserver = new MutationObserver((mutations) => {
         if (!enabled)
             return;
@@ -181,14 +183,18 @@
                         el.remove();
                     }
                     else if (el.firstElementChild && el.querySelectorAll) {
-                        el.querySelectorAll(combinedAdSelector).forEach((e) => e.remove());
-                        el.querySelectorAll('#dismissible ytd-badge-supported-renderer').forEach((badge) => {
-                            if (promotedBadgeRegex.test(badge.textContent || '')) {
-                                badge
-                                    .closest('ytd-video-renderer,ytd-compact-video-renderer')
-                                    ?.remove();
+                        const nodes = el.querySelectorAll(combinedAllSelector);
+                        for (let j = 0; j < nodes.length; j++) {
+                            const e = nodes[j];
+                            if (e.matches(combinedAdSelector)) {
+                                e.remove();
                             }
-                        });
+                            if (e.matches(badgeSelector)) {
+                                if (promotedBadgeRegex.test(e.textContent || '')) {
+                                    e.closest('ytd-video-renderer,ytd-compact-video-renderer')?.remove();
+                                }
+                            }
+                        }
                     }
                 }
             });
@@ -197,12 +203,18 @@
     function removeInitialAds() {
         if (!enabled)
             return;
-        document.querySelectorAll(combinedAdSelector).forEach((el) => el.remove());
-        document.querySelectorAll('#dismissible ytd-badge-supported-renderer').forEach((badge) => {
-            if (promotedBadgeRegex.test(badge.textContent || '')) {
-                badge.closest('ytd-video-renderer,ytd-compact-video-renderer')?.remove();
+        const nodes = document.querySelectorAll(combinedAllSelector);
+        for (let j = 0; j < nodes.length; j++) {
+            const e = nodes[j];
+            if (e.matches(combinedAdSelector)) {
+                e.remove();
             }
-        });
+            if (e.matches(badgeSelector)) {
+                if (promotedBadgeRegex.test(e.textContent || '')) {
+                    e.closest('ytd-video-renderer,ytd-compact-video-renderer')?.remove();
+                }
+            }
+        }
     }
     removeInitialAds();
     if (document.documentElement) {

@@ -251,6 +251,10 @@
     // during high-frequency MutationObserver events and initial scans, preventing unnecessary O(N) string allocations.
     const promotedBadgeRegex = /promoted/i;
 
+    // ⚡ Bolt: Combine standard ad selectors and badge selector to do 1 tree traversal instead of 2.
+    const badgeSelector = '#dismissible ytd-badge-supported-renderer';
+    const combinedAllSelector = `${combinedAdSelector},${badgeSelector}`;
+
     const adObserver = new MutationObserver((mutations) => {
         if (!enabled) return;
         mutations.forEach((mutation) => {
@@ -261,22 +265,21 @@
                         el.remove();
                     } else if (el.firstElementChild && el.querySelectorAll) {
                         // ⚡ Bolt: Fast path for leaf nodes - avoid querySelectorAll parsing overhead if no children exist
-                        el.querySelectorAll(combinedAdSelector).forEach((e) => e.remove());
-
-                        // Remove "Promoted" sidebar/homepage videos
-                        el.querySelectorAll('#dismissible ytd-badge-supported-renderer').forEach(
-                            (badge) => {
-                                if (
-                                    promotedBadgeRegex.test(
-                                        (badge as HTMLElement).textContent || ''
-                                    )
-                                ) {
-                                    badge
-                                        .closest('ytd-video-renderer,ytd-compact-video-renderer')
-                                        ?.remove();
+                        const nodes = el.querySelectorAll(combinedAllSelector);
+                        for (let j = 0; j < nodes.length; j++) {
+                            const e = nodes[j] as HTMLElement;
+                            if (e.matches(combinedAdSelector)) {
+                                e.remove();
+                            }
+                            if (e.matches(badgeSelector)) {
+                                // Remove "Promoted" sidebar/homepage videos
+                                if (promotedBadgeRegex.test(e.textContent || '')) {
+                                    e.closest(
+                                        'ytd-video-renderer,ytd-compact-video-renderer'
+                                    )?.remove();
                                 }
                             }
-                        );
+                        }
                     }
                 }
             });
@@ -286,12 +289,18 @@
     // Initial scan to remove ads already in the DOM before observer kicks in
     function removeInitialAds(): void {
         if (!enabled) return;
-        document.querySelectorAll(combinedAdSelector).forEach((el) => el.remove());
-        document.querySelectorAll('#dismissible ytd-badge-supported-renderer').forEach((badge) => {
-            if (promotedBadgeRegex.test((badge as HTMLElement).textContent || '')) {
-                badge.closest('ytd-video-renderer,ytd-compact-video-renderer')?.remove();
+        const nodes = document.querySelectorAll(combinedAllSelector);
+        for (let j = 0; j < nodes.length; j++) {
+            const e = nodes[j] as HTMLElement;
+            if (e.matches(combinedAdSelector)) {
+                e.remove();
             }
-        });
+            if (e.matches(badgeSelector)) {
+                if (promotedBadgeRegex.test(e.textContent || '')) {
+                    e.closest('ytd-video-renderer,ytd-compact-video-renderer')?.remove();
+                }
+            }
+        }
     }
 
     removeInitialAds();
@@ -319,7 +328,8 @@
         }
 
         const skipBtn = document.getElementsByClassName('ytp-ad-skip-button')[0] as
-            HTMLElement | undefined;
+            | HTMLElement
+            | undefined;
         if (skipBtn) skipBtn.click();
     }
 

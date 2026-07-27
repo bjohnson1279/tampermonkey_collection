@@ -116,3 +116,7 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2024-12-05 - HTMLCollection does not support .forEach
 **Learning:** When refactoring DOM queries to replace `querySelectorAll` (returns a `NodeList`) with `getElementsByClassName` or `getElementsByTagName` (returns an `HTMLCollection`) for performance, `HTMLCollection` does not natively support the `.forEach()` method.
 **Action:** When converting `querySelectorAll` to `getElementsByClassName`, you must update the associated iteration logic to convert the collection to an array (e.g., `Array.from(collection).forEach(...)`) or use a standard `for` loop to prevent runtime type errors.
+
+## 2024-07-27 - Reduce O(N) DOM Traversals in Hot Paths
+**Learning:** Native `querySelectorAll` operations perform tree traversals that block the main thread. While CSS selector parsing is extremely fast in native browsers, parsing the DOM tree is O(N). Doing `document.querySelectorAll('a'); document.querySelectorAll('b')` does two full tree walks, whereas `document.querySelectorAll('a,b')` walks the tree just once.
+**Action:** Combined multiple string selectors into a single selector using commas (`a,b`) to halve the tree traversal overhead during high-frequency execution in MutationObserver loops.
