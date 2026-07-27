@@ -16,12 +16,38 @@ describe('searchEngineFilter', () => {
                 href: 'https://www.google.com/?q=hello',
             },
         };
+
+        // Polyfill document for this test context without using @jest-environment jsdom
+        (global as any).document = {
+            createElement: jest.fn().mockImplementation((tag) => {
+                const el = {
+                    tagName: tag.toUpperCase(),
+                    attributes: {} as any,
+                    style: { cssText: '' },
+                    textContent: '',
+                    setAttribute: jest.fn().mockImplementation((attr, val) => {
+                        el.attributes[attr] = val;
+                    }),
+                    getAttribute: jest.fn().mockImplementation((attr) => el.attributes[attr]),
+                };
+                return el;
+            }),
+            body: {
+                appendChild: jest.fn(),
+            },
+            querySelector: jest.fn(),
+        };
+
+        jest.useFakeTimers();
     });
 
     afterEach(() => {
         consoleErrorSpy.mockRestore();
+        jest.runOnlyPendingTimers();
+        jest.useRealTimers();
         jest.resetModules();
         (global as any).window = originalWindow;
+        delete (global as any).document;
     });
 
     it('should catch and log errors during processSearch', () => {
@@ -88,7 +114,26 @@ describe('searchEngineFilter', () => {
         window.location.hostname = 'www.google.com';
         window.location.search = '?q=hello+asdf+world';
         window.location.href = 'https://www.google.com/?q=hello+asdf+world';
+
+        const mockToast = {
+            textContent: 'Search term blocked. Redirecting to home...',
+            setAttribute: jest.fn(),
+            style: { cssText: '' },
+        };
+        (global.document.createElement as jest.Mock).mockReturnValue(mockToast);
+
         require('./searchEngineFilter');
+
+        expect(global.document.createElement).toHaveBeenCalledWith('div');
+        expect(mockToast.setAttribute).toHaveBeenCalledWith('role', 'alert');
+        expect(global.document.body.appendChild).toHaveBeenCalledWith(mockToast);
+
+        // URL should not change immediately
+        expect(window.location.href).toBe('https://www.google.com/?q=hello+asdf+world');
+
+        // Advance timers to trigger the redirect
+        jest.runAllTimers();
+
         expect(window.location.href).toBe('https://www.google.com/'); // This URL matches the searchEngines config with a trailing slash from new URL().href
     });
 });

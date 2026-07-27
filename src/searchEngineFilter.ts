@@ -71,7 +71,32 @@ interface SearchEngines {
                         (parsedUrl.hostname === matchedDomain ||
                             parsedUrl.hostname.endsWith('.' + matchedDomain))
                     ) {
-                        window.location.href = parsedUrl.href;
+                        // 🎨 Palette: Add accessible toast notification before sudden redirect
+                        const toast = document.createElement('div');
+                        toast.setAttribute('role', 'alert');
+                        toast.setAttribute('aria-live', 'assertive');
+                        toast.style.cssText = `
+                            position: fixed;
+                            top: 20px;
+                            left: 50%;
+                            transform: translateX(-50%);
+                            background-color: #333;
+                            color: white;
+                            padding: 12px 24px;
+                            border-radius: 8px;
+                            font-family: system-ui, sans-serif;
+                            font-size: 14px;
+                            font-weight: 500;
+                            z-index: 2147483647;
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                            text-align: center;
+                        `;
+                        toast.textContent = 'Search term blocked. Redirecting to home...';
+                        document.body.appendChild(toast);
+
+                        setTimeout(() => {
+                            window.location.href = parsedUrl.href;
+                        }, 2500);
                     }
                 }
             }
