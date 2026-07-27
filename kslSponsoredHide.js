@@ -14,14 +14,11 @@
 
     // Your code here...
     const cbk = () => {
-        console.log(`cbk`);
         const sponsoredContent = loadMoreContainer.querySelectorAll('.sponsored');
-        console.log({ sponsoredContent });
 
         if (sponsoredContent) {
             sponsoredContent.forEach((sponsored) => {
                 const sponsoredContainer = sponsored.closest('.queue_story');
-                console.log({ sponsoredContainer });
                 if (sponsoredContainer) {
                     sponsoredContainer.remove();
                 }
@@ -40,7 +37,6 @@
     }
 
     const loadMoreContainer = document.querySelector('#loadMoreBtnContainer');
-    console.log({ loadMoreContainer });
     const config = { attributes: false, childList: true, subtree: true };
     const obs = new MutationObserver(cbk);
     obs.observe(loadMoreContainer, config);
