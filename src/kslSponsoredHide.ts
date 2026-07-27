@@ -20,13 +20,15 @@ interface SponsoredElement extends HTMLElement {
     const removeSponsoredContent = (): void => {
         const sponsoredElements = document.getElementsByClassName('sponsored');
 
-        Array.from(sponsoredElements).forEach((sponsored: Element): void => {
+        // ⚡ Bolt: Use a backward standard for loop for HTMLCollection to avoid unnecessary Array allocation
+        for (let i = sponsoredElements.length - 1; i >= 0; i--) {
+            const sponsored = sponsoredElements[i];
             // Try to find the closest parent container to remove
             const sponsoredContainer = sponsored.closest('.queue, .queue_story');
             if (sponsoredContainer) {
                 sponsoredContainer.remove();
             }
-        });
+        }
     };
 
     // Initial removal of sponsored content
@@ -53,12 +55,14 @@ interface SponsoredElement extends HTMLElement {
         } else if (el.firstElementChild) {
             // ⚡ Bolt: Fast path for leaf nodes - avoid querySelectorAll parsing overhead if no children exist
             const sponsoredElements = el.getElementsByClassName('sponsored');
-            Array.from(sponsoredElements).forEach((sponsored: Element): void => {
+            // ⚡ Bolt: Use a backward standard for loop for HTMLCollection to avoid unnecessary Array allocation
+            for (let i = sponsoredElements.length - 1; i >= 0; i--) {
+                const sponsored = sponsoredElements[i];
                 const sponsoredContainer = sponsored.closest('.queue, .queue_story');
                 if (sponsoredContainer) {
                     sponsoredContainer.remove();
                 }
-            });
+            }
         }
     };
 

@@ -35,4 +35,11 @@
             }
         });
     }
+    newsCards.forEach((card) => {
+        const source = card.querySelector('.source');
+        filterSources.forEach((src) => {
+            if (source.innerText.includes(src)) {
+                card.style.display = 'none';
+            }
+    });
 })();
