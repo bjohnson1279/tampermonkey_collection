@@ -14,12 +14,32 @@
     // Your code here...
     const newsCards = document.querySelectorAll('.news-card');
     const filterSources = []; // Sources to remove
+
+    if (filterSources.length > 0) {
+        // Escape regex special chars to prevent syntax errors
+        const escapedSources = filterSources.map((src) =>
+            src.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        );
+        // Pre-compile Regular Expression for O(1) matching vs O(M) loop
+        const regex = new RegExp(`(${escapedSources.join('|')})`);
+
+        newsCards.forEach((card) => {
+            const source = card.querySelector('.source');
+            // Use textContent instead of innerText to avoid triggering reflow
+            if (source) {
+                const match = source.textContent.match(regex);
+                if (match) {
+                    console.log(`Removing card from ${match[0]}`);
+                    card.style.display = 'none';
+                }
+            }
+        });
+    }
     newsCards.forEach((card) => {
         const source = card.querySelector('.source');
         filterSources.forEach((src) => {
             if (source.innerText.includes(src)) {
                 card.style.display = 'none';
             }
-        });
     });
 })();
