@@ -121,3 +121,7 @@
 ## 2024-12-05 - Predictable hover contrast with filter
 **Learning:** Using `opacity: 0.8` for hover states on solid buttons is an accessibility anti-pattern. Lowering opacity allows the background color to bleed through, which creates unpredictable color blending and frequently leads to WCAG contrast failures depending on the container's background.
 **Action:** Always use `filter: brightness(0.85)` (or similar values) for hover states on solid buttons to predictably darken or lighten the button uniformly without making it transparent, ensuring the text-to-button contrast ratio is preserved.
+
+## 2026-07-27 - Contextual Toast for Sudden Redirects
+**Learning:** When programmatically intercepting user actions to perform a sudden redirect (e.g., blocking a search term and returning to the homepage), doing so silently is jarring and leaves the user confused about what happened. Providing immediate, accessible visual feedback briefly before the redirect significantly improves UX by giving the user crucial context.
+**Action:** Inject an accessible toast notification (using `role="alert"` or `aria-live`) and introduce a brief delay (`setTimeout`) before executing sudden programmatic redirects to ensure users understand the system's response.
