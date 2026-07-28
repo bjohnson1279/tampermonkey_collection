@@ -123,3 +123,7 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2024-07-27 - Avoid Array Allocations in Intervals
 **Learning:** High-frequency intervals (like `setInterval` running every 1000ms) should avoid operations that allocate new memory on every tick, such as `Array.from()`. This causes unnecessary garbage collection overhead and can lead to jank.
 **Action:** Replaced `Array.from(document.getElementsByClassName(...))` with a raw `HTMLCollectionOf<Element>` return type, and iterated using a standard `for` loop instead of `.forEach()`.
+
+## 2023-10-27 - Avoid Array.from() inside MutationObserver callbacks
+**Learning:** Wrapping a live `HTMLCollection` returned by `getElementsByClassName` with `Array.from()` to use `.forEach()` creates unnecessary O(N) array allocation. Inside high-frequency contexts like `MutationObserver` callbacks, this can lead to excessive garbage collection overhead and potential UI jank.
+**Action:** Use a standard `for` loop to iterate directly over `HTMLCollection` objects in performance-critical paths instead of converting them to static arrays via `Array.from()`. Note: Be careful with live collections if elements are being removed or their classes are mutating, as this can shift indices during iteration.
