@@ -14,6 +14,7 @@ describe('searchEngineFilter', () => {
                 hostname: 'www.google.com',
                 search: '?q=hello',
                 href: 'https://www.google.com/?q=hello',
+                replace: jest.fn(),
             },
         };
 
@@ -134,6 +135,6 @@ describe('searchEngineFilter', () => {
         // Advance timers to trigger the redirect
         jest.runAllTimers();
 
-        expect(window.location.href).toBe('https://www.google.com/'); // This URL matches the searchEngines config with a trailing slash from new URL().href
+        expect(window.location.replace).toHaveBeenCalledWith('https://www.google.com/'); // This URL matches the searchEngines config with a trailing slash from new URL().href
     });
 });

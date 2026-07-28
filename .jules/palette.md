@@ -125,3 +125,7 @@
 ## 2026-07-27 - Contextual Toast for Sudden Redirects
 **Learning:** When programmatically intercepting user actions to perform a sudden redirect (e.g., blocking a search term and returning to the homepage), doing so silently is jarring and leaves the user confused about what happened. Providing immediate, accessible visual feedback briefly before the redirect significantly improves UX by giving the user crucial context.
 **Action:** Inject an accessible toast notification (using `role="alert"` or `aria-live`) and introduce a brief delay (`setTimeout`) before executing sudden programmatic redirects to ensure users understand the system's response.
+
+## 2024-07-28 - Prevent back-button traps on redirects
+**Learning:** When implementing redirects to external URLs (e.g., after validating against a blocklist), using `window.location.href` creates a back-button trap, leading to poor UX as users get stuck in a redirect loop.
+**Action:** Use `window.location.replace()` instead of assigning to `window.location.href`. This prevents the redirect from polluting the browser history and creating a back-button trap, improving user privacy and UX.
