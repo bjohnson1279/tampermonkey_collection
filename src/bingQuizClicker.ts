@@ -49,8 +49,7 @@ class BingQuizClicker {
             gotThisRight: document.getElementsByClassName('wk_hideCompulsary'),
             nextButton:
                 (document.getElementsByClassName(this.NEXT_BUTTON_CLASS)[0] as
-                    | HTMLElement
-                    | undefined) || null,
+                    HTMLElement | undefined) || null,
         };
     }
 

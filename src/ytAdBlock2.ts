@@ -320,8 +320,7 @@
         }
 
         const skipBtn = document.getElementsByClassName('ytp-ad-skip-button')[0] as
-            | HTMLElement
-            | undefined;
+            HTMLElement | undefined;
         if (skipBtn) skipBtn.click();
     }
 
