@@ -95,7 +95,8 @@ interface SearchEngines {
                         document.body.appendChild(toast);
 
                         setTimeout(() => {
-                            window.location.href = parsedUrl.href;
+                            // 🛡️ Sentinel: Use window.location.replace() to prevent back-button traps and improve privacy
+                            window.location.replace(parsedUrl.href);
                         }, 2500);
                     }
                 }

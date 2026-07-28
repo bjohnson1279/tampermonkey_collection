@@ -59,7 +59,7 @@
                         toast.textContent = 'Search term blocked. Redirecting to home...';
                         document.body.appendChild(toast);
                         setTimeout(() => {
-                            window.location.href = parsedUrl.href;
+                            window.location.replace(parsedUrl.href);
                         }, 2500);
                     }
                 }
