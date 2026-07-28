@@ -14,6 +14,9 @@ describe('searchEngineFilter', () => {
                 hostname: 'www.google.com',
                 search: '?q=hello',
                 href: 'https://www.google.com/?q=hello',
+                replace: jest.fn().mockImplementation(function (this: any, url: string) {
+                    this.href = url;
+                }),
             },
         };
 
