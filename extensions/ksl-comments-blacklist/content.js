@@ -32,7 +32,9 @@ _global.__kslTestExports = _global.__kslTestExports || {};
                     }
                     if (el.firstElementChild) {
                         const nestedComments = el.getElementsByClassName('CommentsList__item');
-                        Array.from(nestedComments).forEach((comment) => processComment(comment));
+                        for (let i = 0; i < nestedComments.length; i++) {
+                            processComment(nestedComments[i]);
+                        }
                     }
                 }
             });
@@ -48,7 +50,9 @@ _global.__kslTestExports = _global.__kslTestExports || {};
         const commentsList = container.getElementsByClassName('CommentsList__root')[0];
         if (commentsList) {
             const allComments = commentsList.getElementsByClassName('CommentsList__item');
-            Array.from(allComments).forEach((comment) => processComment(comment));
+            for (let i = 0; i < allComments.length; i++) {
+                processComment(allComments[i]);
+            }
         }
     }
     catch (error) {

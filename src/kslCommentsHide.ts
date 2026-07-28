@@ -43,7 +43,8 @@ _global.__kslTestExports = _global.__kslTestExports || {};
     const processComment = (comment: HTMLElement): void => {
         // ⚡ Bolt: Replace querySelector('.class') with getElementsByClassName('class')[0] for O(1) live collection lookup instead of O(N) tree traversal inside the MutationObserver
         const usernameElement = comment.getElementsByClassName('CommentsList__userName')[0] as
-            HTMLElement | undefined;
+            | HTMLElement
+            | undefined;
         if (!usernameElement?.textContent) return;
 
         const username = usernameElement.textContent.trim();
@@ -68,9 +69,10 @@ _global.__kslTestExports = _global.__kslTestExports || {};
                     if (el.firstElementChild) {
                         // ⚡ Bolt: Fast path for leaf nodes - avoid querySelectorAll parsing overhead if no children exist
                         const nestedComments = el.getElementsByClassName('CommentsList__item');
-                        Array.from(nestedComments).forEach((comment) =>
-                            processComment(comment as HTMLElement)
-                        );
+                        // ⚡ Bolt: Use standard for loop instead of Array.from() to prevent O(N) array allocation overhead during high-frequency callbacks
+                        for (let i = 0; i < nestedComments.length; i++) {
+                            processComment(nestedComments[i] as HTMLElement);
+                        }
                     }
                 }
             });
@@ -88,10 +90,14 @@ _global.__kslTestExports = _global.__kslTestExports || {};
 
         // Initial check in case comments are already loaded
         const commentsList = container.getElementsByClassName('CommentsList__root')[0] as
-            HTMLElement | undefined;
+            | HTMLElement
+            | undefined;
         if (commentsList) {
             const allComments = commentsList.getElementsByClassName('CommentsList__item');
-            Array.from(allComments).forEach((comment) => processComment(comment as HTMLElement));
+            // ⚡ Bolt: Use standard for loop instead of Array.from() to prevent O(N) array allocation overhead
+            for (let i = 0; i < allComments.length; i++) {
+                processComment(allComments[i] as HTMLElement);
+            }
         }
     } catch (error) {
         // 🛡️ Sentinel: Removed error object from console.error to prevent stack trace exposure
