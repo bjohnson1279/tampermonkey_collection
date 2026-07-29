@@ -79,8 +79,9 @@ interface SearchEngines {
                             position: fixed;
                             top: 20px;
                             left: 50%;
-                            transform: translateX(-50%);
-                            background-color: #333;
+                            transform: translate(-50%, -10px);
+                            opacity: 0;
+                            background-color: #b02a37;
                             color: white;
                             padding: 12px 24px;
                             border-radius: 8px;
@@ -88,11 +89,17 @@ interface SearchEngines {
                             font-size: 14px;
                             font-weight: 500;
                             z-index: 2147483647;
-                            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
                             text-align: center;
+                            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
                         `;
-                        toast.textContent = 'Search term blocked. Redirecting to home...';
+                        toast.textContent = '🚫 Search term blocked. Redirecting to home...';
                         document.body.appendChild(toast);
+
+                        // Trigger reflow to ensure the CSS transition plays
+                        void toast.offsetHeight;
+                        toast.style.opacity = '1';
+                        toast.style.transform = 'translate(-50%, 0)';
 
                         setTimeout(() => {
                             // 🛡️ Sentinel: Use window.location.replace() to prevent back-button traps and improve privacy
