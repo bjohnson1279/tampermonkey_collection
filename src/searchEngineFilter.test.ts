@@ -14,7 +14,6 @@ describe('searchEngineFilter', () => {
                 hostname: 'www.google.com',
                 search: '?q=hello',
                 href: 'https://www.google.com/?q=hello',
-                replace: jest.fn(),
                 replace: jest.fn().mockImplementation(function (this: any, url: string) {
                     this.href = url;
                 }),
@@ -120,9 +119,10 @@ describe('searchEngineFilter', () => {
         window.location.href = 'https://www.google.com/?q=hello+asdf+world';
 
         const mockToast = {
-            textContent: 'Search term blocked. Redirecting to home...',
+            textContent: '🚫 Search term blocked. Redirecting to home...',
             setAttribute: jest.fn(),
-            style: { cssText: '' },
+            style: { cssText: '', opacity: '', transform: '' },
+            offsetHeight: 20,
         };
         (global.document.createElement as jest.Mock).mockReturnValue(mockToast);
 

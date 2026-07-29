@@ -129,3 +129,7 @@
 ## 2024-07-28 - Prevent back-button traps on redirects
 **Learning:** When implementing redirects to external URLs (e.g., after validating against a blocklist), using `window.location.href` creates a back-button trap, leading to poor UX as users get stuck in a redirect loop.
 **Action:** Use `window.location.replace()` instead of assigning to `window.location.href`. This prevents the redirect from polluting the browser history and creating a back-button trap, improving user privacy and UX.
+
+## 2024-07-29 - Polished Animations for Contextual Toasts
+**Learning:** While injecting a contextual toast prevents user confusion during sudden redirects, having it appear instantly without transition can still feel unpolished and jarring. Additionally, using generic colors (like dark grey) for a blocked action misses an opportunity to communicate state visually.
+**Action:** Always include a brief, smooth entry animation (e.g., fade-in and slide-down) for injected UI elements like toasts to make the interaction feel intentional and smooth. Use semantic colors (like red for blocked actions) and status icons to improve immediate visual parsing.
