@@ -61,15 +61,13 @@ class YouTubeAdRemover {
     }
 
     private removeAds(addedNodes?: NodeList | Node[]): void {
-        // ⚡ Bolt: Replace O(N) internal DOM traversals inside the loop with a single O(1) pass
-        // using a descendant CSS selector, significantly reducing main thread parsing overhead.
-        const combinedSelector =
-            'ytd-rich-item-renderer .ytd-ad-slot-renderer, ytd-video-renderer .ytd-ad-slot-renderer';
-
         if (!addedNodes) {
             // Fallback for initial check or if no specific nodes are provided
-            const adItems = document.querySelectorAll(combinedSelector);
-            adItems.forEach((adItem) => {
+            // ⚡ Bolt: Replace querySelectorAll with getElementsByClassName (O(1) live collection)
+            const adItems = document.getElementsByClassName(this.AD_CLASS);
+            // ⚡ Bolt: Use a backward standard for loop for HTMLCollection to avoid unnecessary Array allocation
+            for (let i = adItems.length - 1; i >= 0; i--) {
+                const adItem = adItems[i];
                 const videoItem = adItem.closest('ytd-rich-item-renderer, ytd-video-renderer');
                 if (videoItem) {
                     const contentDiv = videoItem.querySelector('#content, #dismissible');
@@ -79,7 +77,7 @@ class YouTubeAdRemover {
                     }
                     videoItem.remove();
                 }
-            });
+            }
         } else {
             // Process only the added nodes to improve performance
             addedNodes.forEach((node) => {
@@ -97,9 +95,11 @@ class YouTubeAdRemover {
                             element.remove();
                         }
                     } else if (element.firstElementChild) {
-                        // ⚡ Bolt: Fast path for leaf nodes - avoid querySelectorAll parsing overhead if no children exist
-                        const adItems = element.querySelectorAll(combinedSelector);
-                        adItems.forEach((adItem) => {
+                        // ⚡ Bolt: Fast path for leaf nodes - avoid parsing overhead if no children exist
+                        const adItems = element.getElementsByClassName(this.AD_CLASS);
+                        // ⚡ Bolt: Use a backward standard for loop for HTMLCollection to avoid unnecessary Array allocation
+                        for (let i = adItems.length - 1; i >= 0; i--) {
+                            const adItem = adItems[i];
                             const videoItem = adItem.closest(
                                 'ytd-rich-item-renderer, ytd-video-renderer'
                             );
@@ -112,7 +112,7 @@ class YouTubeAdRemover {
                                 }
                                 videoItem.remove();
                             }
-                        });
+                        }
                     }
                 }
             });
