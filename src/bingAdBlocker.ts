@@ -12,16 +12,20 @@
 (function (): void {
     'use strict';
 
-    const slideContainer: HTMLElement | null = document.querySelector('.tob_calcontainer');
+    // ⚡ Bolt: Replace querySelector('.class') with getElementsByClassName('class')[0] for O(1) live collection lookup instead of O(N) tree traversal
+    const slideContainer = document.getElementsByClassName('tob_calcontainer')[0] as
+        HTMLElement | undefined;
 
     if (slideContainer) {
-        // ⚡ Performance: Use a single query for all ads to avoid O(N) redundant DOM searches
-        const ads: NodeListOf<HTMLElement> = slideContainer.querySelectorAll('.tobitem .b_adSlug');
-        ads.forEach((ad: HTMLElement) => {
+        // ⚡ Bolt: Replace querySelectorAll with getElementsByClassName for O(1) live collection lookup
+        // ⚡ Bolt: Use a backward standard for loop for HTMLCollection to avoid unnecessary Array allocation
+        const ads = slideContainer.getElementsByClassName('b_adSlug');
+        for (let i = ads.length - 1; i >= 0; i--) {
+            const ad = ads[i];
             const box: HTMLElement | null = ad.closest('.tobitem');
             if (box) {
                 box.remove();
             }
-        });
+        }
     }
 })();
