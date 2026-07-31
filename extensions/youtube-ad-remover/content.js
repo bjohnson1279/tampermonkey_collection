@@ -51,7 +51,8 @@ class YouTubeAdRemover {
             }
         }
         else {
-            addedNodes.forEach((node) => {
+            for (let i = 0; i < addedNodes.length; i++) {
+                const node = addedNodes[i];
                 if (node.nodeType === Node.ELEMENT_NODE) {
                     const element = node;
                     if (element.matches('ytd-rich-item-renderer, ytd-video-renderer')) {
@@ -80,7 +81,7 @@ class YouTubeAdRemover {
                         }
                     }
                 }
-            });
+            }
         }
     }
     destroy() {

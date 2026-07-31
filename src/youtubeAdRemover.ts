@@ -80,7 +80,9 @@ class YouTubeAdRemover {
             }
         } else {
             // Process only the added nodes to improve performance
-            addedNodes.forEach((node) => {
+            // ⚡ Bolt: Use standard for loop instead of .forEach() to prevent O(N) closure allocation overhead during high-frequency MutationObserver callbacks
+            for (let i = 0; i < addedNodes.length; i++) {
+                const node = addedNodes[i];
                 if (node.nodeType === Node.ELEMENT_NODE) {
                     const element = node as Element;
 
@@ -115,7 +117,7 @@ class YouTubeAdRemover {
                         }
                     }
                 }
-            });
+            }
         }
     }
 
