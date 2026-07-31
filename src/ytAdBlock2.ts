@@ -254,34 +254,38 @@
 
     const adObserver = new MutationObserver((mutations) => {
         if (!enabled) return;
-        mutations.forEach((mutation) => {
-            mutation.addedNodes.forEach((node) => {
+        // ⚡ Bolt: Use standard for loops instead of .forEach() to prevent O(N) closure allocation overhead during high-frequency MutationObserver events
+        for (let i = 0; i < mutations.length; i++) {
+            const mutation = mutations[i];
+            for (let j = 0; j < mutation.addedNodes.length; j++) {
+                const node = mutation.addedNodes[j];
                 if (node.nodeType === Node.ELEMENT_NODE) {
                     const el = node as HTMLElement;
                     if (el.matches && el.matches(combinedAdSelector)) {
                         el.remove();
                     } else if (el.firstElementChild && el.querySelectorAll) {
                         // ⚡ Bolt: Fast path for leaf nodes - avoid querySelectorAll parsing overhead if no children exist
-                        el.querySelectorAll(combinedAdSelector).forEach((e) => e.remove());
+                        const adNodes = el.querySelectorAll(combinedAdSelector);
+                        for (let k = 0; k < adNodes.length; k++) {
+                            adNodes[k].remove();
+                        }
 
                         // Remove "Promoted" sidebar/homepage videos
-                        el.querySelectorAll('#dismissible ytd-badge-supported-renderer').forEach(
-                            (badge) => {
-                                if (
-                                    promotedBadgeRegex.test(
-                                        (badge as HTMLElement).textContent || ''
-                                    )
-                                ) {
-                                    badge
-                                        .closest('ytd-video-renderer,ytd-compact-video-renderer')
-                                        ?.remove();
-                                }
-                            }
+                        const badgeNodes = el.querySelectorAll(
+                            '#dismissible ytd-badge-supported-renderer'
                         );
+                        for (let k = 0; k < badgeNodes.length; k++) {
+                            const badge = badgeNodes[k];
+                            if (promotedBadgeRegex.test((badge as HTMLElement).textContent || '')) {
+                                badge
+                                    .closest('ytd-video-renderer,ytd-compact-video-renderer')
+                                    ?.remove();
+                            }
+                        }
                     }
                 }
-            });
-        });
+            }
+        }
     });
 
     // Initial scan to remove ads already in the DOM before observer kicks in
