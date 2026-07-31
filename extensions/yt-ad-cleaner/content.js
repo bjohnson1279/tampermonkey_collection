@@ -14,7 +14,12 @@
         enabled = true;
     }
     function saveState() {
-        localStorage.setItem('ytAdblockEnabled', JSON.stringify(enabled));
+        try {
+            localStorage.setItem('ytAdblockEnabled', JSON.stringify(enabled));
+        }
+        catch (e) {
+            console.warn('Failed to save ytAdblockEnabled to localStorage', e instanceof Error ? e.message : String(e));
+        }
     }
     const blockedPatternRegex = /doubleclick\.net|youtube\.com\/api\/stats\/ads|youtube\.com\/api\/stats\/atr|youtube\.com\/get_midroll|youtube\.com\/pagead|ytimg\.com\/ads\//;
     function shouldBlock(url) {

@@ -12,7 +12,11 @@ describe('ytAdBlock2 Security Fix', () => {
                 this.url = url;
             }
         }
-        Object.defineProperty(window, 'Request', { value: MockRequest });
+        Object.defineProperty(window, 'Request', {
+            value: MockRequest,
+            configurable: true,
+            writable: true,
+        });
 
         const store: Record<string, string> = {
             ytAdblockEnabled: '0',
@@ -42,5 +46,34 @@ describe('ytAdBlock2 Security Fix', () => {
         const btn = document.getElementById('adblock-toggle');
         expect(btn).not.toBeNull();
         expect(btn?.textContent).toContain('ON');
+    });
+
+    it('should fail securely if localStorage.setItem throws an error on toggle', async () => {
+        require('./ytAdBlock2.ts');
+        jest.advanceTimersByTime(500);
+        await Promise.resolve();
+
+        const btn = document.getElementById('adblock-toggle');
+        expect(btn).not.toBeNull();
+
+        // Mock setItem to throw QuotaExceededError
+        (window.localStorage.setItem as jest.Mock).mockImplementationOnce(() => {
+            throw new Error('QuotaExceededError');
+        });
+
+        // Spy on console.warn to check for secure error handling without crashing
+        const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+        // Trigger the toggle
+        btn?.click();
+
+        // UI should still update to OFF despite localStorage failure
+        expect(btn?.textContent).toContain('OFF');
+        expect(warnSpy).toHaveBeenCalledWith(
+            'Failed to save ytAdblockEnabled to localStorage',
+            'QuotaExceededError'
+        );
+
+        warnSpy.mockRestore();
     });
 });
