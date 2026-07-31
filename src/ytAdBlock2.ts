@@ -31,7 +31,15 @@
     }
 
     function saveState(): void {
-        localStorage.setItem('ytAdblockEnabled', JSON.stringify(enabled));
+        try {
+            localStorage.setItem('ytAdblockEnabled', JSON.stringify(enabled));
+        } catch (e) {
+            // 🛡️ Sentinel: Fail securely on QuotaExceededError or SecurityError to prevent Denial of Service against the extension
+            console.warn(
+                'Failed to save ytAdblockEnabled to localStorage',
+                e instanceof Error ? e.message : String(e)
+            );
+        }
     }
 
     //----------------------------------------
