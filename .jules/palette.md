@@ -133,3 +133,7 @@
 ## 2024-07-29 - Polished Animations for Contextual Toasts
 **Learning:** While injecting a contextual toast prevents user confusion during sudden redirects, having it appear instantly without transition can still feel unpolished and jarring. Additionally, using generic colors (like dark grey) for a blocked action misses an opportunity to communicate state visually.
 **Action:** Always include a brief, smooth entry animation (e.g., fade-in and slide-down) for injected UI elements like toasts to make the interaction feel intentional and smooth. Use semantic colors (like red for blocked actions) and status icons to improve immediate visual parsing.
+
+## 2024-07-31 - Visual Feedback for Global Hotkeys
+**Learning:** When using global keyboard shortcuts (like `Shift+A`) to toggle features, users often miss the visual feedback if the corresponding UI toggle button is off-screen or unnoticeable. Relying solely on `aria-live` regions or hidden console logs leaves sighted users without confirmation of the action.
+**Action:** Always implement a brief, animated visual toast notification when toggling state via global hotkeys to provide immediate, clear feedback. Ensure the toast has `aria-hidden="true"` if a visually-hidden live announcer is already handling screen reader output, to prevent confusing double-announcements.

@@ -289,6 +289,48 @@
     function styleButtonDynamic(btn) {
         btn.style.backgroundColor = enabled ? '#cc0000' : '#444';
     }
+    let toastTimeout;
+    function showToast(message, isEnabled) {
+        let toast = document.getElementById('adblock-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'adblock-toast';
+            toast.setAttribute('aria-hidden', 'true');
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 24px;
+                left: 24px;
+                background-color: ${isEnabled ? '#cc0000' : '#444'};
+                color: white;
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-family: "Roboto", "Arial", sans-serif;
+                font-size: 14px;
+                font-weight: 500;
+                z-index: 2147483647;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+                opacity: 0;
+                transform: translateY(20px);
+                transition: opacity 0.3s ease-out, transform 0.3s ease-out, background-color 0.3s;
+                pointer-events: none;
+            `;
+            document.body.appendChild(toast);
+        }
+        else {
+            toast.style.backgroundColor = isEnabled ? '#cc0000' : '#444';
+        }
+        toast.textContent = message;
+        void toast.offsetHeight;
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateY(0)';
+        clearTimeout(toastTimeout);
+        toastTimeout = window.setTimeout(() => {
+            if (toast) {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(20px)';
+            }
+        }, 3000);
+    }
     function toggleAdblock() {
         enabled = !enabled;
         saveState();
@@ -303,6 +345,7 @@
         if (announcer) {
             announcer.textContent = `AdBlock is now ${enabled ? 'ON' : 'OFF'}`;
         }
+        showToast(`${enabled ? '🛡️' : '⚠️'} AdBlock is now ${enabled ? 'ON' : 'OFF'}`, enabled);
         console.log(`YouTube AdBlock is now ${enabled ? 'ENABLED' : 'DISABLED'}`);
     }
     document.addEventListener('keydown', (e) => {
