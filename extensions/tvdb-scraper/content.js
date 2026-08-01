@@ -42,19 +42,25 @@ export function scrapeTVDBData() {
     if (!document.getElementById('tvdb-copy-json-btn')) {
         const style = document.createElement('style');
         style.textContent = `
-            #tvdb-copy-json-btn { outline: none; position: fixed; bottom: 24px; right: 24px; z-index: 9999; background: #0056b3; color: white; border: none; border-radius: 8px; padding: 12px 20px; font: 600 14px system-ui, sans-serif; cursor: pointer; user-select: none; -webkit-user-select: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s; }
+            #tvdb-copy-json-btn { outline: none; position: fixed; bottom: 24px; right: 24px; z-index: 9999; background: #0056b3; color: white; border: none; border-radius: 8px; padding: 12px 20px; font: 600 14px system-ui, sans-serif; cursor: pointer; user-select: none; -webkit-user-select: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s; display: flex; align-items: center; gap: 12px; }
             #tvdb-copy-json-btn:hover:not([aria-disabled="true"]) { filter: brightness(0.85); }
             #tvdb-copy-json-btn:focus-visible { outline: 3px solid #0056b3; outline-offset: 2px; }
             #tvdb-copy-json-btn:not([aria-disabled="true"]):active { transform: scale(0.95); }
             #tvdb-copy-json-btn[aria-disabled="true"]:not([data-feedback="true"]) { cursor: not-allowed; opacity: 0.7; }
             #tvdb-copy-json-btn[data-feedback="true"] { cursor: default; }
+            #tvdb-copy-json-btn kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; background-color: rgba(255, 255, 255, 0.2); border-radius: 4px; padding: 2px 6px; font-size: 11px; font-weight: 500; letter-spacing: 0.5px; border: 1px solid rgba(255, 255, 255, 0.3); }
         `;
         document.head.appendChild(style);
         const btn = document.createElement('button');
         btn.id = 'tvdb-copy-json-btn';
         const hasData = episodesData.length > 0;
         const countText = `${episodesData.length} episode${episodesData.length === 1 ? '' : 's'}`;
-        btn.textContent = hasData ? `📋 Copy JSON (${countText})` : '📋 No Data';
+        if (hasData) {
+            btn.innerHTML = `<span>📋 Copy JSON (${countText})</span><kbd aria-hidden="true">Shift+C</kbd>`;
+        }
+        else {
+            btn.textContent = '📋 No Data';
+        }
         if (!hasData)
             btn.setAttribute('aria-disabled', 'true');
         btn.setAttribute('aria-label', hasData ? `Copy ${countText} data to clipboard` : 'No episodes data found');
@@ -94,7 +100,7 @@ export function scrapeTVDBData() {
             }
             timeoutId = window.setTimeout(() => {
                 const countText = `${episodesData.length} episode${episodesData.length === 1 ? '' : 's'}`;
-                btn.textContent = `📋 Copy JSON (${countText})`;
+                btn.innerHTML = `<span>📋 Copy JSON (${countText})</span><kbd aria-hidden="true">Shift+C</kbd>`;
                 btn.style.backgroundColor = '#0056b3';
                 btn.setAttribute('title', 'Copy JSON to clipboard (Shift+C)');
                 btn.setAttribute('aria-label', `Copy ${countText} data to clipboard`);
