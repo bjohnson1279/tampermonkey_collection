@@ -147,7 +147,9 @@ describe('scrapeTVDBData', () => {
 
         const btn = document.getElementById('tvdb-copy-json-btn') as HTMLButtonElement;
         expect(btn).not.toBeNull();
-        expect(btn?.textContent).toBe('📋 Copy JSON (1 episode)');
+        expect(btn?.textContent).toContain('📋 Copy JSON (1 episode)');
+        expect(btn?.textContent).toContain('Shift+C');
+        expect(btn?.innerHTML).toContain('<kbd');
         expect(btn?.getAttribute('aria-label')).toBe('Copy 1 episode data to clipboard');
         expect(btn?.getAttribute('aria-disabled')).toBeNull();
     });
