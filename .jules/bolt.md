@@ -130,3 +130,7 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2026-07-29 - O(1) DOM Queries in MutationObservers
 **Learning:** In high-frequency contexts like `MutationObserver` loops or polling `setInterval`s, using `querySelectorAll()` (even with simple selectors) incurs significant O(N) DOM traversal and parsing overhead. Additionally, methods returning live `HTMLCollections` (like `getElementsByClassName`) cannot be iterated over safely using forward `for` loops or `.forEach()` (after `Array.from()`) if the loop's body removes those elements from the DOM, as indices dynamically shift.
 **Action:** Always replace `querySelectorAll` with `getElementsByClassName` or `getElementById` inside loops and observers when possible. To safely process and remove elements from a live `HTMLCollection`, avoid allocating a new array and instead use a backward `for` loop (e.g., `for (let i = collection.length - 1; i >= 0; i--)`).
+
+## 2024-08-04 - Optimize MutationObserver Loops
+**Learning:** In high-frequency contexts like \`MutationObserver\` callbacks, using \`.forEach()\` creates closure allocations on every tick, which leads to unnecessary garbage collection overhead and potential jank.
+**Action:** Always prefer standard \`for\` loops over \`.forEach()\` when iterating through mutation lists or added nodes in high-frequency contexts.
