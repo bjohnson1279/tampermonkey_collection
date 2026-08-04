@@ -244,7 +244,7 @@
             return;
         const btn = document.createElement('button');
         btn.id = 'adblock-toggle';
-        btn.textContent = `${enabled ? '🛡️' : '⚠️'} AdBlock: ${enabled ? 'ON' : 'OFF'}`;
+        btn.innerHTML = `<span>${enabled ? '🛡️' : '⚠️'} AdBlock: ${enabled ? 'ON' : 'OFF'}</span><kbd aria-hidden="true">Shift+A</kbd>`;
         btn.setAttribute('aria-label', `Toggle AdBlock`);
         btn.setAttribute('aria-pressed', enabled.toString());
         btn.setAttribute('title', `${enabled ? 'Disable' : 'Enable'} AdBlock (Shift+A)`);
@@ -261,6 +261,7 @@
                 #adblock-toggle:hover { filter: brightness(0.85); }
                 #adblock-toggle:focus-visible { outline: 2px solid var(--yt-spec-text-primary, CanvasText); outline-offset: 2px; }
                 #adblock-toggle:active { transform: scale(0.95); }
+                #adblock-toggle kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; background-color: rgba(255, 255, 255, 0.2); border-radius: 4px; padding: 2px 6px; font-size: 11px; font-weight: 500; letter-spacing: 0.5px; border: 1px solid rgba(255, 255, 255, 0.3); }
             `;
             document.head.appendChild(style);
         }
@@ -296,6 +297,9 @@
             -webkit-user-select: none;
             transition: opacity 0.2s, filter 0.2s, outline 0.2s, background-color 0.2s, transform 0.1s;
             transform-origin: center;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         `;
     }
     function styleButtonDynamic(btn) {
@@ -348,7 +352,7 @@
         saveState();
         const btn = document.getElementById('adblock-toggle');
         if (btn) {
-            btn.textContent = `${enabled ? '🛡️' : '⚠️'} AdBlock: ${enabled ? 'ON' : 'OFF'}`;
+            btn.innerHTML = `<span>${enabled ? '🛡️' : '⚠️'} AdBlock: ${enabled ? 'ON' : 'OFF'}</span><kbd aria-hidden="true">Shift+A</kbd>`;
             btn.setAttribute('aria-pressed', enabled.toString());
             btn.setAttribute('title', `${enabled ? 'Disable' : 'Enable'} AdBlock (Shift+A)`);
             styleButtonDynamic(btn);
