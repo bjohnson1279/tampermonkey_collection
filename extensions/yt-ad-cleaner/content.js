@@ -41,7 +41,7 @@
         let url = '';
         let isNative = false;
         try {
-            url = Object.getOwnPropertyDescriptor(Request.prototype, 'url')?.get?.call(req);
+            url = nativeReqUrlGetter?.call(req);
             if (url !== undefined)
                 isNative = true;
         }
@@ -62,8 +62,8 @@
         if (req && typeof req === 'object') {
             let isNativeRequest = false;
             try {
-                if (typeof Request !== 'undefined') {
-                    Object.getOwnPropertyDescriptor(Request.prototype, 'url')?.get?.call(req);
+                if (typeof Request !== 'undefined' && nativeReqUrlGetter) {
+                    nativeReqUrlGetter.call(req);
                     isNativeRequest = true;
                 }
             }
