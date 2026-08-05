@@ -4,10 +4,11 @@ export function scrapeTVDBData() {
     'use strict';
     const episodesData = [];
     const episodes = document.querySelectorAll('.list-group .list-group-item');
-    episodes.forEach((ep) => {
+    for (let j = 0; j < episodes.length; j++) {
+        const ep = episodes[j];
         const heading = ep.getElementsByClassName('list-group-item-heading')[0];
         if (!heading)
-            return;
+            continue;
         const epLabelElement = heading.getElementsByClassName('episode-label')[0];
         const epLabel = epLabelElement?.textContent?.trim() || '';
         const matches = epLabel.match(EPISODE_NUM_REGEX) || [];
@@ -38,7 +39,7 @@ export function scrapeTVDBData() {
             description: itemText,
         };
         episodesData.push(episode);
-    });
+    }
     if (!document.getElementById('tvdb-copy-json-btn')) {
         const style = document.createElement('style');
         style.textContent = `

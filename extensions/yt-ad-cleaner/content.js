@@ -210,12 +210,17 @@
     function removeInitialAds() {
         if (!enabled)
             return;
-        document.querySelectorAll(combinedAdSelector).forEach((el) => el.remove());
-        document.querySelectorAll('#dismissible ytd-badge-supported-renderer').forEach((badge) => {
+        const initialAds = document.querySelectorAll(combinedAdSelector);
+        for (let i = 0; i < initialAds.length; i++) {
+            initialAds[i].remove();
+        }
+        const initialBadges = document.querySelectorAll('#dismissible ytd-badge-supported-renderer');
+        for (let i = 0; i < initialBadges.length; i++) {
+            const badge = initialBadges[i];
             if (promotedBadgeRegex.test(badge.textContent || '')) {
                 badge.closest('ytd-video-renderer,ytd-compact-video-renderer')?.remove();
             }
-        });
+        }
     }
     removeInitialAds();
     if (document.documentElement) {

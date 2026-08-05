@@ -28,11 +28,10 @@ interface ExtendedHTMLElement extends HTMLElement {
     ];
 
     // ⚡ Bolt: Use a combined selector to reduce multiple O(N) DOM traversals to a single O(1) traversal
-    document
-        .querySelectorAll<HTMLElement>(adSelectors.join(','))
-        .forEach((ad: HTMLElement): void => {
-            ad.remove();
-        });
+    const ads = document.querySelectorAll<HTMLElement>(adSelectors.join(','));
+    for (let i = 0; i < ads.length; i++) {
+        ads[i].remove();
+    }
 
     // Set up mutation observer for the chart overlay
     const chartOverlay = document.querySelector<HTMLElement>(
@@ -50,11 +49,12 @@ interface ExtendedHTMLElement extends HTMLElement {
     };
 
     const handleMutations: MutationCallback = (mutationsList: MutationRecord[]): void => {
-        mutationsList.forEach((mutation: MutationRecord): void => {
+        for (let i = 0; i < mutationsList.length; i++) {
+            const mutation = mutationsList[i];
             if (mutation.target instanceof Node) {
                 (mutation.target as HTMLElement).remove();
             }
-        });
+        }
 
         // Update chart items
         // ⚡ Bolt: Replace querySelectorAll('.class') with getElementsByClassName('class') for O(1) live collection lookup instead of O(N) tree traversal inside the MutationObserver
