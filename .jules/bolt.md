@@ -134,3 +134,7 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2024-08-04 - Optimize MutationObserver Loops
 **Learning:** In high-frequency contexts like \`MutationObserver\` callbacks, using \`.forEach()\` creates closure allocations on every tick, which leads to unnecessary garbage collection overhead and potential jank.
 **Action:** Always prefer standard \`for\` loops over \`.forEach()\` when iterating through mutation lists or added nodes in high-frequency contexts.
+
+## 2024-08-05 - return vs continue when replacing forEach
+**Learning:** When refactoring `.forEach()` loops into standard `for` loops (e.g., for performance optimization), strictly ensure that any `return` statements inside the original `.forEach()` callback are converted to `continue` statements in the standard `for` loop. Leaving them as `return` will prematurely exit the entire enclosing function rather than just skipping the current iteration.
+**Action:** Always manually review and convert early returns inside former `.forEach()` callbacks to `continue` when migrating to standard loops.

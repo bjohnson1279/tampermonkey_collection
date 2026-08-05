@@ -29,14 +29,17 @@ export function scrapeTVDBData(): Episode[] {
     // using a descendant CSS selector to significantly reduce main thread parsing overhead.
     const episodes = document.querySelectorAll<HTMLElement>('.list-group .list-group-item');
 
-    episodes.forEach((ep: HTMLElement): void => {
+    for (let j = 0; j < episodes.length; j++) {
+        const ep = episodes[j] as HTMLElement;
         // ⚡ Bolt: Replace querySelector('.class') with getElementsByClassName('class')[0] for O(1) live collection lookup
         const heading = ep.getElementsByClassName('list-group-item-heading')[0] as
-            HTMLElement | undefined;
-        if (!heading) return;
+            | HTMLElement
+            | undefined;
+        if (!heading) continue;
 
         const epLabelElement = heading.getElementsByClassName('episode-label')[0] as
-            HTMLElement | undefined;
+            | HTMLElement
+            | undefined;
         const epLabel = epLabelElement?.textContent?.trim() || '';
         const matches = epLabel.match(EPISODE_NUM_REGEX) || [];
 
@@ -44,7 +47,8 @@ export function scrapeTVDBData(): Episode[] {
         const epTitle = titleLink?.textContent?.trim() || '';
 
         const itemTextElement = ep.getElementsByClassName('list-group-item-text')[0] as
-            HTMLElement | undefined;
+            | HTMLElement
+            | undefined;
         const itemText = itemTextElement?.textContent?.trim() || '';
 
         let itemDate = '';
@@ -74,7 +78,7 @@ export function scrapeTVDBData(): Episode[] {
         };
 
         episodesData.push(episode);
-    });
+    }
 
     if (!document.getElementById('tvdb-copy-json-btn')) {
         const style = document.createElement('style');

@@ -9,11 +9,10 @@
         '.ad_desktop',
         '.ad_clarity',
     ];
-    document
-        .querySelectorAll(adSelectors.join(','))
-        .forEach((ad) => {
-        ad.remove();
-    });
+    const ads = document.querySelectorAll(adSelectors.join(','));
+    for (let i = 0; i < ads.length; i++) {
+        ads[i].remove();
+    }
     const chartOverlay = document.querySelector('.chart-piano-overlay__attachment-point');
     if (!chartOverlay) {
         return;
@@ -24,11 +23,12 @@
         subtree: true,
     };
     const handleMutations = (mutationsList) => {
-        mutationsList.forEach((mutation) => {
+        for (let i = 0; i < mutationsList.length; i++) {
+            const mutation = mutationsList[i];
             if (mutation.target instanceof Node) {
                 mutation.target.remove();
             }
-        });
+        }
         const chartItems = document.getElementsByClassName('chart-list-item');
         for (let i = 0; i < chartItems.length; i++) {
             const chartItem = chartItems[i];

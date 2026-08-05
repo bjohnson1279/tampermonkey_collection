@@ -5,7 +5,6 @@
         const sponsoredElements = document.getElementsByClassName('sponsored');
         for (let i = sponsoredElements.length - 1; i >= 0; i--) {
             const sponsored = sponsoredElements[i];
-        Array.from(sponsoredElements).forEach((sponsored) => {
             const sponsoredContainer = sponsored.closest('.queue, .queue_story');
             if (sponsoredContainer) {
                 sponsoredContainer.remove();
@@ -33,7 +32,6 @@
             const sponsoredElements = el.getElementsByClassName('sponsored');
             for (let i = sponsoredElements.length - 1; i >= 0; i--) {
                 const sponsored = sponsoredElements[i];
-            Array.from(sponsoredElements).forEach((sponsored) => {
                 const sponsoredContainer = sponsored.closest('.queue, .queue_story');
                 if (sponsoredContainer) {
                     sponsoredContainer.remove();
@@ -42,12 +40,14 @@
         }
     };
     const handleMutations = (mutationsList) => {
-        for (const mutation of mutationsList) {
-            mutation.addedNodes.forEach((node) => {
+        for (let i = 0; i < mutationsList.length; i++) {
+            const mutation = mutationsList[i];
+            for (let j = 0; j < mutation.addedNodes.length; j++) {
+                const node = mutation.addedNodes[j];
                 if (node.nodeType === Node.ELEMENT_NODE) {
                     processNode(node);
                 }
-            });
+            }
         }
     };
     try {

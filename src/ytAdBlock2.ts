@@ -299,12 +299,21 @@
     // Initial scan to remove ads already in the DOM before observer kicks in
     function removeInitialAds(): void {
         if (!enabled) return;
-        document.querySelectorAll(combinedAdSelector).forEach((el) => el.remove());
-        document.querySelectorAll('#dismissible ytd-badge-supported-renderer').forEach((badge) => {
+
+        const initialAds = document.querySelectorAll(combinedAdSelector);
+        for (let i = 0; i < initialAds.length; i++) {
+            initialAds[i].remove();
+        }
+
+        const initialBadges = document.querySelectorAll(
+            '#dismissible ytd-badge-supported-renderer'
+        );
+        for (let i = 0; i < initialBadges.length; i++) {
+            const badge = initialBadges[i];
             if (promotedBadgeRegex.test((badge as HTMLElement).textContent || '')) {
                 badge.closest('ytd-video-renderer,ytd-compact-video-renderer')?.remove();
             }
-        });
+        }
     }
 
     removeInitialAds();
@@ -332,7 +341,8 @@
         }
 
         const skipBtn = document.getElementsByClassName('ytp-ad-skip-button')[0] as
-            HTMLElement | undefined;
+            | HTMLElement
+            | undefined;
         if (skipBtn) skipBtn.click();
     }
 

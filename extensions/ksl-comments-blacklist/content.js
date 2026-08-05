@@ -23,8 +23,10 @@ _global.__kslTestExports = _global.__kslTestExports || {};
     };
     _global.__kslTestExports.processComment = processComment;
     const handleMutations = (mutationsList) => {
-        for (const mutation of mutationsList) {
-            mutation.addedNodes.forEach((node) => {
+        for (let i = 0; i < mutationsList.length; i++) {
+            const mutation = mutationsList[i];
+            for (let j = 0; j < mutation.addedNodes.length; j++) {
+                const node = mutation.addedNodes[j];
                 if (node.nodeType === Node.ELEMENT_NODE) {
                     const el = node;
                     if (el.classList.contains('CommentsList__item')) {
@@ -32,12 +34,12 @@ _global.__kslTestExports = _global.__kslTestExports || {};
                     }
                     if (el.firstElementChild) {
                         const nestedComments = el.getElementsByClassName('CommentsList__item');
-                        for (let i = 0; i < nestedComments.length; i++) {
-                            processComment(nestedComments[i]);
+                        for (let k = 0; k < nestedComments.length; k++) {
+                            processComment(nestedComments[k]);
                         }
                     }
                 }
-            });
+            }
         }
     };
     _global.__kslTestExports.handleMutations = handleMutations;

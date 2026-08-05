@@ -59,8 +59,10 @@ _global.__kslTestExports = _global.__kslTestExports || {};
     const handleMutations: MutationCallback = (mutationsList: MutationRecord[]): void => {
         // ⚡ Bolt: Only process added nodes instead of re-querying the entire DOM list on every mutation
         // This avoids O(N²) scaling as more comments are loaded dynamically
-        for (const mutation of mutationsList) {
-            mutation.addedNodes.forEach((node) => {
+        for (let i = 0; i < mutationsList.length; i++) {
+            const mutation = mutationsList[i];
+            for (let j = 0; j < mutation.addedNodes.length; j++) {
+                const node = mutation.addedNodes[j];
                 if (node.nodeType === Node.ELEMENT_NODE) {
                     const el = node as HTMLElement;
                     if (el.classList.contains('CommentsList__item')) {
@@ -70,12 +72,12 @@ _global.__kslTestExports = _global.__kslTestExports || {};
                         // ⚡ Bolt: Fast path for leaf nodes - avoid querySelectorAll parsing overhead if no children exist
                         const nestedComments = el.getElementsByClassName('CommentsList__item');
                         // ⚡ Bolt: Use standard for loop instead of Array.from() to prevent O(N) array allocation overhead during high-frequency callbacks
-                        for (let i = 0; i < nestedComments.length; i++) {
-                            processComment(nestedComments[i] as HTMLElement);
+                        for (let k = 0; k < nestedComments.length; k++) {
+                            processComment(nestedComments[k] as HTMLElement);
                         }
                     }
                 }
-            });
+            }
         }
     };
     _global.__kslTestExports.handleMutations = handleMutations;
