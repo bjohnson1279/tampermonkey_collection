@@ -252,6 +252,7 @@
         'ytd-banner-promo-renderer',
         'ytd-carousel-ad-renderer',
         'ytd-companion-slot-renderer',
+        '#dismissible ytd-badge-supported-renderer',
     ];
 
     const combinedAdSelector = adSelectors.join(',');
@@ -275,19 +276,19 @@
                         // ⚡ Bolt: Fast path for leaf nodes - avoid querySelectorAll parsing overhead if no children exist
                         const adNodes = el.querySelectorAll(combinedAdSelector);
                         for (let k = 0; k < adNodes.length; k++) {
-                            adNodes[k].remove();
-                        }
-
-                        // Remove "Promoted" sidebar/homepage videos
-                        const badgeNodes = el.querySelectorAll(
-                            '#dismissible ytd-badge-supported-renderer'
-                        );
-                        for (let k = 0; k < badgeNodes.length; k++) {
-                            const badge = badgeNodes[k];
-                            if (promotedBadgeRegex.test((badge as HTMLElement).textContent || '')) {
-                                badge
-                                    .closest('ytd-video-renderer,ytd-compact-video-renderer')
-                                    ?.remove();
+                            const adNode = adNodes[k];
+                            if (adNode.tagName === 'YTD-BADGE-SUPPORTED-RENDERER') {
+                                if (
+                                    promotedBadgeRegex.test(
+                                        (adNode as HTMLElement).textContent || ''
+                                    )
+                                ) {
+                                    adNode
+                                        .closest('ytd-video-renderer,ytd-compact-video-renderer')
+                                        ?.remove();
+                                }
+                            } else {
+                                adNode.remove();
                             }
                         }
                     }
@@ -302,16 +303,13 @@
 
         const initialAds = document.querySelectorAll(combinedAdSelector);
         for (let i = 0; i < initialAds.length; i++) {
-            initialAds[i].remove();
-        }
-
-        const initialBadges = document.querySelectorAll(
-            '#dismissible ytd-badge-supported-renderer'
-        );
-        for (let i = 0; i < initialBadges.length; i++) {
-            const badge = initialBadges[i];
-            if (promotedBadgeRegex.test((badge as HTMLElement).textContent || '')) {
-                badge.closest('ytd-video-renderer,ytd-compact-video-renderer')?.remove();
+            const adNode = initialAds[i];
+            if (adNode.tagName === 'YTD-BADGE-SUPPORTED-RENDERER') {
+                if (promotedBadgeRegex.test((adNode as HTMLElement).textContent || '')) {
+                    adNode.closest('ytd-video-renderer,ytd-compact-video-renderer')?.remove();
+                }
+            } else {
+                adNode.remove();
             }
         }
     }
@@ -341,8 +339,7 @@
         }
 
         const skipBtn = document.getElementsByClassName('ytp-ad-skip-button')[0] as
-            | HTMLElement
-            | undefined;
+            HTMLElement | undefined;
         if (skipBtn) skipBtn.click();
     }
 
