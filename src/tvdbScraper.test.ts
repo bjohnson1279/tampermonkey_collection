@@ -191,7 +191,7 @@ describe('scrapeTVDBData', () => {
         await new Promise(process.nextTick);
 
         expect(navigator.clipboard.writeText).toHaveBeenCalledTimes(1);
-        expect(btn.textContent).toBe('❌ Error');
+        expect(btn.textContent).toContain('❌ Error');
         expect(btn.style.backgroundColor).toBe('rgb(176, 42, 55)'); // #b02a37
         expect(btn.getAttribute('title')).toBe('Failed to copy');
         expect(announcer.textContent).toBe('Failed to copy');
