@@ -98,7 +98,7 @@ export function scrapeTVDBData(): Episode[] {
         if (hasData) {
             btn.innerHTML = `<span>📋 Copy JSON (${countText})</span><kbd aria-hidden="true">Shift+C</kbd>`;
         } else {
-            btn.textContent = '📋 No Data';
+            btn.innerHTML = `<span>📋 No Data</span><kbd aria-hidden="true">Shift+C</kbd>`;
         }
         if (!hasData) btn.setAttribute('aria-disabled', 'true');
         btn.setAttribute(
@@ -109,9 +109,7 @@ export function scrapeTVDBData(): Episode[] {
             'title',
             hasData ? 'Copy JSON to clipboard (Shift+C)' : 'No episodes found to copy'
         );
-        if (hasData) {
-            btn.setAttribute('aria-keyshortcuts', 'Shift+C');
-        }
+        btn.setAttribute('aria-keyshortcuts', 'Shift+C');
 
         const announcer = document.createElement('div');
         announcer.setAttribute('aria-live', 'polite');

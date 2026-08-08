@@ -126,7 +126,7 @@ describe('scrapeTVDBData', () => {
 
         const btn = document.getElementById('tvdb-copy-json-btn') as HTMLButtonElement;
         expect(btn).not.toBeNull();
-        expect(btn?.textContent).toBe('📋 No Data');
+        expect(btn?.textContent).toContain('📋 No Data');
         expect(btn?.getAttribute('aria-label')).toBe('No episodes data found');
         expect(btn?.getAttribute('aria-disabled')).toBe('true');
     });
