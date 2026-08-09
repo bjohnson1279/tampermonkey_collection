@@ -18,7 +18,8 @@ class YouTubeAdRemover {
                 return;
             }
             const callback = (mutationsList) => {
-                for (const mutation of mutationsList) {
+                for (let i = 0; i < mutationsList.length; i++) {
+                    const mutation = mutationsList[i];
                     if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
                         this.removeAds(mutation.addedNodes);
                     }
@@ -41,11 +42,6 @@ class YouTubeAdRemover {
                 const adItem = adItems[i];
                 const videoItem = adItem.closest('ytd-rich-item-renderer, ytd-video-renderer');
                 if (videoItem) {
-                    const contentDiv = videoItem.querySelector('#content, #dismissible');
-                    adItem.remove();
-                    if (contentDiv && contentDiv.contains(adItem)) {
-                        contentDiv.remove();
-                    }
                     videoItem.remove();
                 }
             }
@@ -58,10 +54,6 @@ class YouTubeAdRemover {
                     if (element.matches('ytd-rich-item-renderer, ytd-video-renderer')) {
                         const adItem = element.getElementsByClassName(this.AD_CLASS)[0];
                         if (adItem) {
-                            const contentDiv = element.querySelector('#content, #dismissible');
-                            adItem.remove();
-                            if (contentDiv && contentDiv.contains(adItem))
-                                contentDiv.remove();
                             element.remove();
                         }
                     }
@@ -71,11 +63,6 @@ class YouTubeAdRemover {
                             const adItem = adItems[i];
                             const videoItem = adItem.closest('ytd-rich-item-renderer, ytd-video-renderer');
                             if (videoItem) {
-                                const contentDiv = videoItem.querySelector('#content, #dismissible');
-                                adItem.remove();
-                                if (contentDiv && contentDiv.contains(adItem)) {
-                                    contentDiv.remove();
-                                }
                                 videoItem.remove();
                             }
                         }

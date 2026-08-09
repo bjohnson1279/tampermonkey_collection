@@ -35,7 +35,9 @@ class YouTubeAdRemover {
 
             // Callback function to execute when mutations are observed
             const callback: MutationCallback = (mutationsList) => {
-                for (const mutation of mutationsList) {
+                // ⚡ Bolt: Use a standard for loop instead of for...of to avoid iterator allocation overhead in high-frequency observer events
+                for (let i = 0; i < mutationsList.length; i++) {
+                    const mutation = mutationsList[i];
                     if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
                         this.removeAds(mutation.addedNodes);
                     }
@@ -70,11 +72,8 @@ class YouTubeAdRemover {
                 const adItem = adItems[i];
                 const videoItem = adItem.closest('ytd-rich-item-renderer, ytd-video-renderer');
                 if (videoItem) {
-                    const contentDiv = videoItem.querySelector('#content, #dismissible');
-                    adItem.remove();
-                    if (contentDiv && contentDiv.contains(adItem)) {
-                        contentDiv.remove();
-                    }
+                    // ⚡ Bolt: Removed unnecessary querySelector and child `.remove()` calls.
+                    // Removing the ancestor implicitly removes its entire subtree, saving O(N) DOM traversal.
                     videoItem.remove();
                 }
             }
@@ -90,10 +89,8 @@ class YouTubeAdRemover {
                         // ⚡ Bolt: Replace querySelector('.class') with getElementsByClassName('class')[0] for O(1) live collection lookup instead of O(N) tree traversal inside the MutationObserver
                         const adItem = element.getElementsByClassName(this.AD_CLASS)[0];
                         if (adItem) {
-                            const contentDiv = element.querySelector('#content, #dismissible');
-
-                            adItem.remove();
-                            if (contentDiv && contentDiv.contains(adItem)) contentDiv.remove();
+                            // ⚡ Bolt: Removed unnecessary querySelector and child `.remove()` calls.
+                            // Removing the ancestor implicitly removes its entire subtree, saving O(N) DOM traversal.
                             element.remove();
                         }
                     } else if (element.firstElementChild) {
@@ -106,12 +103,8 @@ class YouTubeAdRemover {
                                 'ytd-rich-item-renderer, ytd-video-renderer'
                             );
                             if (videoItem) {
-                                const contentDiv =
-                                    videoItem.querySelector('#content, #dismissible');
-                                adItem.remove();
-                                if (contentDiv && contentDiv.contains(adItem)) {
-                                    contentDiv.remove();
-                                }
+                                // ⚡ Bolt: Removed unnecessary querySelector and child `.remove()` calls.
+                                // Removing the ancestor implicitly removes its entire subtree, saving O(N) DOM traversal.
                                 videoItem.remove();
                             }
                         }

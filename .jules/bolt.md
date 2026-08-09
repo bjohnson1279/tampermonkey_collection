@@ -141,3 +141,7 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2024-08-06 - Consolidate Multiple QuerySelectorAll Traversals
 **Learning:** Performing multiple independent `querySelectorAll` calls within a high-frequency loop (like a `MutationObserver` processing added nodes) causes redundant O(N) DOM tree traversals. While combining CSS selectors with a comma (e.g., `querySelectorAll('a, b')`) solves the traversal issue, it groups distinct elements together.
 **Action:** Combine selectors into a single comma-separated string for `querySelectorAll` to minimize DOM traversals. Inside the loop, differentiate the returned nodes by evaluating their `tagName` property (which is always uppercase for HTML tags) to safely execute type-specific logic while maintaining O(1) traversal benefits.
+
+## 2024-08-09 - O(N) DOM Traversal Overhead inside MutationObserver
+**Learning:** Calling `.remove()` on multiple child nodes explicitly is unnecessary and highly inefficient when you are immediately removing their shared ancestor node. Removing the ancestor implicitly removes its entire subtree from the document, saving O(N) DOM traversal and reducing layout thrashing.
+**Action:** When removing a parent DOM element, do not explicitly query for and remove its child elements first. Remove the ancestor directly.
