@@ -28,6 +28,7 @@ describe('searchEngineFilter', () => {
                     attributes: {} as any,
                     style: { cssText: '' },
                     textContent: '',
+                    innerHTML: '',
                     setAttribute: jest.fn().mockImplementation((attr, val) => {
                         el.attributes[attr] = val;
                     }),
@@ -119,7 +120,8 @@ describe('searchEngineFilter', () => {
         window.location.href = 'https://www.google.com/?q=hello+asdf+world';
 
         const mockToast = {
-            textContent: '🚫 Search term blocked. Redirecting to home...',
+            innerHTML:
+                '<span aria-hidden="true">🚫</span> <span>Search term blocked. Redirecting to home...</span>',
             setAttribute: jest.fn(),
             style: { cssText: '', opacity: '', transform: '' },
             offsetHeight: 20,

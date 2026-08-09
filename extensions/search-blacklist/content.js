@@ -57,8 +57,12 @@
                             box-shadow: 0 4px 12px rgba(0,0,0,0.25);
                             text-align: center;
                             transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
                         `;
-                        toast.textContent = '🚫 Search term blocked. Redirecting to home...';
+                        toast.innerHTML =
+                            '<span aria-hidden="true">🚫</span> <span>Search term blocked. Redirecting to home...</span>';
                         document.body.appendChild(toast);
                         void toast.offsetHeight;
                         toast.style.opacity = '1';
