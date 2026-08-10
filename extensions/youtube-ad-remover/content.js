@@ -18,7 +18,8 @@ class YouTubeAdRemover {
                 return;
             }
             const callback = (mutationsList) => {
-                for (const mutation of mutationsList) {
+                for (let i = 0; i < mutationsList.length; i++) {
+                    const mutation = mutationsList[i];
                     if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
                         this.removeAds(mutation.addedNodes);
                     }

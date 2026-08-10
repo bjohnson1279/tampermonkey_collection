@@ -35,7 +35,9 @@ class YouTubeAdRemover {
 
             // Callback function to execute when mutations are observed
             const callback: MutationCallback = (mutationsList) => {
-                for (const mutation of mutationsList) {
+                // ⚡ Bolt: Use standard for loop instead of for...of to prevent iterator allocation overhead in high-frequency MutationObserver callbacks
+                for (let i = 0; i < mutationsList.length; i++) {
+                    const mutation = mutationsList[i];
                     if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
                         this.removeAds(mutation.addedNodes);
                     }
