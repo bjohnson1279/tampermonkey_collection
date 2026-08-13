@@ -141,3 +141,7 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2024-08-06 - Consolidate Multiple QuerySelectorAll Traversals
 **Learning:** Performing multiple independent `querySelectorAll` calls within a high-frequency loop (like a `MutationObserver` processing added nodes) causes redundant O(N) DOM tree traversals. While combining CSS selectors with a comma (e.g., `querySelectorAll('a, b')`) solves the traversal issue, it groups distinct elements together.
 **Action:** Combine selectors into a single comma-separated string for `querySelectorAll` to minimize DOM traversals. Inside the loop, differentiate the returned nodes by evaluating their `tagName` property (which is always uppercase for HTML tags) to safely execute type-specific logic while maintaining O(1) traversal benefits.
+
+## 2024-08-07 - Avoid for...of loops in MutationObserver callbacks
+**Learning:** Using `for...of` loops in high-frequency execution paths (like `MutationObserver` callbacks) creates unnecessary iterator allocation overhead on every tick. This forces the garbage collector to work harder to clean up the allocated iterators, which can lead to UI jank.
+**Action:** Always prefer standard `for` loops (e.g., `for (let i = 0; i < list.length; i++)`) over `for...of` loops when iterating through collections (like `mutationsList` or `addedNodes`) in performance-critical or high-frequency code paths.
