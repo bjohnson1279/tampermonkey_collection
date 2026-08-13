@@ -33,11 +33,13 @@ export function scrapeTVDBData(): Episode[] {
         const ep = episodes[j] as HTMLElement;
         // ⚡ Bolt: Replace querySelector('.class') with getElementsByClassName('class')[0] for O(1) live collection lookup
         const heading = ep.getElementsByClassName('list-group-item-heading')[0] as
-            HTMLElement | undefined;
+            | HTMLElement
+            | undefined;
         if (!heading) continue;
 
         const epLabelElement = heading.getElementsByClassName('episode-label')[0] as
-            HTMLElement | undefined;
+            | HTMLElement
+            | undefined;
         const epLabel = epLabelElement?.textContent?.trim() || '';
         const matches = epLabel.match(EPISODE_NUM_REGEX) || [];
 
@@ -45,7 +47,8 @@ export function scrapeTVDBData(): Episode[] {
         const epTitle = titleLink?.textContent?.trim() || '';
 
         const itemTextElement = ep.getElementsByClassName('list-group-item-text')[0] as
-            HTMLElement | undefined;
+            | HTMLElement
+            | undefined;
         const itemText = itemTextElement?.textContent?.trim() || '';
 
         let itemDate = '';
@@ -96,9 +99,9 @@ export function scrapeTVDBData(): Episode[] {
         const hasData = episodesData.length > 0;
         const countText = `${episodesData.length} episode${episodesData.length === 1 ? '' : 's'}`;
         if (hasData) {
-            btn.innerHTML = `<span>📋 Copy JSON (${countText})</span><kbd aria-hidden="true">Shift+C</kbd>`;
+            btn.innerHTML = `<span aria-hidden="true">📋</span> <span>Copy JSON (${countText})</span><kbd aria-hidden="true">Shift+C</kbd>`;
         } else {
-            btn.innerHTML = `<span>📋 No Data</span><kbd aria-hidden="true">Shift+C</kbd>`;
+            btn.innerHTML = `<span aria-hidden="true">📋</span> <span>No Data</span><kbd aria-hidden="true">Shift+C</kbd>`;
         }
         if (!hasData) btn.setAttribute('aria-disabled', 'true');
         btn.setAttribute(
@@ -124,20 +127,20 @@ export function scrapeTVDBData(): Episode[] {
             btn.setAttribute('aria-disabled', 'true');
             btn.setAttribute('data-feedback', 'true');
 
-            btn.innerHTML = `<span>⏳ Copying...</span><kbd aria-hidden="true">Shift+C</kbd>`;
+            btn.innerHTML = `<span aria-hidden="true">⏳</span> <span>Copying...</span><kbd aria-hidden="true">Shift+C</kbd>`;
             btn.setAttribute('title', 'Copying to clipboard...');
             btn.setAttribute('aria-label', 'Copying to clipboard...');
             announcer.textContent = 'Copying to clipboard...';
 
             try {
                 await navigator.clipboard.writeText(JSON.stringify(episodesData, null, 2));
-                btn.innerHTML = `<span>✅ Copied!</span><kbd aria-hidden="true">Shift+C</kbd>`;
+                btn.innerHTML = `<span aria-hidden="true">✅</span> <span>Copied!</span><kbd aria-hidden="true">Shift+C</kbd>`;
                 btn.style.backgroundColor = '#146c43';
                 btn.setAttribute('title', 'Successfully copied');
                 btn.setAttribute('aria-label', 'Successfully copied');
                 announcer.textContent = 'Copied to clipboard';
             } catch {
-                btn.innerHTML = `<span>❌ Error</span><kbd aria-hidden="true">Shift+C</kbd>`;
+                btn.innerHTML = `<span aria-hidden="true">❌</span> <span>Error</span><kbd aria-hidden="true">Shift+C</kbd>`;
                 btn.style.backgroundColor = '#b02a37';
                 btn.setAttribute('title', 'Failed to copy');
                 btn.setAttribute('aria-label', 'Failed to copy');
@@ -145,7 +148,7 @@ export function scrapeTVDBData(): Episode[] {
             }
             timeoutId = window.setTimeout(() => {
                 const countText = `${episodesData.length} episode${episodesData.length === 1 ? '' : 's'}`;
-                btn.innerHTML = `<span>📋 Copy JSON (${countText})</span><kbd aria-hidden="true">Shift+C</kbd>`;
+                btn.innerHTML = `<span aria-hidden="true">📋</span> <span>Copy JSON (${countText})</span><kbd aria-hidden="true">Shift+C</kbd>`;
                 btn.style.backgroundColor = '#0056b3';
                 btn.setAttribute('title', 'Copy JSON to clipboard (Shift+C)');
                 btn.setAttribute('aria-label', `Copy ${countText} data to clipboard`);

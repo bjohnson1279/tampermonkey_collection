@@ -126,7 +126,8 @@ describe('scrapeTVDBData', () => {
 
         const btn = document.getElementById('tvdb-copy-json-btn') as HTMLButtonElement;
         expect(btn).not.toBeNull();
-        expect(btn?.textContent).toContain('📋 No Data');
+        expect(btn?.textContent).toContain('📋');
+        expect(btn?.textContent).toContain('No Data');
         expect(btn?.getAttribute('aria-label')).toBe('No episodes data found');
         expect(btn?.getAttribute('aria-disabled')).toBe('true');
     });
@@ -147,7 +148,8 @@ describe('scrapeTVDBData', () => {
 
         const btn = document.getElementById('tvdb-copy-json-btn') as HTMLButtonElement;
         expect(btn).not.toBeNull();
-        expect(btn?.textContent).toContain('📋 Copy JSON (1 episode)');
+        expect(btn?.textContent).toContain('📋');
+        expect(btn?.textContent).toContain('Copy JSON (1 episode)');
         expect(btn?.textContent).toContain('Shift+C');
         expect(btn?.innerHTML).toContain('<kbd');
         expect(btn?.getAttribute('aria-label')).toBe('Copy 1 episode data to clipboard');
@@ -191,7 +193,8 @@ describe('scrapeTVDBData', () => {
         await new Promise(process.nextTick);
 
         expect(navigator.clipboard.writeText).toHaveBeenCalledTimes(1);
-        expect(btn.textContent).toContain('❌ Error');
+        expect(btn.textContent).toContain('❌');
+        expect(btn.textContent).toContain('Error');
         expect(btn.style.backgroundColor).toBe('rgb(176, 42, 55)'); // #b02a37
         expect(btn.getAttribute('title')).toBe('Failed to copy');
         expect(announcer.textContent).toBe('Failed to copy');
