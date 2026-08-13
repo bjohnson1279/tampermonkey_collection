@@ -252,7 +252,8 @@
             return;
         const btn = document.createElement('button');
         btn.id = 'adblock-toggle';
-        btn.innerHTML = `<span>${enabled ? '🛡️' : '⚠️'} AdBlock: ${enabled ? 'ON' : 'OFF'}</span><kbd aria-hidden="true">Shift+A</kbd>`;
+        const icon1 = enabled ? '🛡️' : '⚠️';
+        btn.innerHTML = `<span aria-hidden="true">${icon1}</span> <span>AdBlock: ${enabled ? 'ON' : 'OFF'}</span><kbd aria-hidden="true">Shift+A</kbd>`;
         btn.setAttribute('aria-label', `Toggle AdBlock`);
         btn.setAttribute('aria-pressed', enabled.toString());
         btn.setAttribute('title', `${enabled ? 'Disable' : 'Enable'} AdBlock (Shift+A)`);
@@ -314,7 +315,7 @@
         btn.style.backgroundColor = enabled ? '#cc0000' : '#444';
     }
     let toastTimeout;
-    function showToast(message, isEnabled) {
+    function showToast(icon, message, isEnabled) {
         let toast = document.getElementById('adblock-toast');
         if (!toast) {
             toast = document.createElement('div');
@@ -337,13 +338,16 @@
                 transform: translateY(20px);
                 transition: opacity 0.3s ease-out, transform 0.3s ease-out, background-color 0.3s;
                 pointer-events: none;
+                display: flex;
+                align-items: center;
+                gap: 8px;
             `;
             document.body.appendChild(toast);
         }
         else {
             toast.style.backgroundColor = isEnabled ? '#cc0000' : '#444';
         }
-        toast.textContent = message;
+        toast.innerHTML = `<span aria-hidden="true">${icon}</span> <span>${message}</span>`;
         void toast.offsetHeight;
         toast.style.opacity = '1';
         toast.style.transform = 'translateY(0)';
@@ -360,7 +364,8 @@
         saveState();
         const btn = document.getElementById('adblock-toggle');
         if (btn) {
-            btn.innerHTML = `<span>${enabled ? '🛡️' : '⚠️'} AdBlock: ${enabled ? 'ON' : 'OFF'}</span><kbd aria-hidden="true">Shift+A</kbd>`;
+            const icon2 = enabled ? '🛡️' : '⚠️';
+            btn.innerHTML = `<span aria-hidden="true">${icon2}</span> <span>AdBlock: ${enabled ? 'ON' : 'OFF'}</span><kbd aria-hidden="true">Shift+A</kbd>`;
             btn.setAttribute('aria-pressed', enabled.toString());
             btn.setAttribute('title', `${enabled ? 'Disable' : 'Enable'} AdBlock (Shift+A)`);
             styleButtonDynamic(btn);
@@ -369,7 +374,7 @@
         if (announcer) {
             announcer.textContent = `AdBlock is now ${enabled ? 'ON' : 'OFF'}`;
         }
-        showToast(`${enabled ? '🛡️' : '⚠️'} AdBlock is now ${enabled ? 'ON' : 'OFF'}`, enabled);
+        showToast(enabled ? '🛡️' : '⚠️', `AdBlock is now ${enabled ? 'ON' : 'OFF'}`, enabled);
         console.log(`YouTube AdBlock is now ${enabled ? 'ENABLED' : 'DISABLED'}`);
     }
     document.addEventListener('keydown', (e) => {
