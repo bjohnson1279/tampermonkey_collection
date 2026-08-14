@@ -72,11 +72,6 @@ class YouTubeAdRemover {
                 const adItem = adItems[i];
                 const videoItem = adItem.closest('ytd-rich-item-renderer, ytd-video-renderer');
                 if (videoItem) {
-                    const contentDiv = videoItem.querySelector('#content, #dismissible');
-                    adItem.remove();
-                    if (contentDiv && contentDiv.contains(adItem)) {
-                        contentDiv.remove();
-                    }
                     videoItem.remove();
                 }
             }
@@ -92,10 +87,6 @@ class YouTubeAdRemover {
                         // ⚡ Bolt: Replace querySelector('.class') with getElementsByClassName('class')[0] for O(1) live collection lookup instead of O(N) tree traversal inside the MutationObserver
                         const adItem = element.getElementsByClassName(this.AD_CLASS)[0];
                         if (adItem) {
-                            const contentDiv = element.querySelector('#content, #dismissible');
-
-                            adItem.remove();
-                            if (contentDiv && contentDiv.contains(adItem)) contentDiv.remove();
                             element.remove();
                         }
                     } else if (element.firstElementChild) {
@@ -108,12 +99,6 @@ class YouTubeAdRemover {
                                 'ytd-rich-item-renderer, ytd-video-renderer'
                             );
                             if (videoItem) {
-                                const contentDiv =
-                                    videoItem.querySelector('#content, #dismissible');
-                                adItem.remove();
-                                if (contentDiv && contentDiv.contains(adItem)) {
-                                    contentDiv.remove();
-                                }
                                 videoItem.remove();
                             }
                         }

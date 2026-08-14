@@ -42,11 +42,6 @@ class YouTubeAdRemover {
                 const adItem = adItems[i];
                 const videoItem = adItem.closest('ytd-rich-item-renderer, ytd-video-renderer');
                 if (videoItem) {
-                    const contentDiv = videoItem.querySelector('#content, #dismissible');
-                    adItem.remove();
-                    if (contentDiv && contentDiv.contains(adItem)) {
-                        contentDiv.remove();
-                    }
                     videoItem.remove();
                 }
             }
@@ -59,10 +54,6 @@ class YouTubeAdRemover {
                     if (element.matches('ytd-rich-item-renderer, ytd-video-renderer')) {
                         const adItem = element.getElementsByClassName(this.AD_CLASS)[0];
                         if (adItem) {
-                            const contentDiv = element.querySelector('#content, #dismissible');
-                            adItem.remove();
-                            if (contentDiv && contentDiv.contains(adItem))
-                                contentDiv.remove();
                             element.remove();
                         }
                     }
@@ -72,11 +63,6 @@ class YouTubeAdRemover {
                             const adItem = adItems[i];
                             const videoItem = adItem.closest('ytd-rich-item-renderer, ytd-video-renderer');
                             if (videoItem) {
-                                const contentDiv = videoItem.querySelector('#content, #dismissible');
-                                adItem.remove();
-                                if (contentDiv && contentDiv.contains(adItem)) {
-                                    contentDiv.remove();
-                                }
                                 videoItem.remove();
                             }
                         }
