@@ -294,13 +294,14 @@
     function styleButtonStatic(btn) {
         btn.style.cssText = `
             margin-left: 12px;
-            padding: 4px 8px;
+            height: 36px;
+            padding: 0 16px;
             font-size: 14px;
             font-family: "Roboto", "Arial", sans-serif;
             font-weight: 500;
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 18px;
             cursor: pointer;
             user-select: none;
             -webkit-user-select: none;
