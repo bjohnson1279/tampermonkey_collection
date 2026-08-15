@@ -22,8 +22,16 @@ export const getQueryParams = (urlString: string): QueryParams => {
 
         // Convert URLSearchParams to a plain object
         for (const [key, value] of params.entries()) {
-            // 🛡️ Sentinel: Prevent Prototype Pollution
-            if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+            // 🛡️ Sentinel: Prevent Prototype Pollution downstream by blocking all dangerous object prototype properties
+            if (
+                key === '__proto__' ||
+                key === 'constructor' ||
+                key === 'prototype' ||
+                key === '__defineGetter__' ||
+                key === '__defineSetter__' ||
+                key === '__lookupGetter__' ||
+                key === '__lookupSetter__'
+            ) {
                 continue;
             }
             result[key] = value;
