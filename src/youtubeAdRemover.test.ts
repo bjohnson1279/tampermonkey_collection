@@ -127,8 +127,8 @@ describe('YouTubeAdRemover', () => {
                     'ytd-ad-slot-renderer'
                 );
 
-                expect(mockAdItem1.remove).toHaveBeenCalled();
-                expect(mockContentDiv1.remove).toHaveBeenCalled();
+                expect(mockAdItem1.remove).not.toHaveBeenCalled();
+                expect(mockContentDiv1.remove).not.toHaveBeenCalled();
                 expect(mockVideoItem1.remove).toHaveBeenCalled();
             });
         });
@@ -164,10 +164,6 @@ describe('YouTubeAdRemover', () => {
                         if (className === 'ytd-ad-slot-renderer') return [mockAdItem];
                         return [];
                     }),
-                    querySelector: jest.fn().mockImplementation((selector) => {
-                        if (selector === '#content, #dismissible') return mockContentDiv;
-                        return null;
-                    }),
                     remove: jest.fn(),
                 };
 
@@ -183,8 +179,8 @@ describe('YouTubeAdRemover', () => {
                 expect(mockVideoNode.getElementsByClassName).toHaveBeenCalledWith(
                     'ytd-ad-slot-renderer'
                 );
-                expect(mockAdItem.remove).toHaveBeenCalled();
-                expect(mockContentDiv.remove).toHaveBeenCalled();
+                expect(mockAdItem.remove).not.toHaveBeenCalled();
+                expect(mockContentDiv.remove).not.toHaveBeenCalled();
                 expect(mockVideoNode.remove).toHaveBeenCalled();
             });
 
@@ -196,10 +192,6 @@ describe('YouTubeAdRemover', () => {
 
                 const mockVideoItem = {
                     remove: jest.fn(),
-                    querySelector: jest.fn().mockImplementation((selector) => {
-                        if (selector === '#content, #dismissible') return mockContentDiv;
-                        return null;
-                    }),
                 };
 
                 const mockAdItem = {
@@ -248,8 +240,8 @@ describe('YouTubeAdRemover', () => {
                 expect(mockContainerNode.getElementsByClassName).toHaveBeenCalledWith(
                     'ytd-ad-slot-renderer'
                 );
-                expect(mockAdItem.remove).toHaveBeenCalled();
-                expect(mockContentDiv.remove).toHaveBeenCalled();
+                expect(mockAdItem.remove).not.toHaveBeenCalled();
+                expect(mockContentDiv.remove).not.toHaveBeenCalled();
                 expect(mockVideoItem.remove).toHaveBeenCalled();
 
                 // Text node is ignored

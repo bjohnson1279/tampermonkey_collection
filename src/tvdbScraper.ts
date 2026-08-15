@@ -33,13 +33,11 @@ export function scrapeTVDBData(): Episode[] {
         const ep = episodes[j] as HTMLElement;
         // ⚡ Bolt: Replace querySelector('.class') with getElementsByClassName('class')[0] for O(1) live collection lookup
         const heading = ep.getElementsByClassName('list-group-item-heading')[0] as
-            | HTMLElement
-            | undefined;
+            HTMLElement | undefined;
         if (!heading) continue;
 
         const epLabelElement = heading.getElementsByClassName('episode-label')[0] as
-            | HTMLElement
-            | undefined;
+            HTMLElement | undefined;
         const epLabel = epLabelElement?.textContent?.trim() || '';
         const matches = epLabel.match(EPISODE_NUM_REGEX) || [];
 
@@ -47,8 +45,7 @@ export function scrapeTVDBData(): Episode[] {
         const epTitle = titleLink?.textContent?.trim() || '';
 
         const itemTextElement = ep.getElementsByClassName('list-group-item-text')[0] as
-            | HTMLElement
-            | undefined;
+            HTMLElement | undefined;
         const itemText = itemTextElement?.textContent?.trim() || '';
 
         let itemDate = '';
