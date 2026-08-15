@@ -145,3 +145,7 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2024-08-07 - Avoid for...of loops in MutationObserver callbacks
 **Learning:** Using `for...of` loops in high-frequency execution paths (like `MutationObserver` callbacks) creates unnecessary iterator allocation overhead on every tick. This forces the garbage collector to work harder to clean up the allocated iterators, which can lead to UI jank.
 **Action:** Always prefer standard `for` loops (e.g., `for (let i = 0; i < list.length; i++)`) over `for...of` loops when iterating through collections (like `mutationsList` or `addedNodes`) in performance-critical or high-frequency code paths.
+
+## 2024-08-15 - Redundant descendant removal in DOM manipulation
+**Learning:** When removing a parent DOM element, explicit queries and explicit removals of its child elements are redundant and waste CPU cycles, as removing the ancestor implicitly removes its entire subtree from the document, saving O(N) DOM traversal and reducing layout thrashing.
+**Action:** When refactoring element removal logic, identify and eliminate redundant `querySelector` and `remove()` calls on descendants prior to removing their parent container. Ensure test assertions for those redundant actions are also removed or set to `not.toHaveBeenCalled()`.
