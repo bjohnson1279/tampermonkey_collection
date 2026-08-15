@@ -15,11 +15,13 @@ describe('getQueryParams', () => {
     // Security cases
     it('should prevent prototype pollution', () => {
         const url =
-            'https://example.com/page?__proto__=polluted&constructor=polluted&prototype=polluted&normal=true';
+            'https://example.com/page?__proto__=polluted&constructor=polluted&prototype=polluted&__defineGetter__=polluted&__defineSetter__=polluted&normal=true';
         const params = getQueryParams(url) as any;
 
         expect(params).toEqual({ normal: 'true' });
         expect(params.__proto__).toBeUndefined();
+        expect(params.__defineGetter__).toBeUndefined();
+        expect(params.__defineSetter__).toBeUndefined();
         expect(({} as any).polluted).toBeUndefined();
     });
     // Edge cases
