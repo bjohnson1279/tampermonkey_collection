@@ -9,3 +9,7 @@
 ## 2024-08-15 - Match Native UI for Aesthetics and Accessibility
 **Learning:** When injecting custom UI components (like toggle buttons) into a host application, using arbitrary small padding often results in touch targets that fail WCAG minimum size guidelines (44x44px or native equivalent).
 **Action:** Always inspect the host application's native UI design tokens (e.g., YouTube's 36px pill buttons with 18px border radius) and replicate their dimensions and padding to simultaneously achieve aesthetic harmonization and resolve touch target accessibility issues.
+
+## 2024-08-16 - Respect prefers-reduced-motion
+**Learning:** When injecting animated UI elements (like toasts or buttons with transitions), failing to respect the user's system-level motion preferences can trigger motion sickness and violate accessibility guidelines (WCAG 2.3.3 Animation from Interactions).
+**Action:** Always conditionally disable CSS transitions and animations using `@media (prefers-reduced-motion: reduce)` for injected `<style>` blocks, or `window.matchMedia('(prefers-reduced-motion: reduce)').matches` for inline styles.
