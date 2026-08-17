@@ -18,6 +18,7 @@ describe('searchEngineFilter', () => {
                     this.href = url;
                 }),
             },
+            matchMedia: jest.fn().mockReturnValue({ matches: false }),
         };
 
         // Polyfill document for this test context without using @jest-environment jsdom

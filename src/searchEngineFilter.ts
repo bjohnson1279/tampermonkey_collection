@@ -91,7 +91,7 @@ interface SearchEngines {
                             z-index: 2147483647;
                             box-shadow: 0 4px 12px rgba(0,0,0,0.25);
                             text-align: center;
-                            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+                            ${window.matchMedia('(prefers-reduced-motion: reduce)').matches ? '' : 'transition: opacity 0.3s ease-out, transform 0.3s ease-out;'}
                             display: flex;
                             align-items: center;
                             gap: 8px;

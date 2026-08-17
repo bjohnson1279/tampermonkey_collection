@@ -271,6 +271,10 @@
                 #adblock-toggle:focus-visible { outline: 2px solid var(--yt-spec-text-primary, CanvasText); outline-offset: 2px; }
                 #adblock-toggle:active { transform: scale(0.95); }
                 #adblock-toggle kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; background-color: rgba(255, 255, 255, 0.2); border-radius: 4px; padding: 2px 6px; font-size: 11px; font-weight: 500; letter-spacing: 0.5px; border: 1px solid rgba(255, 255, 255, 0.3); }
+                @media (prefers-reduced-motion: reduce) {
+                    #adblock-toggle { transition: none !important; }
+                    #adblock-toast { transition: none !important; }
+                }
             `;
             document.head.appendChild(style);
         }
