@@ -1,7 +1,7 @@
 "use strict";
 class YouTubeAdRemover {
     constructor() {
-        this.TARGET_NODE_SELECTOR = '#contents';
+        this.TARGET_NODE_ID = 'contents';
         this.AD_CLASS = 'ytd-ad-slot-renderer';
         this.INITIAL_DELAY_MS = 2000;
         this.observer = null;
@@ -12,9 +12,9 @@ class YouTubeAdRemover {
     }
     startWatching() {
         window.setTimeout(() => {
-            const targetNode = document.querySelector(this.TARGET_NODE_SELECTOR);
+            const targetNode = document.getElementById(this.TARGET_NODE_ID);
             if (!targetNode) {
-                console.error(`Could not find the target node: ${this.TARGET_NODE_SELECTOR}`);
+                console.error(`Could not find the target node: #${this.TARGET_NODE_ID}`);
                 return;
             }
             const callback = (mutationsList) => {
