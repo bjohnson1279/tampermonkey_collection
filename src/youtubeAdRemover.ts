@@ -10,7 +10,7 @@
 // ==/UserScript==
 
 class YouTubeAdRemover {
-    private readonly TARGET_NODE_SELECTOR = '#contents';
+    private readonly TARGET_NODE_ID = 'contents';
     private readonly AD_CLASS = 'ytd-ad-slot-renderer';
     private readonly INITIAL_DELAY_MS = 2000;
     private observer: MutationObserver | null = null;
@@ -26,10 +26,11 @@ class YouTubeAdRemover {
     private startWatching(): void {
         // Wait for the page to load and then start observing
         window.setTimeout(() => {
-            const targetNode = document.querySelector(this.TARGET_NODE_SELECTOR);
+            // ⚡ Bolt: Replace querySelector('#id') with getElementById('id') for O(1) initialization speed instead of O(N) DOM traversal
+            const targetNode = document.getElementById(this.TARGET_NODE_ID);
 
             if (!targetNode) {
-                console.error(`Could not find the target node: ${this.TARGET_NODE_SELECTOR}`);
+                console.error(`Could not find the target node: #${this.TARGET_NODE_ID}`);
                 return;
             }
 

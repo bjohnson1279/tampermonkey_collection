@@ -14,6 +14,7 @@ describe('YouTubeAdRemover', () => {
             readyState: 'complete',
             addEventListener: jest.fn(),
             querySelector: jest.fn(),
+            getElementById: jest.fn(),
             querySelectorAll: jest.fn().mockReturnValue([]),
             getElementsByClassName: jest.fn().mockReturnValue([]),
             createElement: jest.fn().mockImplementation((tag) => ({ tag, appendChild: jest.fn() })),
@@ -54,7 +55,7 @@ describe('YouTubeAdRemover', () => {
 
     describe('Initialization and Teardown', () => {
         it('should log error and abort gracefully if target node (#contents) is not found', () => {
-            (global.document.querySelector as jest.Mock).mockReturnValue(null);
+            (global.document.getElementById as jest.Mock).mockReturnValue(null);
 
             adRemover = new ytModule.YouTubeAdRemover();
             expect(console.error).toHaveBeenCalledWith('Could not find the target node: #contents');
@@ -63,7 +64,7 @@ describe('YouTubeAdRemover', () => {
 
         it('should start MutationObserver on #contents and perform initial check when initialized', () => {
             const contents = { id: 'contents' };
-            (global.document.querySelector as jest.Mock).mockReturnValue(contents);
+            (global.document.getElementById as jest.Mock).mockReturnValue(contents);
 
             const observeSpy = jest.fn();
             (global as any).MutationObserver = class {
@@ -87,7 +88,7 @@ describe('YouTubeAdRemover', () => {
         describe('Fallback Querying', () => {
             it('should query ad items and process them when no addedNodes are provided', () => {
                 const contents = { id: 'contents' };
-                (global.document.querySelector as jest.Mock).mockReturnValue(contents);
+                (global.document.getElementById as jest.Mock).mockReturnValue(contents);
 
                 (global as any).MutationObserver = class {
                     observe = jest.fn();
@@ -138,7 +139,7 @@ describe('YouTubeAdRemover', () => {
 
             beforeEach(() => {
                 const contents = { id: 'contents' };
-                (global.document.querySelector as jest.Mock).mockReturnValue(contents);
+                (global.document.getElementById as jest.Mock).mockReturnValue(contents);
 
                 (global as any).MutationObserver = class {
                     observe = jest.fn();

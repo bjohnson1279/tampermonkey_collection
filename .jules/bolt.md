@@ -149,3 +149,6 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2024-08-15 - Redundant descendant removal in DOM manipulation
 **Learning:** When removing a parent DOM element, explicit queries and explicit removals of its child elements are redundant and waste CPU cycles, as removing the ancestor implicitly removes its entire subtree from the document, saving O(N) DOM traversal and reducing layout thrashing.
 **Action:** When refactoring element removal logic, identify and eliminate redundant `querySelector` and `remove()` calls on descendants prior to removing their parent container. Ensure test assertions for those redundant actions are also removed or set to `not.toHaveBeenCalled()`.
+## 2024-08-16 - Replace querySelector with getElementById for ID selectors
+**Learning:** `querySelector('#id')` uses the generic CSS selector parser which is flexible but slower (O(N) traversal overhead in some engines) compared to `getElementById('id')`, which performs a direct O(1) hash map lookup.
+**Action:** When searching for an element by its ID, always replace `querySelector('#id')` with `getElementById('id')` to optimize initialization or lookup speed, especially in performance-critical code paths.
