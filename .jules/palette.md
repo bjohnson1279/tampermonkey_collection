@@ -1,3 +1,19 @@
+## 2024-05-24 - Prevent Layout Shifts on Button State Changes
+**Learning:** When updating the text of a button that contains nested elements (like a `<kbd>` tag for a keyboard shortcut), assigning to `.textContent` destroys all child elements, causing abrupt layout shifts and loss of contextual hints.
+**Action:** Always use `.innerHTML` to update text alongside nested elements like `<kbd>`, and wrap the dynamic text in a `<span>` to ensure styling and flexbox layouts remain consistent across state changes.
+
+## 2026-08-09 - Accessible Toast Notifications
+**Learning:** Emojis injected directly into toast notification text nodes are read aloud by screen readers (e.g., "Prohibited sign Search term blocked"), creating a clunky and confusing audible experience.
+**Action:** Always separate icons/emojis from text by wrapping them in an `<span aria-hidden="true">` tag and using flexbox (`display: flex; align-items: center; gap: 8px`) to maintain visual alignment without compromising screen reader clarity.
+
+## 2024-08-15 - Match Native UI for Aesthetics and Accessibility
+**Learning:** When injecting custom UI components (like toggle buttons) into a host application, using arbitrary small padding often results in touch targets that fail WCAG minimum size guidelines (44x44px or native equivalent).
+**Action:** Always inspect the host application's native UI design tokens (e.g., YouTube's 36px pill buttons with 18px border radius) and replicate their dimensions and padding to simultaneously achieve aesthetic harmonization and resolve touch target accessibility issues.
+
+## 2024-08-16 - Respect prefers-reduced-motion
+**Learning:** When injecting animated UI elements (like toasts or buttons with transitions), failing to respect the user's system-level motion preferences can trigger motion sickness and violate accessibility guidelines (WCAG 2.3.3 Animation from Interactions).
+**Action:** Always conditionally disable CSS transitions and animations using `@media (prefers-reduced-motion: reduce)` for injected `<style>` blocks, or `window.matchMedia('(prefers-reduced-motion: reduce)').matches` for inline styles.
+
 ## 2024-05-18 - Keyboard shortcut accessibility and hover state improvements
 
 **Learning:** Adding `aria-keyshortcuts` when you define an explicit `title` indicating a keyboard shortcut ensures screen readers properly read both the action and the shortcut. Furthermore, keyboard focus outline styles ensure the accessibility of interactive elements that are usually only targeted by mouse hover styles.
@@ -107,9 +123,6 @@
 **Learning:** When injecting custom interactive elements (like buttons) into existing pages, rapid clicking or double-clicking can inadvertently select the button's text, which breaks the native UI feel and feels unpolished.
 **Action:** Always apply `user-select: none` (and `-webkit-user-select: none` for compatibility) to custom injected buttons to ensure they behave like native application controls.
 
-## 2024-05-24 - Prevent text selection on custom UI buttons
-**Learning:** When injecting custom interactive elements (like buttons) into existing pages, rapid clicking or double-clicking can inadvertently select the button's text, which breaks the native UI feel and feels unpolished.
-**Action:** Always apply `user-select: none` (and `-webkit-user-select: none` for compatibility) to custom injected buttons to ensure they behave like native application controls.
 ## 2024-06-25 - Relying purely on color for status (WCAG 1.4.1)
 **Learning:** Indicating a correct or active status solely by changing text color (e.g., `color: green`) violates WCAG 1.4.1 (Use of Color), as colorblind users may not perceive the difference. Additionally, default color keywords like "green" often fail contrast requirements.
 **Action:** When updating styling for a state change, always introduce a non-color visual indicator. Examples include adding a shape/emoji (like a checkmark ✅ via `::before`), changing the font-weight, or adding an underline. Always use a specific hex/rgb value that meets AA contrast guidelines rather than raw color keywords.
