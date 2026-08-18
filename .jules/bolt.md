@@ -152,3 +152,7 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2024-08-16 - Replace querySelector with getElementById for ID selectors
 **Learning:** `querySelector('#id')` uses the generic CSS selector parser which is flexible but slower (O(N) traversal overhead in some engines) compared to `getElementById('id')`, which performs a direct O(1) hash map lookup.
 **Action:** When searching for an element by its ID, always replace `querySelector('#id')` with `getElementById('id')` to optimize initialization or lookup speed, especially in performance-critical code paths.
+
+## 2024-08-18 - Avoid O(N) Traversal for Element Initialization
+**Learning:** Initializing element references at the top level of scripts via `querySelector('#id')` or `querySelector('.class')` forces the browser to unnecessarily parse CSS selectors and traverse the DOM tree (O(N) operations), which slightly degrades performance on initial load compared to dedicated hash map or live collection lookups.
+**Action:** When finding a single element by its ID or class to initialize an observer or handle static assignments outside of loops, always use `document.getElementById('id')` for O(1) hash map lookup, or `document.getElementsByClassName('class')[0]` for O(1) live collection lookups, over generic `querySelector` calls.

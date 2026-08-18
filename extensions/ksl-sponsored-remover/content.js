@@ -12,7 +12,7 @@
         }
     };
     removeSponsoredContent();
-    const loadMoreContainer = document.querySelector('#loadMoreBtnContainer');
+    const loadMoreContainer = document.getElementById('loadMoreBtnContainer');
     if (!loadMoreContainer) {
         return;
     }

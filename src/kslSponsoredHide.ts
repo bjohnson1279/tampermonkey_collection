@@ -35,7 +35,8 @@ interface SponsoredElement extends HTMLElement {
     removeSponsoredContent();
 
     // Set up mutation observer to handle dynamically loaded content
-    const loadMoreContainer = document.querySelector<HTMLElement>('#loadMoreBtnContainer');
+    // ⚡ Bolt: Replace querySelector('#id') with getElementById('id') (O(1) hash map lookup) to minimize overhead during initialization
+    const loadMoreContainer = document.getElementById('loadMoreBtnContainer');
     if (!loadMoreContainer) {
         return;
     }
