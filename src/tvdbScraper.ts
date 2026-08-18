@@ -96,12 +96,28 @@ export function scrapeTVDBData(): Episode[] {
         const btn = document.createElement('button');
         btn.id = 'tvdb-copy-json-btn';
 
+        // 🛡️ Sentinel: Helper function to securely update button contents without innerHTML to prevent DOM-based XSS
+        const updateButtonContent = (icon: string, text: string) => {
+            btn.textContent = ''; // Clear existing content
+            const iconSpan = document.createElement('span');
+            iconSpan.setAttribute('aria-hidden', 'true');
+            iconSpan.textContent = icon;
+            const textSpan = document.createElement('span');
+            textSpan.textContent = text;
+            const kbd = document.createElement('kbd');
+            kbd.setAttribute('aria-hidden', 'true');
+            kbd.textContent = 'Shift+C';
+            btn.appendChild(iconSpan);
+            btn.appendChild(textSpan);
+            btn.appendChild(kbd);
+        };
+
         const hasData = episodesData.length > 0;
         const countText = `${episodesData.length} episode${episodesData.length === 1 ? '' : 's'}`;
         if (hasData) {
-            btn.innerHTML = `<span aria-hidden="true">📋</span> <span>Copy JSON (${countText})</span><kbd aria-hidden="true">Shift+C</kbd>`;
+            updateButtonContent('📋', `Copy JSON (${countText})`);
         } else {
-            btn.innerHTML = `<span aria-hidden="true">📋</span> <span>No Data</span><kbd aria-hidden="true">Shift+C</kbd>`;
+            updateButtonContent('📋', 'No Data');
         }
         if (!hasData) btn.setAttribute('aria-disabled', 'true');
         btn.setAttribute(
@@ -127,20 +143,20 @@ export function scrapeTVDBData(): Episode[] {
             btn.setAttribute('aria-disabled', 'true');
             btn.setAttribute('data-feedback', 'true');
 
-            btn.innerHTML = `<span aria-hidden="true">⏳</span> <span>Copying...</span><kbd aria-hidden="true">Shift+C</kbd>`;
+            updateButtonContent('⏳', 'Copying...');
             btn.setAttribute('title', 'Copying to clipboard...');
             btn.setAttribute('aria-label', 'Copying to clipboard...');
             announcer.textContent = 'Copying to clipboard...';
 
             try {
                 await navigator.clipboard.writeText(JSON.stringify(episodesData, null, 2));
-                btn.innerHTML = `<span aria-hidden="true">✅</span> <span>Copied!</span><kbd aria-hidden="true">Shift+C</kbd>`;
+                updateButtonContent('✅', 'Copied!');
                 btn.style.backgroundColor = '#146c43';
                 btn.setAttribute('title', 'Successfully copied');
                 btn.setAttribute('aria-label', 'Successfully copied');
                 announcer.textContent = 'Copied to clipboard';
             } catch {
-                btn.innerHTML = `<span aria-hidden="true">❌</span> <span>Error</span><kbd aria-hidden="true">Shift+C</kbd>`;
+                updateButtonContent('❌', 'Error');
                 btn.style.backgroundColor = '#b02a37';
                 btn.setAttribute('title', 'Failed to copy');
                 btn.setAttribute('aria-label', 'Failed to copy');
@@ -148,7 +164,7 @@ export function scrapeTVDBData(): Episode[] {
             }
             timeoutId = window.setTimeout(() => {
                 const countText = `${episodesData.length} episode${episodesData.length === 1 ? '' : 's'}`;
-                btn.innerHTML = `<span aria-hidden="true">📋</span> <span>Copy JSON (${countText})</span><kbd aria-hidden="true">Shift+C</kbd>`;
+                updateButtonContent('📋', `Copy JSON (${countText})`);
                 btn.style.backgroundColor = '#0056b3';
                 btn.setAttribute('title', 'Copy JSON to clipboard (Shift+C)');
                 btn.setAttribute('aria-label', `Copy ${countText} data to clipboard`);

@@ -244,6 +244,20 @@
         if (skipBtn)
             skipBtn.click();
     }
+    function updateButtonContent(btn, isEnabled) {
+        btn.textContent = '';
+        const iconSpan = document.createElement('span');
+        iconSpan.setAttribute('aria-hidden', 'true');
+        iconSpan.textContent = isEnabled ? '🛡️' : '⚠️';
+        const textSpan = document.createElement('span');
+        textSpan.textContent = `AdBlock: ${isEnabled ? 'ON' : 'OFF'}`;
+        const kbd = document.createElement('kbd');
+        kbd.setAttribute('aria-hidden', 'true');
+        kbd.textContent = 'Shift+A';
+        btn.appendChild(iconSpan);
+        btn.appendChild(textSpan);
+        btn.appendChild(kbd);
+    }
     function addToggleButton() {
         if (document.getElementById('adblock-toggle'))
             return;
@@ -252,8 +266,7 @@
             return;
         const btn = document.createElement('button');
         btn.id = 'adblock-toggle';
-        const icon1 = enabled ? '🛡️' : '⚠️';
-        btn.innerHTML = `<span aria-hidden="true">${icon1}</span> <span>AdBlock: ${enabled ? 'ON' : 'OFF'}</span><kbd aria-hidden="true">Shift+A</kbd>`;
+        updateButtonContent(btn, enabled);
         btn.setAttribute('aria-label', `Toggle AdBlock`);
         btn.setAttribute('aria-pressed', enabled.toString());
         btn.setAttribute('title', `${enabled ? 'Disable' : 'Enable'} AdBlock (Shift+A)`);
@@ -352,7 +365,14 @@
         else {
             toast.style.backgroundColor = isEnabled ? '#cc0000' : '#444';
         }
-        toast.innerHTML = `<span aria-hidden="true">${icon}</span> <span>${message}</span>`;
+        toast.textContent = '';
+        const iconSpan = document.createElement('span');
+        iconSpan.setAttribute('aria-hidden', 'true');
+        iconSpan.textContent = icon;
+        const textSpan = document.createElement('span');
+        textSpan.textContent = message;
+        toast.appendChild(iconSpan);
+        toast.appendChild(textSpan);
         void toast.offsetHeight;
         toast.style.opacity = '1';
         toast.style.transform = 'translateY(0)';
@@ -369,8 +389,7 @@
         saveState();
         const btn = document.getElementById('adblock-toggle');
         if (btn) {
-            const icon2 = enabled ? '🛡️' : '⚠️';
-            btn.innerHTML = `<span aria-hidden="true">${icon2}</span> <span>AdBlock: ${enabled ? 'ON' : 'OFF'}</span><kbd aria-hidden="true">Shift+A</kbd>`;
+            updateButtonContent(btn, enabled);
             btn.setAttribute('aria-pressed', enabled.toString());
             btn.setAttribute('title', `${enabled ? 'Disable' : 'Enable'} AdBlock (Shift+A)`);
             styleButtonDynamic(btn);
