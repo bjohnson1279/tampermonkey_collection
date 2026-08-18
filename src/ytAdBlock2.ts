@@ -346,6 +346,23 @@
     //----------------------------------------
     // Toggle button UI
     //----------------------------------------
+
+    // 🛡️ Sentinel: Helper function to securely update button contents without innerHTML to prevent DOM-based XSS
+    function updateButtonContent(btn: HTMLElement, isEnabled: boolean): void {
+        btn.textContent = ''; // Clear existing content
+        const iconSpan = document.createElement('span');
+        iconSpan.setAttribute('aria-hidden', 'true');
+        iconSpan.textContent = isEnabled ? '🛡️' : '⚠️';
+        const textSpan = document.createElement('span');
+        textSpan.textContent = `AdBlock: ${isEnabled ? 'ON' : 'OFF'}`;
+        const kbd = document.createElement('kbd');
+        kbd.setAttribute('aria-hidden', 'true');
+        kbd.textContent = 'Shift+A';
+        btn.appendChild(iconSpan);
+        btn.appendChild(textSpan);
+        btn.appendChild(kbd);
+    }
+
     function addToggleButton(): void {
         // ⚡ Bolt: Replace querySelector('#id') with getElementById('id') (O(1) hash map lookup) inside the setInterval loop
         if (document.getElementById('adblock-toggle')) return;
@@ -355,8 +372,7 @@
 
         const btn: HTMLButtonElement = document.createElement('button');
         btn.id = 'adblock-toggle';
-        const icon1 = enabled ? '🛡️' : '⚠️';
-        btn.innerHTML = `<span aria-hidden="true">${icon1}</span> <span>AdBlock: ${enabled ? 'ON' : 'OFF'}</span><kbd aria-hidden="true">Shift+A</kbd>`;
+        updateButtonContent(btn, enabled);
         // Palette: Use static aria-label since aria-pressed already indicates the current state
         btn.setAttribute('aria-label', `Toggle AdBlock`);
         btn.setAttribute('aria-pressed', enabled.toString());
@@ -465,7 +481,15 @@
             toast.style.backgroundColor = isEnabled ? '#cc0000' : '#444';
         }
 
-        toast.innerHTML = `<span aria-hidden="true">${icon}</span> <span>${message}</span>`;
+        // 🛡️ Sentinel: Replace innerHTML with secure DOM manipulation to prevent DOM-based XSS
+        toast.textContent = '';
+        const iconSpan = document.createElement('span');
+        iconSpan.setAttribute('aria-hidden', 'true');
+        iconSpan.textContent = icon;
+        const textSpan = document.createElement('span');
+        textSpan.textContent = message;
+        toast.appendChild(iconSpan);
+        toast.appendChild(textSpan);
 
         // Trigger reflow
         void toast.offsetHeight;
@@ -490,8 +514,7 @@
 
         const btn: HTMLElement | null = document.getElementById('adblock-toggle');
         if (btn) {
-            const icon2 = enabled ? '🛡️' : '⚠️';
-            btn.innerHTML = `<span aria-hidden="true">${icon2}</span> <span>AdBlock: ${enabled ? 'ON' : 'OFF'}</span><kbd aria-hidden="true">Shift+A</kbd>`;
+            updateButtonContent(btn, enabled);
             btn.setAttribute('aria-pressed', enabled.toString());
             btn.setAttribute('title', `${enabled ? 'Disable' : 'Enable'} AdBlock (Shift+A)`);
             styleButtonDynamic(btn as HTMLButtonElement);

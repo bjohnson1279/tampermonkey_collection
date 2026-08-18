@@ -61,8 +61,14 @@
                             align-items: center;
                             gap: 8px;
                         `;
-                        toast.innerHTML =
-                            '<span aria-hidden="true">🚫</span> <span>Search term blocked. Redirecting to home...</span>';
+                        toast.textContent = '';
+                        const iconSpan = document.createElement('span');
+                        iconSpan.setAttribute('aria-hidden', 'true');
+                        iconSpan.textContent = '🚫';
+                        const textSpan = document.createElement('span');
+                        textSpan.textContent = 'Search term blocked. Redirecting to home...';
+                        toast.appendChild(iconSpan);
+                        toast.appendChild(textSpan);
                         document.body.appendChild(toast);
                         void toast.offsetHeight;
                         toast.style.opacity = '1';

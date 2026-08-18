@@ -96,8 +96,17 @@ interface SearchEngines {
                             align-items: center;
                             gap: 8px;
                         `;
-                        toast.innerHTML =
-                            '<span aria-hidden="true">🚫</span> <span>Search term blocked. Redirecting to home...</span>';
+
+                        // 🛡️ Sentinel: Replace innerHTML with document.createElement and textContent to prevent DOM-based XSS
+                        toast.textContent = ''; // Clear existing content
+                        const iconSpan = document.createElement('span');
+                        iconSpan.setAttribute('aria-hidden', 'true');
+                        iconSpan.textContent = '🚫';
+                        const textSpan = document.createElement('span');
+                        textSpan.textContent = 'Search term blocked. Redirecting to home...';
+                        toast.appendChild(iconSpan);
+                        toast.appendChild(textSpan);
+
                         document.body.appendChild(toast);
 
                         // Trigger reflow to ensure the CSS transition plays

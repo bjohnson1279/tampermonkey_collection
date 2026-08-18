@@ -30,10 +30,14 @@ describe('searchEngineFilter', () => {
                     style: { cssText: '' },
                     textContent: '',
                     innerHTML: '',
+                    childNodes: [] as any[],
                     setAttribute: jest.fn().mockImplementation((attr, val) => {
                         el.attributes[attr] = val;
                     }),
                     getAttribute: jest.fn().mockImplementation((attr) => el.attributes[attr]),
+                    appendChild: jest.fn().mockImplementation((child) => {
+                        el.childNodes.push(child);
+                    }),
                 };
                 return el;
             }),
@@ -120,19 +124,23 @@ describe('searchEngineFilter', () => {
         window.location.search = '?q=hello+asdf+world';
         window.location.href = 'https://www.google.com/?q=hello+asdf+world';
 
-        const mockToast = {
-            innerHTML:
-                '<span aria-hidden="true">🚫</span> <span>Search term blocked. Redirecting to home...</span>',
-            setAttribute: jest.fn(),
-            style: { cssText: '', opacity: '', transform: '' },
-            offsetHeight: 20,
-        };
-        (global.document.createElement as jest.Mock).mockReturnValue(mockToast);
-
         require('./searchEngineFilter');
 
         expect(global.document.createElement).toHaveBeenCalledWith('div');
+        expect(global.document.createElement).toHaveBeenCalledWith('span');
+
+        // Find the created toast (first div created)
+        const calls = (global.document.createElement as jest.Mock).mock.results;
+        const mockToast = calls.find((call) => call.value.tagName === 'DIV')?.value;
+
+        expect(mockToast).toBeDefined();
         expect(mockToast.setAttribute).toHaveBeenCalledWith('role', 'alert');
+        expect(mockToast.childNodes.length).toBe(2);
+        expect(mockToast.childNodes[0].textContent).toBe('🚫');
+        expect(mockToast.childNodes[1].textContent).toBe(
+            'Search term blocked. Redirecting to home...'
+        );
+
         expect(global.document.body.appendChild).toHaveBeenCalledWith(mockToast);
 
         // URL should not change immediately
