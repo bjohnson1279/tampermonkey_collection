@@ -212,8 +212,21 @@
             construct(target, args) {
                 let url = args[0];
                 let urlStr: string = '';
+                let isNative = false;
 
-                urlStr = url?.toString() || '';
+                // 🛡️ Sentinel: Use WebIDL brand checking for URL objects to prevent cross-realm adblock evasion
+                // and avoid TOCTOU vulnerabilities from malicious POJOs exploiting duck-typing getters.
+                try {
+                    urlStr = nativeUrlHrefGetter?.call(url);
+                    if (urlStr !== undefined) isNative = true;
+                } catch {
+                    /* Not a URL */
+                }
+
+                if (!isNative) {
+                    urlStr = url?.toString() || '';
+                }
+
                 // 🛡️ Sentinel: Overwrite URL parameter with evaluated string to prevent TOCTOU evasion.
                 // We coerce all inputs (even native URLs) because the underlying WebSocket constructor
                 // uses .toString() implicitly, bypassing our WebIDL brand checks if it were spoofed.

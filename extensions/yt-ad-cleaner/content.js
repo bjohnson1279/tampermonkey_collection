@@ -144,7 +144,17 @@
             construct(target, args) {
                 let url = args[0];
                 let urlStr = '';
-                urlStr = url?.toString() || '';
+                let isNative = false;
+                try {
+                    urlStr = nativeUrlHrefGetter?.call(url);
+                    if (urlStr !== undefined)
+                        isNative = true;
+                }
+                catch {
+                }
+                if (!isNative) {
+                    urlStr = url?.toString() || '';
+                }
                 args[0] = urlStr;
                 if (urlStr && shouldBlock(urlStr)) {
                     throw new Error('WebSocket connection blocked by AdBlocker.');

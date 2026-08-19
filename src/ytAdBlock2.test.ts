@@ -76,4 +76,46 @@ describe('ytAdBlock2 Security Fix', () => {
 
         warnSpy.mockRestore();
     });
+
+    it('should prevent TOCTOU evasion and WebIDL spoofing in WebSocket interceptor', async () => {
+        // We mock WebSocket since it doesn't exist natively in JSDOM
+        class MockWebSocket {
+            url: string;
+            constructor(url: string | URL, protocols?: string | string[]) {
+                this.url = url.toString();
+            }
+        }
+        Object.defineProperty(window, 'WebSocket', {
+            value: MockWebSocket,
+            configurable: true,
+            writable: true,
+        });
+
+        require('./ytAdBlock2.ts');
+        jest.advanceTimersByTime(500);
+        await Promise.resolve();
+
+        // 1. Duck-typing bypass attempt (looks like a URL, but isn't native)
+        const spoofedDuckUrl = {
+            href: 'https://youtube.com/api/stats/ads',
+            toString() {
+                // Return safe URL on check, malicious on use
+                return 'https://safe.com';
+            },
+        };
+
+        // This should pass the blocked logic safely to the target but construct with the safe URL since it evaluates toString and overwrites
+        const ws1 = new window.WebSocket(spoofedDuckUrl as any);
+        expect(ws1.url).toBe('https://safe.com');
+
+        // 2. WebIDL bypass attempt with actual URL
+        const nativeUrl = new window.URL('https://youtube.com/api/stats/ads');
+        // Simulate a cross-realm or malicious override of toString
+        nativeUrl.toString = () => 'https://safe.com';
+
+        // This should throw because WebIDL check sees the true href ('https://youtube.com/api/stats/ads') and correctly intercepts it, blocking the connection
+        expect(() => {
+            new window.WebSocket(nativeUrl);
+        }).toThrow('WebSocket connection blocked by AdBlocker.');
+    });
 });
