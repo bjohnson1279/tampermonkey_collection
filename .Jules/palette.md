@@ -13,3 +13,7 @@
 ## 2024-08-16 - Respect prefers-reduced-motion
 **Learning:** When injecting animated UI elements (like toasts or buttons with transitions), failing to respect the user's system-level motion preferences can trigger motion sickness and violate accessibility guidelines (WCAG 2.3.3 Animation from Interactions).
 **Action:** Always conditionally disable CSS transitions and animations using `@media (prefers-reduced-motion: reduce)` for injected `<style>` blocks, or `window.matchMedia('(prefers-reduced-motion: reduce)').matches` for inline styles.
+
+## 2024-08-17 - Semantics for Toggle Buttons
+**Learning:** Using `aria-pressed` on a toggle button is technically valid but can be less clear for screen reader users than a dedicated switch component.
+**Action:** When a button functions primarily to toggle a state (ON/OFF), use `role="switch"` and `aria-checked` instead of `aria-pressed`. This provides a clearer, more standard semantic meaning for AT users.

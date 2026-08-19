@@ -255,7 +255,8 @@
         const icon1 = enabled ? '🛡️' : '⚠️';
         btn.innerHTML = `<span aria-hidden="true">${icon1}</span> <span>AdBlock: ${enabled ? 'ON' : 'OFF'}</span><kbd aria-hidden="true">Shift+A</kbd>`;
         btn.setAttribute('aria-label', `Toggle AdBlock`);
-        btn.setAttribute('aria-pressed', enabled.toString());
+        btn.setAttribute('role', 'switch');
+        btn.setAttribute('aria-checked', enabled.toString());
         btn.setAttribute('title', `${enabled ? 'Disable' : 'Enable'} AdBlock (Shift+A)`);
         btn.setAttribute('aria-keyshortcuts', 'Shift+A');
         styleButtonStatic(btn);
@@ -371,7 +372,7 @@
         if (btn) {
             const icon2 = enabled ? '🛡️' : '⚠️';
             btn.innerHTML = `<span aria-hidden="true">${icon2}</span> <span>AdBlock: ${enabled ? 'ON' : 'OFF'}</span><kbd aria-hidden="true">Shift+A</kbd>`;
-            btn.setAttribute('aria-pressed', enabled.toString());
+            btn.setAttribute('aria-checked', enabled.toString());
             btn.setAttribute('title', `${enabled ? 'Disable' : 'Enable'} AdBlock (Shift+A)`);
             styleButtonDynamic(btn);
         }
