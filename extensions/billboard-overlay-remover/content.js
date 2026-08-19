@@ -13,7 +13,7 @@
     for (let i = 0; i < ads.length; i++) {
         ads[i].remove();
     }
-    const chartOverlay = document.querySelector('.chart-piano-overlay__attachment-point');
+    const chartOverlay = document.getElementsByClassName('chart-piano-overlay__attachment-point')[0];
     if (!chartOverlay) {
         return;
     }

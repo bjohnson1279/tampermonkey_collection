@@ -34,9 +34,10 @@ interface ExtendedHTMLElement extends HTMLElement {
     }
 
     // Set up mutation observer for the chart overlay
-    const chartOverlay = document.querySelector<HTMLElement>(
-        '.chart-piano-overlay__attachment-point'
-    );
+    // ⚡ Bolt: Replace querySelector('.class') with getElementsByClassName('class')[0] for O(1) live collection lookup instead of O(N) tree traversal
+    const chartOverlay = document.getElementsByClassName(
+        'chart-piano-overlay__attachment-point'
+    )[0];
     if (!chartOverlay) {
         return;
     }
