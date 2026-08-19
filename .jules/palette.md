@@ -150,3 +150,8 @@
 ## 2024-07-31 - Visual Feedback for Global Hotkeys
 **Learning:** When using global keyboard shortcuts (like `Shift+A`) to toggle features, users often miss the visual feedback if the corresponding UI toggle button is off-screen or unnoticeable. Relying solely on `aria-live` regions or hidden console logs leaves sighted users without confirmation of the action.
 **Action:** Always implement a brief, animated visual toast notification when toggling state via global hotkeys to provide immediate, clear feedback. Ensure the toast has `aria-hidden="true"` if a visually-hidden live announcer is already handling screen reader output, to prevent confusing double-announcements.
+
+## 2026-08-18 - Semantic Switch Toggle
+**Learning:** When a button primarily toggles a binary state (ON/OFF), using `role="switch"` and `aria-checked` instead of a standard button with `aria-pressed` provides clearer semantic meaning for screen readers.
+**Action:** Use switch role for binary toggles.
+
