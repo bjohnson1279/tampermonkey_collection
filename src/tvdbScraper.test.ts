@@ -128,6 +128,7 @@ describe('scrapeTVDBData', () => {
         expect(btn).not.toBeNull();
         expect(btn?.textContent).toContain('📋');
         expect(btn?.textContent).toContain('No Data');
+        expect(btn?.querySelector('kbd')).toBeNull();
         expect(btn?.getAttribute('aria-label')).toBe('No episodes data found');
         expect(btn?.getAttribute('aria-disabled')).toBe('true');
     });
@@ -195,6 +196,7 @@ describe('scrapeTVDBData', () => {
         expect(navigator.clipboard.writeText).toHaveBeenCalledTimes(1);
         expect(btn.textContent).toContain('❌');
         expect(btn.textContent).toContain('Error');
+        expect(btn.querySelector('kbd')).toBeNull();
         expect(btn.style.backgroundColor).toBe('rgb(176, 42, 55)'); // #b02a37
         expect(btn.getAttribute('title')).toBe('Failed to copy');
         expect(announcer.textContent).toBe('Failed to copy');
