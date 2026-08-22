@@ -270,6 +270,27 @@
 
     const combinedAdSelector = adSelectors.join(',');
 
+    // ⚡ Bolt: Use O(1) Set lookup for tag names to avoid expensive CSS selector parsing inside high-frequency observer loops
+    const fastAdTags = new Set([
+        'YTD-PROMOTED-SPARKLES-TEXT-SEARCH-RENDERER',
+        'YTD-DISPLAY-AD-RENDERER',
+        'YTD-PROMOTED-VIDEO-RENDERER',
+        'YTD-AD-SLOT-RENDERER',
+        'YTD-IN-FEED-AD-LAYOUT-RENDERER',
+        'YTD-ACTION-COMPANION-AD-RENDERER',
+        'YTD-COMPACT-PROMOTED-VIDEO-RENDERER',
+        'YTD-PROMOTED-SPARKLES-WEB-RENDERER',
+        'YTD-REEL-PLAYER-OVERLAY-RENDERER',
+        'YTD-REEL-AD-RENDERER',
+        'YTD-MERCH-SHELF-RENDERER',
+        'YTD-RICH-SHELF-RENDERER',
+        'YTD-VIDEO-MASTHEAD-AD-ADVERTISER-INFO-RENDERER',
+        'YTD-VIDEO-MASTHEAD-AD-PRIMARY-VIDEO-RENDERER',
+        'YTD-BANNER-PROMO-RENDERER',
+        'YTD-CAROUSEL-AD-RENDERER',
+        'YTD-COMPANION-SLOT-RENDERER',
+    ]);
+
     // ⚡ Bolt: Use a pre-compiled regex instead of .toLowerCase().includes() for ~6x faster text content checking
     // during high-frequency MutationObserver events and initial scans, preventing unnecessary O(N) string allocations.
     const promotedBadgeRegex = /promoted/i;
@@ -283,7 +304,15 @@
                 const node = mutation.addedNodes[j];
                 if (node.nodeType === Node.ELEMENT_NODE) {
                     const el = node as HTMLElement;
-                    if (el.matches && el.matches(combinedAdSelector)) {
+                    // ⚡ Bolt: Replace expensive .matches() with O(1) Set lookup of tagName and direct ID/attribute checks
+                    if (
+                        fastAdTags.has(el.tagName) ||
+                        el.id === 'player-ads' ||
+                        (el.tagName === 'YTD-REEL-SHELF-RENDERER' &&
+                            el.hasAttribute('is-shorts')) ||
+                        (el.tagName === 'YTD-BADGE-SUPPORTED-RENDERER' &&
+                            el.closest('#dismissible'))
+                    ) {
                         el.remove();
                     } else if (el.firstElementChild && el.querySelectorAll) {
                         // ⚡ Bolt: Fast path for leaf nodes - avoid querySelectorAll parsing overhead if no children exist

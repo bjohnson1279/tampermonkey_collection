@@ -160,7 +160,7 @@ describe('YouTubeAdRemover', () => {
 
                 const mockVideoNode = {
                     nodeType: (global as any).Node.ELEMENT_NODE,
-                    matches: jest.fn().mockReturnValue(true),
+                    tagName: 'YTD-RICH-ITEM-RENDERER',
                     getElementsByClassName: jest.fn().mockImplementation((className) => {
                         if (className === 'ytd-ad-slot-renderer') return [mockAdItem];
                         return [];
@@ -174,9 +174,6 @@ describe('YouTubeAdRemover', () => {
                     {} as any
                 );
 
-                expect(mockVideoNode.matches).toHaveBeenCalledWith(
-                    'ytd-rich-item-renderer, ytd-video-renderer'
-                );
                 expect(mockVideoNode.getElementsByClassName).toHaveBeenCalledWith(
                     'ytd-ad-slot-renderer'
                 );

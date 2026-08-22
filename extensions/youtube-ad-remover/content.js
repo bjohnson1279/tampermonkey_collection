@@ -51,7 +51,8 @@ class YouTubeAdRemover {
                 const node = addedNodes[i];
                 if (node.nodeType === Node.ELEMENT_NODE) {
                     const element = node;
-                    if (element.matches('ytd-rich-item-renderer, ytd-video-renderer')) {
+                    if (element.tagName === 'YTD-RICH-ITEM-RENDERER' ||
+                        element.tagName === 'YTD-VIDEO-RENDERER') {
                         const adItem = element.getElementsByClassName(this.AD_CLASS)[0];
                         if (adItem) {
                             element.remove();
