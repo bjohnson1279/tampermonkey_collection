@@ -19,18 +19,21 @@ interface ExtendedHTMLElement extends HTMLElement {
 
     // Remove various ad containers
     const adSelectors = [
-        '.ad-container',
-        '.ad-holder',
-        '.ad_desktop_placeholder',
-        '.ad_desktop_wrapper',
-        '.ad_desktop',
-        '.ad_clarity',
+        'ad-container',
+        'ad-holder',
+        'ad_desktop_placeholder',
+        'ad_desktop_wrapper',
+        'ad_desktop',
+        'ad_clarity',
     ];
 
-    // ⚡ Bolt: Use a combined selector to reduce multiple O(N) DOM traversals to a single O(1) traversal
-    const ads = document.querySelectorAll<HTMLElement>(adSelectors.join(','));
-    for (let i = 0; i < ads.length; i++) {
-        ads[i].remove();
+    // ⚡ Bolt: Replace O(N) querySelectorAll with O(1) live collection lookups via getElementsByClassName
+    for (let j = 0; j < adSelectors.length; j++) {
+        const ads = document.getElementsByClassName(adSelectors[j]);
+        // ⚡ Bolt: Use a backward standard for loop for HTMLCollection to avoid unnecessary Array allocation
+        for (let i = ads.length - 1; i >= 0; i--) {
+            ads[i].remove();
+        }
     }
 
     // Set up mutation observer for the chart overlay

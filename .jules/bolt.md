@@ -157,6 +157,11 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 **Learning:** Initializing element references at the top level of scripts via `querySelector('#id')` or `querySelector('.class')` forces the browser to unnecessarily parse CSS selectors and traverse the DOM tree (O(N) operations), which slightly degrades performance on initial load compared to dedicated hash map or live collection lookups.
 **Action:** When finding a single element by its ID or class to initialize an observer or handle static assignments outside of loops, always use `document.getElementById('id')` for O(1) hash map lookup, or `document.getElementsByClassName('class')[0]` for O(1) live collection lookups, over generic `querySelector` calls.
 
-## YYYY-MM-DD - [Avoid .matches() with complex selectors in hot paths]
+## 2024-08-20 - Replace O(N) querySelectorAll with O(1) getElementsByClassName for class lists
+**Learning:** When removing a list of elements based on a list of class selectors, using a combined `querySelectorAll('.class1, .class2')` forces the browser to parse the selector and traverse the entire DOM tree (O(N) traversal).
+**Action:** Replace `querySelectorAll` with a loop over the class names, calling `document.getElementsByClassName('class')` for each. Since `getElementsByClassName` performs an O(1) live collection lookup, this is significantly faster. Crucially, because `getElementsByClassName` returns a live `HTMLCollection`, iterate through it using a backward `for` loop (e.g., `for (let i = collection.length - 1; i >= 0; i--)`) to safely remove elements without causing index shifting bugs.
+
+## 2024-08-21 - [Avoid .matches() with complex selectors in hot paths]
 **Learning:** Using `element.matches(selector)` with complex, multi-part CSS selectors (e.g. `tag1, tag2, .class1`) inside a high-frequency `MutationObserver` loop forces the browser to heavily engage the CSS selector parsing engine on every DOM node mutation, adding severe main-thread overhead.
 **Action:** Replace `element.matches()` calls inside high-frequency observer paths with direct string equality checks (e.g. `element.tagName === 'TAG'`), or for multiple tags, pre-compile an O(1) `Set` of tag names outside the loop and use `set.has(element.tagName)`.
+

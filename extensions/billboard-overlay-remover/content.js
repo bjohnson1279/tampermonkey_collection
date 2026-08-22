@@ -2,16 +2,18 @@
 (function () {
     'use strict';
     const adSelectors = [
-        '.ad-container',
-        '.ad-holder',
-        '.ad_desktop_placeholder',
-        '.ad_desktop_wrapper',
-        '.ad_desktop',
-        '.ad_clarity',
+        'ad-container',
+        'ad-holder',
+        'ad_desktop_placeholder',
+        'ad_desktop_wrapper',
+        'ad_desktop',
+        'ad_clarity',
     ];
-    const ads = document.querySelectorAll(adSelectors.join(','));
-    for (let i = 0; i < ads.length; i++) {
-        ads[i].remove();
+    for (let j = 0; j < adSelectors.length; j++) {
+        const ads = document.getElementsByClassName(adSelectors[j]);
+        for (let i = ads.length - 1; i >= 0; i--) {
+            ads[i].remove();
+        }
     }
     const chartOverlay = document.getElementsByClassName('chart-piano-overlay__attachment-point')[0];
     if (!chartOverlay) {
