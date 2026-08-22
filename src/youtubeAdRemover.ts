@@ -84,7 +84,11 @@ class YouTubeAdRemover {
                 if (node.nodeType === Node.ELEMENT_NODE) {
                     const element = node as Element;
 
-                    if (element.matches('ytd-rich-item-renderer, ytd-video-renderer')) {
+                    // ⚡ Bolt: Replace expensive .matches() with O(1) tagName string equality check inside MutationObserver
+                    if (
+                        element.tagName === 'YTD-RICH-ITEM-RENDERER' ||
+                        element.tagName === 'YTD-VIDEO-RENDERER'
+                    ) {
                         // ⚡ Bolt: Replace querySelector('.class') with getElementsByClassName('class')[0] for O(1) live collection lookup instead of O(N) tree traversal inside the MutationObserver
                         const adItem = element.getElementsByClassName(this.AD_CLASS)[0];
                         if (adItem) {

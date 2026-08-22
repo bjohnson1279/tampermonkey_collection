@@ -155,3 +155,8 @@
 **Learning:** When a button primarily toggles a binary state (ON/OFF), using `role="switch"` and `aria-checked` instead of a standard button with `aria-pressed` provides clearer semantic meaning for screen readers.
 **Action:** Use switch role for binary toggles.
 
+## 2024-08-21 - [Accessibility] Hide Keyboard Shortcuts in Disabled States
+**Learning:** Displaying keyboard shortcut hints (`<kbd>`) inside interactive elements provides great discoverability, but showing them when the element is in a disabled state (e.g. "No Data") or a transient feedback state (e.g. "Copying...", "Copied!") creates visual clutter and confuses users about whether the shortcut is currently active.
+**Action:** When injecting contextual UI elements with keyboard shortcuts, conditionally render the shortcut hint to only appear when the button is actively available for interaction.
+
+

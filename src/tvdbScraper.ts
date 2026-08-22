@@ -33,11 +33,13 @@ export function scrapeTVDBData(): Episode[] {
         const ep = episodes[j] as HTMLElement;
         // ⚡ Bolt: Replace querySelector('.class') with getElementsByClassName('class')[0] for O(1) live collection lookup
         const heading = ep.getElementsByClassName('list-group-item-heading')[0] as
-            HTMLElement | undefined;
+            | HTMLElement
+            | undefined;
         if (!heading) continue;
 
         const epLabelElement = heading.getElementsByClassName('episode-label')[0] as
-            HTMLElement | undefined;
+            | HTMLElement
+            | undefined;
         const epLabel = epLabelElement?.textContent?.trim() || '';
         const matches = epLabel.match(EPISODE_NUM_REGEX) || [];
 
@@ -45,7 +47,8 @@ export function scrapeTVDBData(): Episode[] {
         const epTitle = titleLink?.textContent?.trim() || '';
 
         const itemTextElement = ep.getElementsByClassName('list-group-item-text')[0] as
-            HTMLElement | undefined;
+            | HTMLElement
+            | undefined;
         const itemText = itemTextElement?.textContent?.trim() || '';
 
         let itemDate = '';
@@ -97,19 +100,22 @@ export function scrapeTVDBData(): Episode[] {
         btn.id = 'tvdb-copy-json-btn';
 
         // 🛡️ Sentinel: Helper function to securely update button contents without innerHTML to prevent DOM-based XSS
-        const updateButtonContent = (icon: string, text: string) => {
+        const updateButtonContent = (icon: string, text: string, showShortcut: boolean = true) => {
             btn.textContent = ''; // Clear existing content
             const iconSpan = document.createElement('span');
             iconSpan.setAttribute('aria-hidden', 'true');
             iconSpan.textContent = icon;
             const textSpan = document.createElement('span');
             textSpan.textContent = text;
-            const kbd = document.createElement('kbd');
-            kbd.setAttribute('aria-hidden', 'true');
-            kbd.textContent = 'Shift+C';
             btn.appendChild(iconSpan);
             btn.appendChild(textSpan);
-            btn.appendChild(kbd);
+
+            if (showShortcut) {
+                const kbd = document.createElement('kbd');
+                kbd.setAttribute('aria-hidden', 'true');
+                kbd.textContent = 'Shift+C';
+                btn.appendChild(kbd);
+            }
         };
 
         const hasData = episodesData.length > 0;
@@ -117,7 +123,7 @@ export function scrapeTVDBData(): Episode[] {
         if (hasData) {
             updateButtonContent('📋', `Copy JSON (${countText})`);
         } else {
-            updateButtonContent('📋', 'No Data');
+            updateButtonContent('📋', 'No Data', false);
         }
         if (!hasData) btn.setAttribute('aria-disabled', 'true');
         btn.setAttribute(
@@ -143,20 +149,20 @@ export function scrapeTVDBData(): Episode[] {
             btn.setAttribute('aria-disabled', 'true');
             btn.setAttribute('data-feedback', 'true');
 
-            updateButtonContent('⏳', 'Copying...');
+            updateButtonContent('⏳', 'Copying...', false);
             btn.setAttribute('title', 'Copying to clipboard...');
             btn.setAttribute('aria-label', 'Copying to clipboard...');
             announcer.textContent = 'Copying to clipboard...';
 
             try {
                 await navigator.clipboard.writeText(JSON.stringify(episodesData, null, 2));
-                updateButtonContent('✅', 'Copied!');
+                updateButtonContent('✅', 'Copied!', false);
                 btn.style.backgroundColor = '#146c43';
                 btn.setAttribute('title', 'Successfully copied');
                 btn.setAttribute('aria-label', 'Successfully copied');
                 announcer.textContent = 'Copied to clipboard';
             } catch {
-                updateButtonContent('❌', 'Error');
+                updateButtonContent('❌', 'Error', false);
                 btn.style.backgroundColor = '#b02a37';
                 btn.setAttribute('title', 'Failed to copy');
                 btn.setAttribute('aria-label', 'Failed to copy');

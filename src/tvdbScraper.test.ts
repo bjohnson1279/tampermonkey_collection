@@ -130,6 +130,7 @@ describe('scrapeTVDBData', () => {
         expect(btn?.textContent).toContain('No Data');
         expect(btn?.getAttribute('aria-label')).toBe('No episodes data found');
         expect(btn?.getAttribute('aria-disabled')).toBe('true');
+        expect(btn?.querySelector('kbd')).toBeNull();
     });
 
     it('should inject copy JSON button with correct state when data exists', () => {
@@ -198,6 +199,7 @@ describe('scrapeTVDBData', () => {
         expect(btn.style.backgroundColor).toBe('rgb(176, 42, 55)'); // #b02a37
         expect(btn.getAttribute('title')).toBe('Failed to copy');
         expect(announcer.textContent).toBe('Failed to copy');
+        expect(btn.querySelector('kbd')).toBeNull();
     });
 
     it('should restore dynamic aria-label after copy timeout', async () => {
