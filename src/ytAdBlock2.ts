@@ -396,8 +396,10 @@
         iconSpan.setAttribute('aria-hidden', 'true');
         iconSpan.textContent = isEnabled ? '🛡️' : '⚠️';
         const textSpan = document.createElement('span');
+        textSpan.className = 'adblock-btn-text';
         textSpan.textContent = `AdBlock: ${isEnabled ? 'ON' : 'OFF'}`;
         const kbd = document.createElement('kbd');
+        kbd.className = 'adblock-btn-shortcut';
         kbd.setAttribute('aria-hidden', 'true');
         kbd.textContent = 'Shift+A';
         btn.appendChild(iconSpan);
@@ -414,6 +416,7 @@
 
         const btn: HTMLButtonElement = document.createElement('button');
         btn.id = 'adblock-toggle';
+        btn.type = 'button';
         updateButtonContent(btn, enabled);
         // Palette: Use static aria-label since aria-checked already indicates the current state
         btn.setAttribute('aria-label', `Toggle AdBlock`);
@@ -438,6 +441,11 @@
                 #adblock-toggle:focus-visible { outline: 2px solid var(--yt-spec-text-primary, CanvasText); outline-offset: 2px; }
                 #adblock-toggle:active { transform: scale(0.95); }
                 #adblock-toggle kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; background-color: rgba(255, 255, 255, 0.2); border-radius: 4px; padding: 2px 6px; font-size: 11px; font-weight: 500; letter-spacing: 0.5px; border: 1px solid rgba(255, 255, 255, 0.3); }
+                @media (max-width: 768px) {
+                    #adblock-toggle .adblock-btn-text,
+                    #adblock-toggle .adblock-btn-shortcut { display: none; }
+                    #adblock-toggle { padding: 0 12px !important; margin-left: 8px !important; }
+                }
                 @media (prefers-reduced-motion: reduce) {
                     #adblock-toggle { transition: none !important; }
                     #adblock-toast { transition: none !important; }
