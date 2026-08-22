@@ -165,3 +165,6 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 **Learning:** Using `element.matches(selector)` with complex, multi-part CSS selectors (e.g. `tag1, tag2, .class1`) inside a high-frequency `MutationObserver` loop forces the browser to heavily engage the CSS selector parsing engine on every DOM node mutation, adding severe main-thread overhead.
 **Action:** Replace `element.matches()` calls inside high-frequency observer paths with direct string equality checks (e.g. `element.tagName === 'TAG'`), or for multiple tags, pre-compile an O(1) `Set` of tag names outside the loop and use `set.has(element.tagName)`.
 
+## YYYY-MM-DD - Cache Live HTMLCollections in Intervals
+**Learning:** While getElementsByClassName and getElementsByTagName are O(1) operations that return live HTMLCollections, calling them repeatedly inside high-frequency intervals (like a 500ms setInterval) still incurs function call overhead on every tick.
+**Action:** Cache the live HTMLCollection returned by these methods globally outside the interval. Because the collection is live, it automatically updates when the DOM changes, eliminating all query function calls inside the loop.

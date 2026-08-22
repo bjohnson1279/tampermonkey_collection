@@ -263,18 +263,21 @@
     if (document.documentElement) {
         adObserver.observe(document.documentElement, { childList: true, subtree: true });
     }
+    const videoElements = document.getElementsByTagName('video');
+    const adShowingElements = document.getElementsByClassName('ad-showing');
+    const skipBtnElements = document.getElementsByClassName('ytp-ad-skip-button');
     function skipVideoAds() {
         if (!enabled)
             return;
-        const video = document.getElementsByTagName('video')[0] ?? null;
+        const video = videoElements[0] ?? null;
         if (!video)
             return;
-        if (document.getElementsByClassName('ad-showing').length > 0) {
+        if (adShowingElements.length > 0) {
             if (Number.isFinite(video.duration)) {
                 video.currentTime = video.duration;
             }
         }
-        const skipBtn = document.getElementsByClassName('ytp-ad-skip-button')[0];
+        const skipBtn = skipBtnElements[0];
         if (skipBtn)
             skipBtn.click();
     }

@@ -365,23 +365,26 @@
     //----------------------------------------
     // Skip video ads
     //----------------------------------------
+
+    // ⚡ Bolt: Cache live HTMLCollections outside the setInterval loop.
+    // Since they are live, they automatically reflect DOM changes without the overhead of repeating O(1) query calls every 500ms.
+    const videoElements = document.getElementsByTagName('video');
+    const adShowingElements = document.getElementsByClassName('ad-showing');
+    const skipBtnElements = document.getElementsByClassName('ytp-ad-skip-button');
+
     function skipVideoAds(): void {
         if (!enabled) return;
 
-        // ⚡ Bolt: Replace querySelector (O(N) traversal) with getElementsByTagName (O(1) live collection)
-        // inside this 500ms setInterval to minimize main thread CPU usage on a heavy YouTube DOM.
-        const video: HTMLVideoElement | null = document.getElementsByTagName('video')[0] ?? null;
+        const video: HTMLVideoElement | null = videoElements[0] ?? null;
         if (!video) return;
 
-        // ⚡ Bolt: Replace querySelector('.class') with getElementsByClassName('class')[0] for O(1) live collection lookup instead of O(N) tree traversal
-        if (document.getElementsByClassName('ad-showing').length > 0) {
+        if (adShowingElements.length > 0) {
             if (Number.isFinite(video.duration)) {
                 video.currentTime = video.duration;
             }
         }
 
-        const skipBtn = document.getElementsByClassName('ytp-ad-skip-button')[0] as
-            HTMLElement | undefined;
+        const skipBtn = skipBtnElements[0] as HTMLElement | undefined;
         if (skipBtn) skipBtn.click();
     }
 
