@@ -1,3 +1,0 @@
-## YYYY-MM-DD - Responsive UI Injection
-**Learning:** When injecting custom UI components (like toggle buttons) into host applications, always include responsive CSS breakpoints (e.g., hiding text labels on small screens) to prevent breaking the host native layout. Accessibility is preserved by ensuring the button retains its core semantic attributes (`aria-label`, `role="switch"`). Additionally, always explicitly set `type="button"` on injected buttons to prevent unintended form submissions if the host DOM structure changes.
-**Action:** Apply media queries to hide non-essential text/hints on mobile, and always set `type="button"` for injected actionable UI elements.
