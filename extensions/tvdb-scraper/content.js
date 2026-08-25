@@ -4,7 +4,7 @@ export function scrapeTVDBData() {
     'use strict';
     const episodesData = [];
     const episodes = document.querySelectorAll('.list-group .list-group-item');
-    for (let j = 0; j < episodes.length; j++) {
+    for (let j = 0, len = episodes.length; j < len; j++) {
         const ep = episodes[j];
         const heading = ep.getElementsByClassName('list-group-item-heading')[0];
         if (!heading)
@@ -18,7 +18,7 @@ export function scrapeTVDBData() {
         const itemText = itemTextElement?.textContent?.trim() || '';
         let itemDate = '';
         const listInline = ep.getElementsByClassName('list-inline');
-        for (let i = 0; i < listInline.length; i++) {
+        for (let i = 0, len = listInline.length; i < len; i++) {
             const listItem = listInline[i];
             const dateText = listItem.textContent?.replace(NETWORK_CLEANUP_REGEX, '').trim() || '';
             try {

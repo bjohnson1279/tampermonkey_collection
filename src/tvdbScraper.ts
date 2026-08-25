@@ -29,7 +29,8 @@ export function scrapeTVDBData(): Episode[] {
     // using a descendant CSS selector to significantly reduce main thread parsing overhead.
     const episodes = document.querySelectorAll<HTMLElement>('.list-group .list-group-item');
 
-    for (let j = 0; j < episodes.length; j++) {
+    // ⚡ Bolt: Cache collection length to prevent repeated property lookups on every loop iteration
+    for (let j = 0, len = episodes.length; j < len; j++) {
         const ep = episodes[j] as HTMLElement;
         // ⚡ Bolt: Replace querySelector('.class') with getElementsByClassName('class')[0] for O(1) live collection lookup
         const heading = ep.getElementsByClassName('list-group-item-heading')[0] as
@@ -51,7 +52,8 @@ export function scrapeTVDBData(): Episode[] {
         let itemDate = '';
         const listInline = ep.getElementsByClassName('list-inline');
 
-        for (let i = 0; i < listInline.length; i++) {
+        // ⚡ Bolt: Cache collection length to prevent repeated property lookups on every loop iteration
+        for (let i = 0, len = listInline.length; i < len; i++) {
             const listItem = listInline[i] as HTMLElement;
             const dateText = listItem.textContent?.replace(NETWORK_CLEANUP_REGEX, '').trim() || '';
 
