@@ -447,7 +447,7 @@
                 @media (max-width: 768px) {
                     #adblock-toggle .adblock-btn-text,
                     #adblock-toggle .adblock-btn-shortcut { display: none; }
-                    #adblock-toggle { padding: 0 12px !important; margin-left: 8px !important; }
+                    #adblock-toggle { padding: 0 12px !important; margin-left: 8px !important; min-height: 44px !important; min-width: 44px !important; justify-content: center !important; }
                 }
                 @media (prefers-reduced-motion: reduce) {
                     #adblock-toggle { transition: none !important; }
