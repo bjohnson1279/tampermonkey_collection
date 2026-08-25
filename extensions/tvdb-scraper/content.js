@@ -4,7 +4,7 @@ export function scrapeTVDBData() {
     'use strict';
     const episodesData = [];
     const episodes = document.querySelectorAll('.list-group .list-group-item');
-    for (let j = 0; j < episodes.length; j++) {
+    for (let j = 0, len = episodes.length; j < len; j++) {
         const ep = episodes[j];
         const heading = ep.getElementsByClassName('list-group-item-heading')[0];
         if (!heading)
@@ -18,7 +18,7 @@ export function scrapeTVDBData() {
         const itemText = itemTextElement?.textContent?.trim() || '';
         let itemDate = '';
         const listInline = ep.getElementsByClassName('list-inline');
-        for (let i = 0; i < listInline.length; i++) {
+        for (let i = 0, len = listInline.length; i < len; i++) {
             const listItem = listInline[i];
             const dateText = listItem.textContent?.replace(NETWORK_CLEANUP_REGEX, '').trim() || '';
             try {
@@ -50,6 +50,10 @@ export function scrapeTVDBData() {
             #tvdb-copy-json-btn[aria-disabled="true"]:not([data-feedback="true"]) { cursor: not-allowed; opacity: 0.7; }
             #tvdb-copy-json-btn[data-feedback="true"] { cursor: default; }
             #tvdb-copy-json-btn kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; background-color: rgba(255, 255, 255, 0.2); border-radius: 4px; padding: 2px 6px; font-size: 11px; font-weight: 500; letter-spacing: 0.5px; border: 1px solid rgba(255, 255, 255, 0.3); }
+            @media (max-width: 768px) {
+                #tvdb-copy-json-btn { min-height: 44px; bottom: 16px; right: 16px; }
+                #tvdb-copy-json-btn kbd { display: none; }
+            }
             @media (prefers-reduced-motion: reduce) {
                 #tvdb-copy-json-btn { transition: none !important; }
             }
@@ -57,6 +61,7 @@ export function scrapeTVDBData() {
         document.head.appendChild(style);
         const btn = document.createElement('button');
         btn.id = 'tvdb-copy-json-btn';
+        btn.type = 'button';
         const updateButtonContent = (icon, text, showShortcut = true) => {
             btn.textContent = '';
             const iconSpan = document.createElement('span');

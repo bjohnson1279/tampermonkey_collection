@@ -30,6 +30,7 @@ class YouTubeAdRemover {
             const targetNode = document.getElementById(this.TARGET_NODE_ID);
 
             if (!targetNode) {
+                // 🛡️ Sentinel: Safe console.error usage without error object, preventing stack trace exposure
                 console.error(`Could not find the target node: #${this.TARGET_NODE_ID}`);
                 return;
             }

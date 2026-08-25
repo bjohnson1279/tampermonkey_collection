@@ -29,17 +29,16 @@ export function scrapeTVDBData(): Episode[] {
     // using a descendant CSS selector to significantly reduce main thread parsing overhead.
     const episodes = document.querySelectorAll<HTMLElement>('.list-group .list-group-item');
 
-    for (let j = 0; j < episodes.length; j++) {
+    // ⚡ Bolt: Cache collection length to prevent repeated property lookups on every loop iteration
+    for (let j = 0, len = episodes.length; j < len; j++) {
         const ep = episodes[j] as HTMLElement;
         // ⚡ Bolt: Replace querySelector('.class') with getElementsByClassName('class')[0] for O(1) live collection lookup
         const heading = ep.getElementsByClassName('list-group-item-heading')[0] as
-            | HTMLElement
-            | undefined;
+            HTMLElement | undefined;
         if (!heading) continue;
 
         const epLabelElement = heading.getElementsByClassName('episode-label')[0] as
-            | HTMLElement
-            | undefined;
+            HTMLElement | undefined;
         const epLabel = epLabelElement?.textContent?.trim() || '';
         const matches = epLabel.match(EPISODE_NUM_REGEX) || [];
 
@@ -47,14 +46,14 @@ export function scrapeTVDBData(): Episode[] {
         const epTitle = titleLink?.textContent?.trim() || '';
 
         const itemTextElement = ep.getElementsByClassName('list-group-item-text')[0] as
-            | HTMLElement
-            | undefined;
+            HTMLElement | undefined;
         const itemText = itemTextElement?.textContent?.trim() || '';
 
         let itemDate = '';
         const listInline = ep.getElementsByClassName('list-inline');
 
-        for (let i = 0; i < listInline.length; i++) {
+        // ⚡ Bolt: Cache collection length to prevent repeated property lookups on every loop iteration
+        for (let i = 0, len = listInline.length; i < len; i++) {
             const listItem = listInline[i] as HTMLElement;
             const dateText = listItem.textContent?.replace(NETWORK_CLEANUP_REGEX, '').trim() || '';
 
@@ -90,6 +89,10 @@ export function scrapeTVDBData(): Episode[] {
             #tvdb-copy-json-btn[aria-disabled="true"]:not([data-feedback="true"]) { cursor: not-allowed; opacity: 0.7; }
             #tvdb-copy-json-btn[data-feedback="true"] { cursor: default; }
             #tvdb-copy-json-btn kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; background-color: rgba(255, 255, 255, 0.2); border-radius: 4px; padding: 2px 6px; font-size: 11px; font-weight: 500; letter-spacing: 0.5px; border: 1px solid rgba(255, 255, 255, 0.3); }
+            @media (max-width: 768px) {
+                #tvdb-copy-json-btn { min-height: 44px; bottom: 16px; right: 16px; }
+                #tvdb-copy-json-btn kbd { display: none; }
+            }
             @media (prefers-reduced-motion: reduce) {
                 #tvdb-copy-json-btn { transition: none !important; }
             }
@@ -98,6 +101,7 @@ export function scrapeTVDBData(): Episode[] {
 
         const btn = document.createElement('button');
         btn.id = 'tvdb-copy-json-btn';
+        btn.type = 'button';
 
         // 🛡️ Sentinel: Helper function to securely update button contents without innerHTML to prevent DOM-based XSS
         const updateButtonContent = (icon: string, text: string, showShortcut: boolean = true) => {

@@ -93,3 +93,7 @@
 **Vulnerability:** The `WebSocket` interceptor in `src/ytAdBlock2.ts` lacked WebIDL brand checking for `URL` objects, relying solely on duck-typing and `.toString()` evaluation (`urlStr = url?.toString() || '';`).
 **Learning:** While `fetch` and `XHR` interceptors were secure against WebIDL spoofing and TOCTOU attacks via `Object.getOwnPropertyDescriptor(URL.prototype, 'href')?.get`, the `WebSocket` constructor interceptor was overlooked. Attackers could craft a malicious duck-typed object or override the `.toString()` method of a native `URL` instance to bypass the adblock filter (returning a safe URL during the check, but an ad URL when coerced by the underlying API).
 **Prevention:** Consistently apply WebIDL brand checking across ALL network interceptors (`fetch`, `XHR`, `sendBeacon`, and `WebSocket`) to securely extract the native URL value, mitigating duck-typing and `.toString()` TOCTOU evasion techniques.
+## 2026-08-23 - [Information Exposure via Debug console.log]
+**Vulnerability:** Debug `console.log` statements in production scripts can leak sensitive application state and user identifiers (e.g., adblock configuration status) into the browser console.
+**Learning:** Just like `console.error` and `console.warn` must securely catch and format exceptions to prevent stack trace leaks, verbose `console.log` statements should be stripped from final production builds to prevent passive information exposure.
+**Prevention:** Avoid using `console.log` for state updates or debug information in production Tampermonkey scripts or browser extensions.

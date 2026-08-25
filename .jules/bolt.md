@@ -168,3 +168,7 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## YYYY-MM-DD - Cache Live HTMLCollections in Intervals
 **Learning:** While getElementsByClassName and getElementsByTagName are O(1) operations that return live HTMLCollections, calling them repeatedly inside high-frequency intervals (like a 500ms setInterval) still incurs function call overhead on every tick.
 **Action:** Cache the live HTMLCollection returned by these methods globally outside the interval. Because the collection is live, it automatically updates when the DOM changes, eliminating all query function calls inside the loop.
+
+## YYYY-MM-DD - Optimize for loop iteration
+**Learning:** In standard for loops, looking up the length of an array/collection on every iteration (`i < list.length`) adds overhead.
+**Action:** Cache the length (`let len = list.length; for (let i = 0; i < len; i++)`) to avoid the repeated property lookup and slightly improve performance.
