@@ -75,15 +75,7 @@
                     args[0] = new Request(url, { duplex: 'half', ...req });
                 }
                 catch (e) {
-                    try {
-                        Object.defineProperty(req, 'url', {
-                            value: url,
-                            configurable: true,
-                            enumerable: true,
-                            writable: true,
-                        });
-                    }
-                    catch (e2) { }
+                    args[0] = url;
                 }
             }
         }

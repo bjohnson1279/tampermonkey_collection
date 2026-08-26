@@ -111,14 +111,10 @@
                 try {
                     args[0] = new Request(url, { duplex: 'half', ...(req as RequestInit) } as any);
                 } catch (e) {
-                    try {
-                        Object.defineProperty(req, 'url', {
-                            value: url,
-                            configurable: true,
-                            enumerable: true,
-                            writable: true,
-                        });
-                    } catch (e2) {}
+                    // 🛡️ Sentinel: If Request constructor fails, fallback to explicitly passing
+                    // the evaluated string URL to prevent TOCTOU evasion via native fetch
+                    // implicitly calling an overridden .toString() method on the POJO.
+                    args[0] = url;
                 }
             }
         } else {
