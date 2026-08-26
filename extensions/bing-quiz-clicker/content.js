@@ -7,6 +7,8 @@ class BingQuizClicker {
         this.initialize();
     }
     initialize() {
+        this.gotThisRightElements = document.getElementsByClassName('wk_hideCompulsary');
+        this.nextButtonElements = document.getElementsByClassName(this.NEXT_BUTTON_CLASS);
         const style = document.createElement('style');
         style.textContent = `
             .wk_hideCompulsary { visibility: visible !important; }
@@ -22,8 +24,8 @@ class BingQuizClicker {
     }
     getQuizElements() {
         return {
-            gotThisRight: document.getElementsByClassName('wk_hideCompulsary'),
-            nextButton: document.getElementsByClassName(this.NEXT_BUTTON_CLASS)[0] || null,
+            gotThisRight: this.gotThisRightElements,
+            nextButton: this.nextButtonElements[0] || null,
         };
     }
     handleQuizElements(elements) {
