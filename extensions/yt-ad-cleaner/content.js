@@ -163,7 +163,7 @@
             },
         });
     }
-    const adSelectors = [
+    const staticAdSelectors = [
         'ytd-promoted-sparkles-text-search-renderer',
         'ytd-display-ad-renderer',
         'ytd-promoted-video-renderer',
@@ -183,28 +183,13 @@
         'ytd-banner-promo-renderer',
         'ytd-carousel-ad-renderer',
         'ytd-companion-slot-renderer',
-        '#dismissible ytd-badge-supported-renderer',
     ];
-    const combinedAdSelector = adSelectors.join(',');
-    const fastAdTags = new Set([
-        'YTD-PROMOTED-SPARKLES-TEXT-SEARCH-RENDERER',
-        'YTD-DISPLAY-AD-RENDERER',
-        'YTD-PROMOTED-VIDEO-RENDERER',
-        'YTD-AD-SLOT-RENDERER',
-        'YTD-IN-FEED-AD-LAYOUT-RENDERER',
-        'YTD-ACTION-COMPANION-AD-RENDERER',
-        'YTD-COMPACT-PROMOTED-VIDEO-RENDERER',
-        'YTD-PROMOTED-SPARKLES-WEB-RENDERER',
-        'YTD-REEL-PLAYER-OVERLAY-RENDERER',
-        'YTD-REEL-AD-RENDERER',
-        'YTD-MERCH-SHELF-RENDERER',
-        'YTD-RICH-SHELF-RENDERER',
-        'YTD-VIDEO-MASTHEAD-AD-ADVERTISER-INFO-RENDERER',
-        'YTD-VIDEO-MASTHEAD-AD-PRIMARY-VIDEO-RENDERER',
-        'YTD-BANNER-PROMO-RENDERER',
-        'YTD-CAROUSEL-AD-RENDERER',
-        'YTD-COMPANION-SLOT-RENDERER',
-    ]);
+    const adStyle = document.createElement('style');
+    adStyle.id = 'yt-adblock-styles';
+    adStyle.textContent = `${staticAdSelectors.join(', ')} { display: none !important; }`;
+    if (enabled) {
+        (document.head || document.documentElement).appendChild(adStyle);
+    }
     const promotedBadgeRegex = /promoted/i;
     const adObserver = new MutationObserver((mutations) => {
         if (!enabled)
@@ -215,27 +200,14 @@
                 const node = mutation.addedNodes[j];
                 if (node.nodeType === Node.ELEMENT_NODE) {
                     const el = node;
-                    if (fastAdTags.has(el.tagName) ||
-                        el.id === 'player-ads' ||
-                        (el.tagName === 'YTD-REEL-SHELF-RENDERER' &&
-                            el.hasAttribute('is-shorts')) ||
-                        (el.tagName === 'YTD-BADGE-SUPPORTED-RENDERER' &&
-                            el.closest('#dismissible'))) {
-                        el.remove();
-                    }
-                    else if (el.firstElementChild && el.querySelectorAll) {
-                        const adNodes = el.querySelectorAll(combinedAdSelector);
-                        for (let k = 0; k < adNodes.length; k++) {
+                    if (el.firstElementChild && el.getElementsByTagName) {
+                        const adNodes = el.getElementsByTagName('ytd-badge-supported-renderer');
+                        for (let k = adNodes.length - 1; k >= 0; k--) {
                             const adNode = adNodes[k];
-                            if (adNode.tagName === 'YTD-BADGE-SUPPORTED-RENDERER') {
-                                if (promotedBadgeRegex.test(adNode.textContent || '')) {
-                                    adNode
-                                        .closest('ytd-video-renderer,ytd-compact-video-renderer')
-                                        ?.remove();
-                                }
-                            }
-                            else {
-                                adNode.remove();
+                            if (promotedBadgeRegex.test(adNode.textContent || '')) {
+                                adNode
+                                    .closest('ytd-video-renderer,ytd-compact-video-renderer')
+                                    ?.remove();
                             }
                         }
                     }
@@ -246,16 +218,11 @@
     function removeInitialAds() {
         if (!enabled)
             return;
-        const initialAds = document.querySelectorAll(combinedAdSelector);
-        for (let i = 0; i < initialAds.length; i++) {
+        const initialAds = document.getElementsByTagName('ytd-badge-supported-renderer');
+        for (let i = initialAds.length - 1; i >= 0; i--) {
             const adNode = initialAds[i];
-            if (adNode.tagName === 'YTD-BADGE-SUPPORTED-RENDERER') {
-                if (promotedBadgeRegex.test(adNode.textContent || '')) {
-                    adNode.closest('ytd-video-renderer,ytd-compact-video-renderer')?.remove();
-                }
-            }
-            else {
-                adNode.remove();
+            if (promotedBadgeRegex.test(adNode.textContent || '')) {
+                adNode.closest('ytd-video-renderer,ytd-compact-video-renderer')?.remove();
             }
         }
     }
@@ -433,6 +400,14 @@
     function toggleAdblock() {
         enabled = !enabled;
         saveState();
+        if (enabled) {
+            if (!document.getElementById('yt-adblock-styles')) {
+                (document.head || document.documentElement).appendChild(adStyle);
+            }
+        }
+        else {
+            adStyle.remove();
+        }
         const btn = document.getElementById('adblock-toggle');
         if (btn) {
             updateButtonContent(btn, enabled);
