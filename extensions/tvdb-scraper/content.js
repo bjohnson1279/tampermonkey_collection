@@ -51,7 +51,8 @@ export function scrapeTVDBData() {
             #tvdb-copy-json-btn[data-feedback="true"] { cursor: default; }
             #tvdb-copy-json-btn kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; background-color: rgba(255, 255, 255, 0.2); border-radius: 4px; padding: 2px 6px; font-size: 11px; font-weight: 500; letter-spacing: 0.5px; border: 1px solid rgba(255, 255, 255, 0.3); }
             @media (max-width: 768px) {
-                #tvdb-copy-json-btn { min-height: 44px; bottom: 16px; right: 16px; }
+                #tvdb-copy-json-btn { min-height: 44px; min-width: 44px; padding: 0 12px; justify-content: center; bottom: 16px; right: 16px; }
+                #tvdb-copy-json-btn .tvdb-btn-text { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
                 #tvdb-copy-json-btn kbd { display: none; }
             }
             @media (prefers-reduced-motion: reduce) {
@@ -68,6 +69,7 @@ export function scrapeTVDBData() {
             iconSpan.setAttribute('aria-hidden', 'true');
             iconSpan.textContent = icon;
             const textSpan = document.createElement('span');
+            textSpan.className = 'tvdb-btn-text';
             textSpan.textContent = text;
             btn.appendChild(iconSpan);
             btn.appendChild(textSpan);
