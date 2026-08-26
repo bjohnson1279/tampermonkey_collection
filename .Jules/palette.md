@@ -1,0 +1,3 @@
+## 2026-08-26 - Responsive Icon-Only FAB Touch Targets
+**Learning:** When making floating action buttons responsive by hiding their text labels on mobile devices, you must ensure the remaining icon maintains a minimum 44x44px touch target (WCAG 2.5.5) and is re-centered, otherwise the button becomes inaccessible.
+**Action:** Always test mobile breakpoints on FABs to verify touch target dimensions and centering when text elements are hidden. Furthermore, while screen readers will read the aria-label of the parent button, using a visually-hidden class (like sr-only) for the text label is often safer than display:none to guarantee screen readers always have an accessible name available.
