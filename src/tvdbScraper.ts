@@ -98,7 +98,7 @@ export function scrapeTVDBData(): Episode[] {
         if (hasData) {
             btn.innerHTML = `<span>📋 Copy JSON (${countText})</span><kbd aria-hidden="true">Shift+C</kbd>`;
         } else {
-            btn.textContent = '📋 No Data';
+            btn.innerHTML = '<span>📋 No Data</span>';
         }
         if (!hasData) btn.setAttribute('aria-disabled', 'true');
         btn.setAttribute(
