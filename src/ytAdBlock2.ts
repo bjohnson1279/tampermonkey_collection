@@ -241,7 +241,7 @@
     //----------------------------------------
     // DOM cleanup for ad containers
     //----------------------------------------
-    const adSelectors: string[] = [
+    const staticAdSelectors: string[] = [
         'ytd-promoted-sparkles-text-search-renderer',
         'ytd-display-ad-renderer',
         'ytd-promoted-video-renderer',
@@ -261,31 +261,15 @@
         'ytd-banner-promo-renderer',
         'ytd-carousel-ad-renderer',
         'ytd-companion-slot-renderer',
-        '#dismissible ytd-badge-supported-renderer',
     ];
 
-    const combinedAdSelector = adSelectors.join(',');
-
-    // ⚡ Bolt: Use O(1) Set lookup for tag names to avoid expensive CSS selector parsing inside high-frequency observer loops
-    const fastAdTags = new Set([
-        'YTD-PROMOTED-SPARKLES-TEXT-SEARCH-RENDERER',
-        'YTD-DISPLAY-AD-RENDERER',
-        'YTD-PROMOTED-VIDEO-RENDERER',
-        'YTD-AD-SLOT-RENDERER',
-        'YTD-IN-FEED-AD-LAYOUT-RENDERER',
-        'YTD-ACTION-COMPANION-AD-RENDERER',
-        'YTD-COMPACT-PROMOTED-VIDEO-RENDERER',
-        'YTD-PROMOTED-SPARKLES-WEB-RENDERER',
-        'YTD-REEL-PLAYER-OVERLAY-RENDERER',
-        'YTD-REEL-AD-RENDERER',
-        'YTD-MERCH-SHELF-RENDERER',
-        'YTD-RICH-SHELF-RENDERER',
-        'YTD-VIDEO-MASTHEAD-AD-ADVERTISER-INFO-RENDERER',
-        'YTD-VIDEO-MASTHEAD-AD-PRIMARY-VIDEO-RENDERER',
-        'YTD-BANNER-PROMO-RENDERER',
-        'YTD-CAROUSEL-AD-RENDERER',
-        'YTD-COMPANION-SLOT-RENDERER',
-    ]);
+    // ⚡ Bolt: Replace O(N) DOM querySelectorAll loops for static ad containers with a single O(1) injected stylesheet
+    const adStyle = document.createElement('style');
+    adStyle.id = 'yt-adblock-styles';
+    adStyle.textContent = `${staticAdSelectors.join(', ')} { display: none !important; }`;
+    if (enabled) {
+        (document.head || document.documentElement).appendChild(adStyle);
+    }
 
     // ⚡ Bolt: Use a pre-compiled regex instead of .toLowerCase().includes() for ~6x faster text content checking
     // during high-frequency MutationObserver events and initial scans, preventing unnecessary O(N) string allocations.
@@ -300,33 +284,18 @@
                 const node = mutation.addedNodes[j];
                 if (node.nodeType === Node.ELEMENT_NODE) {
                     const el = node as HTMLElement;
-                    // ⚡ Bolt: Replace expensive .matches() with O(1) Set lookup of tagName and direct ID/attribute checks
-                    if (
-                        fastAdTags.has(el.tagName) ||
-                        el.id === 'player-ads' ||
-                        (el.tagName === 'YTD-REEL-SHELF-RENDERER' &&
-                            el.hasAttribute('is-shorts')) ||
-                        (el.tagName === 'YTD-BADGE-SUPPORTED-RENDERER' &&
-                            el.closest('#dismissible'))
-                    ) {
-                        el.remove();
-                    } else if (el.firstElementChild && el.querySelectorAll) {
-                        // ⚡ Bolt: Fast path for leaf nodes - avoid querySelectorAll parsing overhead if no children exist
-                        const adNodes = el.querySelectorAll(combinedAdSelector);
-                        for (let k = 0; k < adNodes.length; k++) {
+                    // ⚡ Bolt: Replace querySelectorAll with getElementsByTagName for O(1) live collection lookup
+                    if (el.firstElementChild && el.getElementsByTagName) {
+                        const adNodes = el.getElementsByTagName('ytd-badge-supported-renderer');
+                        // ⚡ Bolt: Iterate backward through live collection
+                        for (let k = adNodes.length - 1; k >= 0; k--) {
                             const adNode = adNodes[k];
-                            if (adNode.tagName === 'YTD-BADGE-SUPPORTED-RENDERER') {
-                                if (
-                                    promotedBadgeRegex.test(
-                                        (adNode as HTMLElement).textContent || ''
-                                    )
-                                ) {
-                                    adNode
-                                        .closest('ytd-video-renderer,ytd-compact-video-renderer')
-                                        ?.remove();
-                                }
-                            } else {
-                                adNode.remove();
+                            if (
+                                promotedBadgeRegex.test((adNode as HTMLElement).textContent || '')
+                            ) {
+                                adNode
+                                    .closest('ytd-video-renderer,ytd-compact-video-renderer')
+                                    ?.remove();
                             }
                         }
                     }
@@ -339,15 +308,12 @@
     function removeInitialAds(): void {
         if (!enabled) return;
 
-        const initialAds = document.querySelectorAll(combinedAdSelector);
-        for (let i = 0; i < initialAds.length; i++) {
+        // ⚡ Bolt: Replace querySelectorAll with getElementsByTagName for O(1) live collection lookup
+        const initialAds = document.getElementsByTagName('ytd-badge-supported-renderer');
+        for (let i = initialAds.length - 1; i >= 0; i--) {
             const adNode = initialAds[i];
-            if (adNode.tagName === 'YTD-BADGE-SUPPORTED-RENDERER') {
-                if (promotedBadgeRegex.test((adNode as HTMLElement).textContent || '')) {
-                    adNode.closest('ytd-video-renderer,ytd-compact-video-renderer')?.remove();
-                }
-            } else {
-                adNode.remove();
+            if (promotedBadgeRegex.test((adNode as HTMLElement).textContent || '')) {
+                adNode.closest('ytd-video-renderer,ytd-compact-video-renderer')?.remove();
             }
         }
     }
@@ -561,6 +527,14 @@
     function toggleAdblock(): void {
         enabled = !enabled;
         saveState();
+
+        if (enabled) {
+            if (!document.getElementById('yt-adblock-styles')) {
+                (document.head || document.documentElement).appendChild(adStyle);
+            }
+        } else {
+            adStyle.remove();
+        }
 
         const btn: HTMLElement | null = document.getElementById('adblock-toggle');
         if (btn) {

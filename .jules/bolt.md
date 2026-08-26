@@ -172,3 +172,8 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## YYYY-MM-DD - Optimize for loop iteration
 **Learning:** In standard for loops, looking up the length of an array/collection on every iteration (`i < list.length`) adds overhead.
 **Action:** Cache the length (`let len = list.length; for (let i = 0; i < len; i++)`) to avoid the repeated property lookup and slightly improve performance.
+
+## 2024-11-20 - O(1) CSS Injection vs querySelectorAll for static elements
+**Learning:** To optimize O(N) DOM traversals for hiding multiple static element classes or IDs (e.g., ad blocking), avoid repeatedly using `querySelectorAll` in JavaScript loops or high-frequency MutationObserver callbacks.
+**Action:** Construct a single `<style>` element containing `{ display: none !important; }` for the combined selectors and inject it once into the document. This leverages the browser's highly optimized native CSS engine to process layout updates instantly.
+
