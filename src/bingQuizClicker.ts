@@ -18,12 +18,18 @@ class BingQuizClicker {
     private readonly NEXT_BUTTON_CLASS = 'wk_button';
     private readonly CHECK_INTERVAL_MS = 1000;
     private intervalId: number | null = null;
+    private gotThisRightElements!: HTMLCollectionOf<Element>;
+    private nextButtonElements!: HTMLCollectionOf<Element>;
 
     constructor() {
         this.initialize();
     }
 
     private initialize(): void {
+        // Cache live HTMLCollections to avoid repeated O(1) query function call overhead on every tick
+        this.gotThisRightElements = document.getElementsByClassName('wk_hideCompulsary');
+        this.nextButtonElements = document.getElementsByClassName(this.NEXT_BUTTON_CLASS);
+
         // ⚡ Bolt: Replace O(N) inline style assignments with O(1) injected stylesheet
         const style = document.createElement('style');
         style.textContent = `
@@ -44,12 +50,10 @@ class BingQuizClicker {
     }
 
     private getQuizElements(): QuizElements {
-        // ⚡ Bolt: Replace querySelector('.class') with getElementsByClassName('class') for O(1) live collection lookup instead of O(N) tree traversal inside the 1000ms setInterval loop.
+        // ⚡ Bolt: Return cached live collections instead of re-querying the DOM
         return {
-            gotThisRight: document.getElementsByClassName('wk_hideCompulsary'),
-            nextButton:
-                (document.getElementsByClassName(this.NEXT_BUTTON_CLASS)[0] as
-                    HTMLElement | undefined) || null,
+            gotThisRight: this.gotThisRightElements,
+            nextButton: (this.nextButtonElements[0] as HTMLElement | undefined) || null,
         };
     }
 

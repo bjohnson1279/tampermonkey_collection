@@ -177,3 +177,6 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 **Learning:** To optimize O(N) DOM traversals for hiding multiple static element classes or IDs (e.g., ad blocking), avoid repeatedly using `querySelectorAll` in JavaScript loops or high-frequency MutationObserver callbacks.
 **Action:** Construct a single `<style>` element containing `{ display: none !important; }` for the combined selectors and inject it once into the document. This leverages the browser's highly optimized native CSS engine to process layout updates instantly.
 
+## 2024-11-20 - Cache live HTMLCollections to avoid polling overhead
+**Learning:** In polling loops like `setInterval`, repeatedly calling `document.getElementsByClassName` performs redundant DOM lookups on every tick, even though the returned `HTMLCollection` is live.
+**Action:** Initialize the live `HTMLCollection`s once as class properties or global variables outside the interval. Return these cached live collections from getter methods to eliminate O(1) query function call overhead on every tick while still automatically reflecting dynamic DOM changes.

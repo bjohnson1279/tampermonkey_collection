@@ -47,7 +47,8 @@ describe('BingQuizClicker', () => {
             // Advance time
             jest.advanceTimersByTime(1000);
 
-            expect(getElementsByClassNameSpy).toHaveBeenCalled();
+            // ⚡ Bolt: Ensure getElementsByClassName is NOT called inside the interval
+            expect(getElementsByClassNameSpy).not.toHaveBeenCalled();
         });
     });
 
