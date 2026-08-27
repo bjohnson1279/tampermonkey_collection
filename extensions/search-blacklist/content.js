@@ -20,6 +20,8 @@
             let engine;
             let matchedDomain;
             for (const domain in searchEngines) {
+                if (!Object.prototype.hasOwnProperty.call(searchEngines, domain))
+                    continue;
                 if (hostname === domain || hostname.endsWith('.' + domain)) {
                     engine = searchEngines[domain];
                     matchedDomain = domain;

@@ -48,6 +48,9 @@ interface SearchEngines {
             let engine: SearchEngineConfig | undefined;
             let matchedDomain: string | undefined;
             for (const domain in searchEngines) {
+                // 🛡️ Sentinel: Mitigate Prototype Pollution by ensuring we only iterate over own properties of the searchEngines object
+                if (!Object.prototype.hasOwnProperty.call(searchEngines, domain)) continue;
+
                 if (hostname === domain || hostname.endsWith('.' + domain)) {
                     engine = searchEngines[domain];
                     matchedDomain = domain;
