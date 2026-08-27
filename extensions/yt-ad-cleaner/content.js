@@ -186,9 +186,9 @@
     const adObserver = new MutationObserver((mutations) => {
         if (!enabled)
             return;
-        for (let i = 0; i < mutations.length; i++) {
+        for (let i = 0, len = mutations.length; i < len; i++) {
             const mutation = mutations[i];
-            for (let j = 0; j < mutation.addedNodes.length; j++) {
+            for (let j = 0, nodeLen = mutation.addedNodes.length; j < nodeLen; j++) {
                 const node = mutation.addedNodes[j];
                 if (node.nodeType === Node.ELEMENT_NODE) {
                     const el = node;
