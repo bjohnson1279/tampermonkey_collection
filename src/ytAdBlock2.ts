@@ -407,7 +407,7 @@
                 #adblock-toggle:active { transform: scale(0.95); }
                 #adblock-toggle kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; background-color: rgba(255, 255, 255, 0.2); border-radius: 4px; padding: 2px 6px; font-size: 11px; font-weight: 500; letter-spacing: 0.5px; border: 1px solid rgba(255, 255, 255, 0.3); }
                 @media (max-width: 768px) {
-                    #adblock-toggle .adblock-btn-text,
+                    #adblock-toggle .adblock-btn-text { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
                     #adblock-toggle .adblock-btn-shortcut { display: none; }
                     #adblock-toggle { padding: 0 12px !important; margin-left: 8px !important; min-height: 44px !important; min-width: 44px !important; justify-content: center !important; }
                 }
