@@ -119,6 +119,21 @@ describe('searchEngineFilter', () => {
         expect(window.location.href).toBe('https://www.google.com/?q=hello+world');
     });
 
+    it('should ignore prototype polluted properties on searchEngines object', () => {
+        (Object.prototype as any)['attacker.com'] = {
+            queryParam: 'q',
+            url: 'https://attacker.com',
+        };
+        window.location.hostname = 'attacker.com';
+        window.location.search = '?q=asdf';
+        window.location.href = 'https://attacker.com/?q=asdf';
+
+        require('./searchEngineFilter');
+
+        expect(window.location.replace).not.toHaveBeenCalled();
+        delete (Object.prototype as any)['attacker.com'];
+    });
+
     it('should redirect if query is blacklisted', () => {
         window.location.hostname = 'www.google.com';
         window.location.search = '?q=hello+asdf+world';
