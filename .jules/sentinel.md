@@ -1,4 +1,111 @@
+## 2024-06-27 - [Prototype Pollution via Query Params]
+**Vulnerability:** Prototype pollution vulnerability found in `src/getQueryString.ts` during query string parameter parsing using `URLSearchParams`.
+**Learning:** Object initialization `{}` alongside unrestrained assignment `result[key] = value` allowed dangerous query parameters like `?__proto__=polluted` to modify the generic object prototype, impacting subsequent script actions.
+**Prevention:** Always initialize objects expected to store untrusted data (like parsed query parameters) using `Object.create(null)` instead of `{}`. Additionally, filter out specifically dangerous keys (`__proto__`, `constructor`, `prototype`) explicitly if doing assignment from external inputs.
+
+## 2024-06-29 - [Fetch Evasion via Request Objects]
+**Vulnerability:** Adblocker/tracker blocking logic using fetch interception was vulnerable to evasion when fetch is called with a `Request` or `URL` object instead of a string URL.
+**Learning:** The interceptor used `args[0]?.toString()` which results in `"[object Request]"` instead of the actual URL, completely bypassing blocklists that match on url strings.
+**Prevention:** When hooking `fetch` or `XMLHttpRequest`, always normalize the argument type by checking `instanceof Request` or `instanceof URL` and extract the `.url` or `.href` properties respectively before applying security filtering.
+
+## 2025-06-30 - Tampermonkey Cross-Realm Adblock Evasion
+**Vulnerability:** YouTube AdBlocker (`ytAdBlock2`) used `req instanceof Request` or `req instanceof URL` in `fetch` and `XMLHttpRequest` monkeypatches to extract URLs. This fails when the `Request` or `URL` object originates from a different realm (like an iframe or web worker). The fallback was `req?.toString()`, which returns `"[object Request]"`. This allowed requests with ad URLs to bypass the `shouldBlock` filter.
+**Learning:** `instanceof` checks fail across Javascript realms because each realm has its own global objects (e.g., `window.Request !== iframe.contentWindow.Request`).
+**Prevention:** Use duck typing (checking for properties like `typeof req === 'object' && 'url' in req`) instead of `instanceof` when extracting data from objects that might cross boundaries, especially in browser extensions and Tampermonkey scripts that interact with complex, multi-realm applications like YouTube.
+
+## 2024-07-01 - [TOCTOU via dynamic toString() or getters in request interception]
+**Vulnerability:** A Time-Of-Check to Time-Of-Use (TOCTOU) evasion was present in the `fetch` and `XMLHttpRequest.prototype.open` monkey patches in `ytAdBlock2.ts`. The script safely extracted the URL for the `shouldBlock` filter but passed the original object (with potentially dynamic getters or `.toString()` methods) to the native implementations. An attacker could pass a POJO that returns a safe URL during the check and a blocked URL during the native call.
+**Learning:** Checking the property of an object and later relying on the native engine to coercively extract that property again allows for a TOCTOU evasion if the property (or `toString()`) is dynamic.
+**Prevention:** When intercepting network requests, if you rely on coercing an object to a string (or extracting a property), pass the already-coerced string to the underlying API instead of the original object to eliminate the time gap.
+
+## 2024-05-18 - [Fetch Interceptor TOCTOU via Getters]
+**Vulnerability:** The `fetch` interceptor extracted the URL from `req.url` to check against an adblock list, but then passed the original `req` object to the native `fetch`. A malicious object with a getter for `url` could return a safe URL during the check and an ad URL when native `fetch` evaluated it.
+**Learning:** Checking a property on an object and then passing the object to a native API creates a Time-Of-Check to Time-Of-Use (TOCTOU) vulnerability because the getter is evaluated twice.
+**Prevention:** Unconditionally overwrite `args[0]` with the extracted primitive URL string ONLY for POJOs. Native `Request` objects are immune to this TOCTOU vector as their internal URL slot is immutable once constructed, and overwriting `args[0]` when `args[0]` is a `Request` would drop the original request's properties.
+
+## 2024-07-03 - [Path/Query Confusion in Hostname Matching]
+**Vulnerability:** In `src/searchEngineFilter.ts`, the script matched the target search engine domain using `window.location.href.includes(domain)`. This allowed a malicious or unrelated site with a URL like `https://attacker.com/?q=blacklist_word&bing.com` to trigger the script's logic, leading to unintended behavior (redirects). Additionally, the script logged potentially sensitive user search queries to the console.
+**Learning:** Checking the entire `href` for a domain substring is a classic path/query confusion vulnerability. Any part of the URL (path, query, hash) can contain the domain string.
+**Prevention:** Always use `window.location.hostname` (or `URL.hostname`) to verify the domain or origin before executing sensitive script logic. Avoid logging sensitive user input like search queries to the console in production scripts.
+
+## 2026-07-10 - [User Identifier Exposure in Console Logs]
+**Vulnerability:** Usernames of blocked users were being logged to the console using `console.log` when hiding their comments in `kslCommentsHide.ts`.
+**Learning:** Logging sensitive user input or identifiers (like usernames, even of blocked users) to the console in production browser scripts exposes Personally Identifiable Information (PII) to anyone with access to the developer console or telemetry tools capturing console output.
+**Prevention:** Never log user identifiers or sensitive data to the browser console in production environments. Remove debug statements that expose this information before deploying.
+
+## 2025-07-02 - [TOCTOU via Duck-Typing Evasion in Request Interception]
+**Vulnerability:** The adblocker interceptors in `ytAdBlock2.ts` used duck typing (`'url' in req`) to extract URLs, which allowed malicious POJOs with dynamic getters to evade blocking. A POJO could return a safe URL during the `shouldBlock` check but an ad URL when the native API later accessed the property.
+**Learning:** Checking for properties via duck typing in interceptors and leaving the object unmodified enables a Time-Of-Check to Time-Of-Use (TOCTOU) vulnerability if the property getter is dynamic.
+**Prevention:** Use WebIDL brand checking (e.g., `Object.getOwnPropertyDescriptor(Request.prototype, 'url')?.get?.call(req)`) to securely identify native `Request` and `URL` objects. For any non-native object, immediately evaluate and replace the argument with the coerced string URL to eliminate the time gap.
+
+## 2024-07-06 - [Fetch Evasion via TOCTOU in POJO getters]
+**Vulnerability:** The fetch monkeypatch in `src/ytAdBlock2.ts` used simple duck typing (`'url' in req`) to identify Request objects. This allowed malicious POJOs to spoof properties to evade checks via dynamic getters, leading to a Time-Of-Check to Time-Of-Use (TOCTOU) vulnerability where the ad URL passed the `shouldBlock` filter but hit the native fetch intact.
+**Learning:** Simple duck typing on object properties is easily spoofable by getters. Moreover, intercepting native `Request` objects and replacing them with coerced strings destroys other request metadata (like `method` or `body`). Native `Request` objects are immune to TOCTOU for `url` since their internal slot is immutable.
+**Prevention:** Use WebIDL brand-checking (e.g., `Object.getOwnPropertyDescriptor(Request.prototype, 'url')?.get?.call(req)`) to securely and reliably identify Native `Request` objects across all JavaScript realms. Only overwrite `args[0]` with the safe URL string if the object is a POJO.
+
+## 2024-07-15 - [Hostname Confusion in Search Engine Filter]
+**Vulnerability:** Subdomain and prefix spoofing vulnerability found in `src/searchEngineFilter.ts` where `hostname.includes(domain)` was used to match search engines.
+**Learning:** Using `.includes()` on a hostname allows malicious domains like `notgoogle.com` or `google.com.attacker.com` to falsely match the target domain, potentially triggering unintended script logic or exposing sensitive user search queries.
+**Prevention:** Always use exact matching (`hostname === domain`) or proper suffix matching (`hostname.endsWith('.' + domain)`) when validating hostnames against a list of trusted domains.
+
+## 2026-07-14 - [Tracking Evasion via sendBeacon]
+**Vulnerability:** YouTube AdBlocker (`ytAdBlock2`) intercepted `fetch` and `XMLHttpRequest`, but left `navigator.sendBeacon` unprotected. This allowed tracking and ad analytics requests (like those hitting `/api/stats/ads`) to bypass the network filter, exposing the user to tracking and potentially triggering secondary ad mechanisms.
+**Learning:** Modern web applications often use `navigator.sendBeacon` for analytics and telemetry because it guarantees request delivery even during page unload. Adblockers that only hook `fetch` and `XHR` are blind to these requests.
+**Prevention:** When building network interceptors for privacy or adblocking, always secure all outbound network APIs, including `navigator.sendBeacon`. Apply the same WebIDL/TOCTOU preventions as used in `fetch` and `XHR`.
+
+## 2024-07-20 - [Network Filter Evasion via Relative URLs]
+**Vulnerability:** Adblocker/tracker blocking logic using fetch interception was vulnerable to evasion when requests were made using relative URLs (e.g., `fetch('/api/stats/ads')`). The URL was tested directly against a regex that expected full domain matches (like `youtube.com\/api\/stats`), causing relative URLs to silently bypass the filter.
+**Learning:** Network APIs like `fetch` and `XMLHttpRequest` accept relative URLs, which the browser automatically resolves against the current origin. Network filters relying on full URL patterns will fail to block these unless the relative URLs are resolved first.
+**Prevention:** When intercepting network requests to evaluate against a URL blocklist (e.g., via regex), always normalize the input URL to an absolute URL (e.g., `new URL(url, window.location.href).href`) before testing. Use a `try/catch` block to safely fallback to the original URL if parsing fails.
+
+## 2024-05-24 - Secure Open Redirects
+**Vulnerability:** Open Redirect via Unvalidated `window.location.href` Assignment
+**Learning:** Assigning a configurable or unvalidated URL directly to `window.location.href` exposes the application to open redirects, potentially allowing attackers to route users to malicious sites if the underlying configuration is tampered with or injected.
+**Prevention:** Always validate destination URLs by parsing them with the `URL` API (`new URL(url, base)`). Ensure the protocol is strictly `https:` and securely verify the hostname matches expected values using strict equality (`===`) or strict suffix matching (`.endsWith('.domain.com')`). Never rely on `.includes()` for hostname validation due to substring spoofing vulnerabilities.
+
+## 2024-07-28 - [Network Filter Evasion via WebSocket]
+**Vulnerability:** Trackers can bypass `fetch`, `XMLHttpRequest`, and `navigator.sendBeacon` interceptors by using `WebSocket` connections for telemetry and ads, allowing them to evade network filters entirely.
+**Learning:** `WebSocket` is another network API that must be secured in privacy and adblocking extensions to prevent evasion. Like other network hooks, it is also vulnerable to TOCTOU and cross-realm object spoofing.
+**Prevention:** When building network interceptors for privacy or adblocking, always secure `WebSocket` connections. Apply the same WebIDL brand-checking and TOCTOU preventions as used in `fetch` and `XHR` when evaluating the connection URL.
+\n## 2024-07-31 - [WebSocket Evasion via Native toString Overrides]\n**Vulnerability:** When intercepting the `WebSocket` constructor to prevent connections to trackers, using WebIDL brand checking to conditionally bypass string coercion for native `URL` objects leaves a vulnerability. Since the native `WebSocket` constructor intrinsically coerces the first argument to a string, passing a maliciously crafted `URL` object with an overridden `.toString()` method would bypass the adblock filter but connect to the ad server during native construction.\n**Learning:** The native `WebSocket` constructor expects a string URL. If an object is passed, it uses the object's `.toString()` method. Unlike `fetch` which consumes `Request` objects securely, `WebSocket` does not have an immutable native URL slot for object arguments. Thus, it is always vulnerable to TOCTOU evasion if the argument is not explicitly coerced and overwritten before hitting the native constructor.\n**Prevention:** When securing `window.WebSocket` interceptors against TOCTOU evasion, unlike `fetch` which handles immutable native `Request` objects, the native `WebSocket` constructor strictly requires a string parameter. You must explicitly evaluate the URL to a string and unconditionally overwrite the constructor argument (e.g., `args[0] = urlStr`) to prevent bypasses via malicious objects mutating their `.toString()` values.
+
 ## 2025-02-23 - [navigator.sendBeacon TOCTOU & WebIDL bypass]
 **Vulnerability:** The `navigator.sendBeacon` interceptor in `src/ytAdBlock2.ts` used insecure duck-typing (`typeof url === 'object' && 'href' in url`) for URL object validation and failed to overwrite the `url` parameter with the evaluated string when forwarding to the native function.
 **Learning:** This inconsistency relative to `fetch` and `XMLHttpRequest` left `sendBeacon` vulnerable to cross-realm adblock evasion (malicious iframes bypassing duck-typing) and Time-Of-Check to Time-Of-Use (TOCTOU) vulnerabilities (where malicious POJOs spoof as URLs, pass the regex check, and then mutate their `href` getter or `toString()` before hitting the native `sendBeacon`). Also, repeated reflection via `Object.getOwnPropertyDescriptor` inside hot-path interceptors incurs significant performance overhead.
 **Prevention:** Always use WebIDL brand checking for URL validation across *all* network interceptors (`fetch`, `XHR`, `sendBeacon`, `WebSocket`). Ensure the `url` parameter passed to the native function is always overwritten with the safely evaluated string (unless it's an immutable native Request object). Finally, proactively cache native getters (like `URL.prototype.href`) outside of interceptor closures to maintain performance.
+
+## 2024-08-01 - [TOCTOU Evasion via Native URL toString Override in String-Based APIs]
+**Vulnerability:** The `XMLHttpRequest.prototype.open` and `navigator.sendBeacon` interceptors verified URLs using WebIDL brand checking for native `URL` objects. However, they passed these native `URL` objects directly to the underlying APIs without explicit string coercion. An attacker could bypass the filter by instantiating a native `URL` object and maliciously overriding its `.toString()` method to return a safe URL during the check, but an ad URL when the underlying API implicitly coerced it.
+**Learning:** Native `URL` objects can still be exploited in string-based APIs if their `.toString()` or `href` getters are mutated. Just because an object passes a WebIDL brand check as a native instance does not mean its properties are immutable against cross-realm or direct overrides.
+**Prevention:** For APIs that inherently expect strings (like `XHR`, `sendBeacon`, and `WebSocket`), *always* explicitly evaluate the URL to a primitive string and unconditionally overwrite the parameter passed to the native function. Do not assume native `URL` objects are safe to pass directly.
+
+## 2024-06-28 - [Prototype Pollution Downstream Vectors]
+**Vulnerability:** Even when initializing objects with `Object.create(null)` to prevent direct prototype pollution, allowing keys like `__defineGetter__` or `__defineSetter__` to be assigned to the flat object can still trigger prototype pollution downstream if the object is later merged or cloned by vulnerable utility functions.
+**Learning:** Object initialization via `Object.create(null)` mitigates direct pollution but not propagation pollution. Additionally, using case-insensitive checks (like `.toLowerCase()`) for blocklists is both ineffective against case-sensitive JavaScript property access and incorrectly blocks valid keys (e.g., `?Prototype=1`).
+**Prevention:** Filter out all dangerous object prototype property keys explicitly using strictly exact, case-sensitive matches (`__proto__`, `constructor`, `prototype`, `__defineGetter__`, `__defineSetter__`, `__lookupGetter__`, `__lookupSetter__`) when parsing external inputs.
+
+## 2024-05-27 - [DOM-based XSS via innerHTML]
+**Vulnerability:** UI elements like toasts and buttons were dynamically generated using string interpolation and `innerHTML` (e.g., `toast.innerHTML = \`<span aria-hidden="true">${icon}</span> <span>${message}</span>\``). While the current inputs might be benign, this pattern is inherently vulnerable to DOM-based XSS if user-controlled data ever enters the interpolation flow.
+**Learning:** Using `innerHTML` with string interpolation creates a systemic risk, especially in browser extensions where trust boundaries are blurred. Even static or "trusted" inputs can become attack vectors if the underlying logic changes or third-party data is ingested.
+**Prevention:** Eliminate the use of `innerHTML` entirely. Always construct DOM elements securely using `document.createElement`, assign text content via `.textContent`, and assemble the structure using `.appendChild`. This ensures that all inputs are treated strictly as data, never as executable markup.
+
+## 2024-08-05 - [WebSocket WebIDL Brand Checking Bypass]
+**Vulnerability:** The `WebSocket` interceptor in `src/ytAdBlock2.ts` lacked WebIDL brand checking for `URL` objects, relying solely on duck-typing and `.toString()` evaluation (`urlStr = url?.toString() || '';`).
+**Learning:** While `fetch` and `XHR` interceptors were secure against WebIDL spoofing and TOCTOU attacks via `Object.getOwnPropertyDescriptor(URL.prototype, 'href')?.get`, the `WebSocket` constructor interceptor was overlooked. Attackers could craft a malicious duck-typed object or override the `.toString()` method of a native `URL` instance to bypass the adblock filter (returning a safe URL during the check, but an ad URL when coerced by the underlying API).
+**Prevention:** Consistently apply WebIDL brand checking across ALL network interceptors (`fetch`, `XHR`, `sendBeacon`, and `WebSocket`) to securely extract the native URL value, mitigating duck-typing and `.toString()` TOCTOU evasion techniques.
+
+## 2026-08-23 - [Information Exposure via Debug console.log]
+**Vulnerability:** Debug `console.log` statements in production scripts can leak sensitive application state and user identifiers (e.g., adblock configuration status) into the browser console.
+**Learning:** Just like `console.error` and `console.warn` must securely catch and format exceptions to prevent stack trace leaks, verbose `console.log` statements should be stripped from final production builds to prevent passive information exposure.
+**Prevention:** Avoid using `console.log` for state updates or debug information in production Tampermonkey scripts or browser extensions.
+
+## 2024-08-10 - [TOCTOU Evasion via fetch Catch Block Fallback]
+**Vulnerability:** In `ytAdBlock2.ts`, the `fetch` interceptor attempted to convert POJO requests to native `Request` objects to prevent TOCTOU evasion. However, if the `Request` constructor threw an error (e.g., due to an invalid method), the catch block left the POJO as the first argument to `origFetch`. Native `fetch` would then implicitly coerce this POJO to a string via `.toString()`, allowing attackers to bypass the filter if `.toString()` was maliciously overridden to return different URLs.
+**Learning:** Error handling paths in security-critical interceptors must not fallback to unsafe behavior. If an object cannot be securely normalized, it must be explicitly coerced to a primitive (like a string) before being passed to the native API to prevent implicit coercion vulnerabilities.
+**Prevention:** When intercepting APIs that perform implicit string coercion, ensure that all fallback and error paths unconditionally replace object arguments with evaluated primitive strings. Never pass an unverified or un-normalized object to a native API if it can trigger dynamic property access or methods like `.toString()`.
+
+## 2024-08-27 - [Prototype Pollution Sink in for...in Loops]
+**Vulnerability:** Iterating over object properties using a raw `for...in` loop without `hasOwnProperty` checks allows properties injected via Prototype Pollution on `Object.prototype` to be enumerated and executed. In scripts running on arbitrary or broad matches (e.g. search engine interceptors), this can be chained into DOM-based Open Redirects.
+**Learning:** Even if an object is defined locally as a static literal, `for...in` traverses the prototype chain. If any untrusted script or query parameter on the page pollutes `Object.prototype`, the loop will process the polluted properties.
+**Prevention:** Always guard `for...in` iterations with `!Object.prototype.hasOwnProperty.call(obj, prop)` or use `Object.keys(obj)` / `Object.entries(obj)` to restrict enumeration strictly to own properties.
+
