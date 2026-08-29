@@ -175,3 +175,7 @@
 
 
 
+
+## 2024-08-28 - Hide keyboard shortcuts in disabled states
+**Learning:** The previous UX insight specified removing the <kbd> visual element when keyboard shortcuts are functionally disabled. Keeping the `aria-keyshortcuts` attribute during this time creates mismatched accessibility states and misleads screen readers.
+**Action:** Always conditionally remove `aria-keyshortcuts` when the corresponding visual `<kbd>` shortcut hint is removed to maintain semantic consistency and accessibility.

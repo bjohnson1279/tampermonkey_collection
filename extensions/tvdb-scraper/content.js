@@ -78,6 +78,10 @@ export function scrapeTVDBData() {
                 kbd.setAttribute('aria-hidden', 'true');
                 kbd.textContent = 'Shift+C';
                 btn.appendChild(kbd);
+                btn.setAttribute('aria-keyshortcuts', 'Shift+C');
+            }
+            else {
+                btn.removeAttribute('aria-keyshortcuts');
             }
         };
         const hasData = episodesData.length > 0;
@@ -92,7 +96,6 @@ export function scrapeTVDBData() {
             btn.setAttribute('aria-disabled', 'true');
         btn.setAttribute('aria-label', hasData ? `Copy ${countText} data to clipboard` : 'No episodes data found');
         btn.setAttribute('title', hasData ? 'Copy JSON to clipboard (Shift+C)' : 'No episodes found to copy');
-        btn.setAttribute('aria-keyshortcuts', 'Shift+C');
         const announcer = document.createElement('div');
         announcer.setAttribute('aria-live', 'polite');
         announcer.style.cssText =
