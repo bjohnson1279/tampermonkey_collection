@@ -278,9 +278,9 @@
     const adObserver = new MutationObserver((mutations) => {
         if (!enabled) return;
         // ⚡ Bolt: Use standard for loops instead of .forEach() to prevent O(N) closure allocation overhead during high-frequency MutationObserver events
-        for (let i = 0; i < mutations.length; i++) {
+        for (let i = 0, len = mutations.length; i < len; i++) {
             const mutation = mutations[i];
-            for (let j = 0; j < mutation.addedNodes.length; j++) {
+            for (let j = 0, lenNodes = mutation.addedNodes.length; j < lenNodes; j++) {
                 const node = mutation.addedNodes[j];
                 if (node.nodeType === Node.ELEMENT_NODE) {
                     const el = node as HTMLElement;

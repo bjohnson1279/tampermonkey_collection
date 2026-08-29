@@ -180,3 +180,6 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2024-11-20 - Cache live HTMLCollections to avoid polling overhead
 **Learning:** In polling loops like `setInterval`, repeatedly calling `document.getElementsByClassName` performs redundant DOM lookups on every tick, even though the returned `HTMLCollection` is live.
 **Action:** Initialize the live `HTMLCollection`s once as class properties or global variables outside the interval. Return these cached live collections from getter methods to eliminate O(1) query function call overhead on every tick while still automatically reflecting dynamic DOM changes.
+## 2026-08-28 - Cache loop lengths in MutationObservers
+**Learning:** In standard for loops inside high-frequency contexts like `MutationObserver` callbacks, looking up the length of an array/collection on every iteration (`i < list.length`) adds unnecessary overhead.
+**Action:** Cache the length (`let len = list.length; for (let i = 0; i < len; i++)`) to avoid the repeated property lookup and improve performance.
