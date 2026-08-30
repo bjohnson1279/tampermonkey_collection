@@ -175,3 +175,7 @@
 
 
 
+
+## YYYY-MM-DD - Screen Reader Clarity for Inactive Shortcuts
+**Learning:** While hiding <kbd> elements visually removes clutter for disabled/transient buttons, failing to also remove the aria-keyshortcuts attribute causes screen readers to still announce the shortcut as if it were active. This creates a confusing experience for non-visual users who try to use the shortcut and get no response.
+**Action:** Always explicitly remove the aria-keyshortcuts attribute (e.g., btn.removeAttribute("aria-keyshortcuts")) when an interactive element enters a disabled or transient feedback state, and restore it when the element becomes active again.
