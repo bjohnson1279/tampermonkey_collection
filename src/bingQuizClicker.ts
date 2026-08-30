@@ -71,7 +71,8 @@ class BingQuizClicker {
     }
 
     private handleCorrectAnswers(elements: HTMLCollectionOf<Element>): void {
-        for (let i = 0; i < elements.length; i++) {
+        // ⚡ Bolt: Cache HTMLCollection length to prevent repeated property lookups on every loop iteration
+        for (let i = 0, len = elements.length; i < len; i++) {
             const element = elements[i];
             const parent = element.parentElement;
             if (!parent) continue;

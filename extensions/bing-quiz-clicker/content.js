@@ -38,7 +38,7 @@ class BingQuizClicker {
         }
     }
     handleCorrectAnswers(elements) {
-        for (let i = 0; i < elements.length; i++) {
+        for (let i = 0, len = elements.length; i < len; i++) {
             const element = elements[i];
             const parent = element.parentElement;
             if (!parent)
