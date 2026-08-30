@@ -92,7 +92,12 @@ export function scrapeTVDBData() {
             btn.setAttribute('aria-disabled', 'true');
         btn.setAttribute('aria-label', hasData ? `Copy ${countText} data to clipboard` : 'No episodes data found');
         btn.setAttribute('title', hasData ? 'Copy JSON to clipboard (Shift+C)' : 'No episodes found to copy');
-        btn.setAttribute('aria-keyshortcuts', 'Shift+C');
+        if (hasData) {
+            btn.setAttribute('aria-keyshortcuts', 'Shift+C');
+        }
+        else {
+            btn.removeAttribute('aria-keyshortcuts');
+        }
         const announcer = document.createElement('div');
         announcer.setAttribute('aria-live', 'polite');
         announcer.style.cssText =
@@ -107,6 +112,7 @@ export function scrapeTVDBData() {
             updateButtonContent('⏳', 'Copying...', false);
             btn.setAttribute('title', 'Copying to clipboard...');
             btn.setAttribute('aria-label', 'Copying to clipboard...');
+            btn.removeAttribute('aria-keyshortcuts');
             announcer.textContent = 'Copying to clipboard...';
             try {
                 await navigator.clipboard.writeText(JSON.stringify(episodesData, null, 2));
@@ -129,6 +135,7 @@ export function scrapeTVDBData() {
                 btn.style.backgroundColor = '#0056b3';
                 btn.setAttribute('title', 'Copy JSON to clipboard (Shift+C)');
                 btn.setAttribute('aria-label', `Copy ${countText} data to clipboard`);
+                btn.setAttribute('aria-keyshortcuts', 'Shift+C');
                 btn.removeAttribute('data-feedback');
                 announcer.textContent = '';
                 btn.removeAttribute('aria-disabled');

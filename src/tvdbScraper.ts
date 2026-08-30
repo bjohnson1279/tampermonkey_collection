@@ -34,13 +34,11 @@ export function scrapeTVDBData(): Episode[] {
         const ep = episodes[j] as HTMLElement;
         // ⚡ Bolt: Replace querySelector('.class') with getElementsByClassName('class')[0] for O(1) live collection lookup
         const heading = ep.getElementsByClassName('list-group-item-heading')[0] as
-            | HTMLElement
-            | undefined;
+            HTMLElement | undefined;
         if (!heading) continue;
 
         const epLabelElement = heading.getElementsByClassName('episode-label')[0] as
-            | HTMLElement
-            | undefined;
+            HTMLElement | undefined;
         const epLabel = epLabelElement?.textContent?.trim() || '';
         const matches = epLabel.match(EPISODE_NUM_REGEX) || [];
 
@@ -48,8 +46,7 @@ export function scrapeTVDBData(): Episode[] {
         const epTitle = titleLink?.textContent?.trim() || '';
 
         const itemTextElement = ep.getElementsByClassName('list-group-item-text')[0] as
-            | HTMLElement
-            | undefined;
+            HTMLElement | undefined;
         const itemText = itemTextElement?.textContent?.trim() || '';
 
         let itemDate = '';
@@ -143,7 +140,11 @@ export function scrapeTVDBData(): Episode[] {
             'title',
             hasData ? 'Copy JSON to clipboard (Shift+C)' : 'No episodes found to copy'
         );
-        btn.setAttribute('aria-keyshortcuts', 'Shift+C');
+        if (hasData) {
+            btn.setAttribute('aria-keyshortcuts', 'Shift+C');
+        } else {
+            btn.removeAttribute('aria-keyshortcuts');
+        }
 
         const announcer = document.createElement('div');
         announcer.setAttribute('aria-live', 'polite');
@@ -161,6 +162,7 @@ export function scrapeTVDBData(): Episode[] {
             updateButtonContent('⏳', 'Copying...', false);
             btn.setAttribute('title', 'Copying to clipboard...');
             btn.setAttribute('aria-label', 'Copying to clipboard...');
+            btn.removeAttribute('aria-keyshortcuts');
             announcer.textContent = 'Copying to clipboard...';
 
             try {
@@ -183,6 +185,7 @@ export function scrapeTVDBData(): Episode[] {
                 btn.style.backgroundColor = '#0056b3';
                 btn.setAttribute('title', 'Copy JSON to clipboard (Shift+C)');
                 btn.setAttribute('aria-label', `Copy ${countText} data to clipboard`);
+                btn.setAttribute('aria-keyshortcuts', 'Shift+C');
                 btn.removeAttribute('data-feedback');
                 announcer.textContent = '';
                 btn.removeAttribute('aria-disabled');
