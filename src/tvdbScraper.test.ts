@@ -131,6 +131,7 @@ describe('scrapeTVDBData', () => {
         expect(btn?.getAttribute('aria-label')).toBe('No episodes data found');
         expect(btn?.getAttribute('aria-disabled')).toBe('true');
         expect(btn?.querySelector('kbd')).toBeNull();
+        expect(btn?.getAttribute('aria-keyshortcuts')).toBeNull();
     });
 
     it('should inject copy JSON button with correct state when data exists', () => {
@@ -153,6 +154,7 @@ describe('scrapeTVDBData', () => {
         expect(btn?.textContent).toContain('Copy JSON (1 episode)');
         expect(btn?.textContent).toContain('Shift+C');
         expect(btn?.querySelector('kbd')).not.toBeNull();
+        expect(btn?.getAttribute('aria-keyshortcuts')).toBe('Shift+C');
         expect(btn?.getAttribute('aria-label')).toBe('Copy 1 episode data to clipboard');
         expect(btn?.getAttribute('aria-disabled')).toBeNull();
     });

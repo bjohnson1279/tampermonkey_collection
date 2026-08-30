@@ -176,6 +176,9 @@
 
 
 
+## 2024-08-28 - Hide keyboard shortcuts in disabled states
+**Learning:** The previous UX insight specified removing the <kbd> visual element when keyboard shortcuts are functionally disabled. Keeping the `aria-keyshortcuts` attribute during this time creates mismatched accessibility states and misleads screen readers.
+**Action:** Always conditionally remove `aria-keyshortcuts` when the corresponding visual `<kbd>` shortcut hint is removed to maintain semantic consistency and accessibility.
 ## YYYY-MM-DD - Screen Reader Clarity for Inactive Shortcuts
 **Learning:** While hiding <kbd> elements visually removes clutter for disabled/transient buttons, failing to also remove the aria-keyshortcuts attribute causes screen readers to still announce the shortcut as if it were active. This creates a confusing experience for non-visual users who try to use the shortcut and get no response.
 **Action:** Always explicitly remove the aria-keyshortcuts attribute (e.g., btn.removeAttribute("aria-keyshortcuts")) when an interactive element enters a disabled or transient feedback state, and restore it when the element becomes active again.
