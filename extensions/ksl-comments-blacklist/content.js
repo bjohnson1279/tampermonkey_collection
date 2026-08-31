@@ -23,9 +23,9 @@ _global.__kslTestExports = _global.__kslTestExports || {};
     };
     _global.__kslTestExports.processComment = processComment;
     const handleMutations = (mutationsList) => {
-        for (let i = 0; i < mutationsList.length; i++) {
+        for (let i = 0, len = mutationsList.length; i < len; i++) {
             const mutation = mutationsList[i];
-            for (let j = 0; j < mutation.addedNodes.length; j++) {
+            for (let j = 0, nodeLen = mutation.addedNodes.length; j < nodeLen; j++) {
                 const node = mutation.addedNodes[j];
                 if (node.nodeType === Node.ELEMENT_NODE) {
                     const el = node;
@@ -34,7 +34,7 @@ _global.__kslTestExports = _global.__kslTestExports || {};
                     }
                     if (el.firstElementChild) {
                         const nestedComments = el.getElementsByClassName('CommentsList__item');
-                        for (let k = 0; k < nestedComments.length; k++) {
+                        for (let k = 0, len = nestedComments.length; k < len; k++) {
                             processComment(nestedComments[k]);
                         }
                     }
@@ -52,7 +52,7 @@ _global.__kslTestExports = _global.__kslTestExports || {};
         const commentsList = container.getElementsByClassName('CommentsList__root')[0];
         if (commentsList) {
             const allComments = commentsList.getElementsByClassName('CommentsList__item');
-            for (let i = 0; i < allComments.length; i++) {
+            for (let i = 0, len = allComments.length; i < len; i++) {
                 processComment(allComments[i]);
             }
         }
