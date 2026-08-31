@@ -109,3 +109,7 @@
 **Learning:** Even if an object is defined locally as a static literal, `for...in` traverses the prototype chain. If any untrusted script or query parameter on the page pollutes `Object.prototype`, the loop will process the polluted properties.
 **Prevention:** Always guard `for...in` iterations with `!Object.prototype.hasOwnProperty.call(obj, prop)` or use `Object.keys(obj)` / `Object.entries(obj)` to restrict enumeration strictly to own properties.
 
+## YYYY-MM-DD - [Object.entries Mitigation for Prototype Pollution in Iterators]
+**Vulnerability:** Iterating over object properties using a raw `for...in` loop without `hasOwnProperty` checks allows properties injected via Prototype Pollution on `Object.prototype` to be enumerated and executed. In scripts running on arbitrary or broad matches (e.g. search engine interceptors), this can be chained into DOM-based Open Redirects.
+**Learning:** Even if an object is defined locally as a static literal, `for...in` traverses the prototype chain. If any untrusted script or query parameter on the page pollutes `Object.prototype`, the loop will process the polluted properties.
+**Prevention:** To comprehensively mitigate prototype pollution when iterating over configuration objects or maps, avoid using `for...in` loops entirely, even if guarded by `hasOwnProperty`. Instead, use `Object.entries(obj)` or `Object.keys(obj)` which strictly return own enumerable string-keyed properties and eliminate the risk of iterating over maliciously injected prototype properties.

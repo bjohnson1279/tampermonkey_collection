@@ -96,15 +96,12 @@ export function scrapeTVDBData() {
             btn.setAttribute('aria-disabled', 'true');
         btn.setAttribute('aria-label', hasData ? `Copy ${countText} data to clipboard` : 'No episodes data found');
         btn.setAttribute('title', hasData ? 'Copy JSON to clipboard (Shift+C)' : 'No episodes found to copy');
-<<<<<<< HEAD
-=======
         if (hasData) {
             btn.setAttribute('aria-keyshortcuts', 'Shift+C');
         }
         else {
             btn.removeAttribute('aria-keyshortcuts');
         }
->>>>>>> origin/master
         const announcer = document.createElement('div');
         announcer.setAttribute('aria-live', 'polite');
         announcer.style.cssText =
