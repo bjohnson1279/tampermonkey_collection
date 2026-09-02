@@ -101,20 +101,14 @@ describe('YouTubeAdRemover', () => {
                 };
 
                 const mockVideoItem1 = {
+                    tagName: 'YTD-VIDEO-RENDERER',
                     remove: jest.fn(),
-                    querySelector: jest.fn().mockImplementation((selector) => {
-                        if (selector === '#content, #dismissible') return mockContentDiv1;
-                        return null;
-                    }),
+                    parentElement: null,
                 };
 
                 const mockAdItem1 = {
                     remove: jest.fn(),
-                    closest: jest.fn().mockImplementation((selector) => {
-                        if (selector === 'ytd-rich-item-renderer, ytd-video-renderer')
-                            return mockVideoItem1;
-                        return null;
-                    }),
+                    parentElement: mockVideoItem1,
                 };
 
                 (global.document.getElementsByClassName as jest.Mock).mockReturnValue([
@@ -189,16 +183,14 @@ describe('YouTubeAdRemover', () => {
                 };
 
                 const mockVideoItem = {
+                    tagName: 'YTD-VIDEO-RENDERER',
                     remove: jest.fn(),
+                    parentElement: null,
                 };
 
                 const mockAdItem = {
                     remove: jest.fn(),
-                    closest: jest.fn().mockImplementation((selector) => {
-                        if (selector === 'ytd-rich-item-renderer, ytd-video-renderer')
-                            return mockVideoItem;
-                        return null;
-                    }),
+                    parentElement: mockVideoItem,
                 };
 
                 const mockContainerNode = {
