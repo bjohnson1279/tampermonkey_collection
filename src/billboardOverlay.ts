@@ -28,7 +28,7 @@ interface ExtendedHTMLElement extends HTMLElement {
     ];
 
     // ⚡ Bolt: Replace O(N) querySelectorAll with O(1) live collection lookups via getElementsByClassName
-    for (let j = 0; j < adSelectors.length; j++) {
+    for (let j = 0, len = adSelectors.length; j < len; j++) {
         const ads = document.getElementsByClassName(adSelectors[j]);
         // ⚡ Bolt: Use a backward standard for loop for HTMLCollection to avoid unnecessary Array allocation
         for (let i = ads.length - 1; i >= 0; i--) {
@@ -53,7 +53,7 @@ interface ExtendedHTMLElement extends HTMLElement {
     };
 
     const handleMutations: MutationCallback = (mutationsList: MutationRecord[]): void => {
-        for (let i = 0; i < mutationsList.length; i++) {
+        for (let i = 0, len = mutationsList.length; i < len; i++) {
             const mutation = mutationsList[i];
             if (mutation.target instanceof Node) {
                 (mutation.target as HTMLElement).remove();
@@ -63,7 +63,7 @@ interface ExtendedHTMLElement extends HTMLElement {
         // Update chart items
         // ⚡ Bolt: Replace querySelectorAll('.class') with getElementsByClassName('class') for O(1) live collection lookup instead of O(N) tree traversal inside the MutationObserver
         const chartItems = document.getElementsByClassName('chart-list-item');
-        for (let i = 0; i < chartItems.length; i++) {
+        for (let i = 0, len = chartItems.length; i < len; i++) {
             const chartItem = chartItems[i] as ExtendedHTMLElement;
             chartItem.visible = true;
             chartItem.height = 102;

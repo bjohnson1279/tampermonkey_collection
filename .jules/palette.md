@@ -182,3 +182,6 @@
 ## YYYY-MM-DD - Screen Reader Clarity for Inactive Shortcuts
 **Learning:** While hiding <kbd> elements visually removes clutter for disabled/transient buttons, failing to also remove the aria-keyshortcuts attribute causes screen readers to still announce the shortcut as if it were active. This creates a confusing experience for non-visual users who try to use the shortcut and get no response.
 **Action:** Always explicitly remove the aria-keyshortcuts attribute (e.g., btn.removeAttribute("aria-keyshortcuts")) when an interactive element enters a disabled or transient feedback state, and restore it when the element becomes active again.
+## YYYY-MM-DD - Windows High Contrast Mode Button Visibility
+**Learning:** Custom UI buttons or elements styled with `border: none` and relying on background colors become invisible or indistinguishable from normal text in Windows High Contrast Mode (WHCM) and CSS `forced-colors: active`.
+**Action:** To maintain accessibility and a visible boundary, use `border: 1px solid transparent` alongside `box-sizing: border-box` instead of `border: none`.
