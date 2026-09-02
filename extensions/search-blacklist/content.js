@@ -19,11 +19,11 @@
             const params = new URLSearchParams(window.location.search);
             let engine;
             let matchedDomain;
-            for (const domain in searchEngines) {
-                if (!Object.prototype.hasOwnProperty.call(searchEngines, domain))
-                    continue;
+            const entries = Object.entries(searchEngines);
+            for (let i = 0; i < entries.length; i++) {
+                const [domain, config] = entries[i];
                 if (hostname === domain || hostname.endsWith('.' + domain)) {
-                    engine = searchEngines[domain];
+                    engine = config;
                     matchedDomain = domain;
                     break;
                 }
