@@ -481,6 +481,8 @@
                 color: white;
                 padding: 12px 24px;
                 border-radius: 8px;
+                border: 1px solid transparent;
+                box-sizing: border-box;
                 font-family: "Roboto", "Arial", sans-serif;
                 font-size: 14px;
                 font-weight: 500;
