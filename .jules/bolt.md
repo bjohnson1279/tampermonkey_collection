@@ -182,3 +182,7 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 **Action:** Initialize the live `HTMLCollection`s once as class properties or global variables outside the interval. Return these cached live collections from getter methods to eliminate O(1) query function call overhead on every tick while still automatically reflecting dynamic DOM changes.
 **Learning:** High-frequency MutationObserver callbacks can suffer from micro-jank if standard for loops do not cache the array/collection length, causing repeated property lookups on every single loop iteration.
 **Action:** Always cache the length in a standard for loop initialization (e.g., let i = 0, len = array.length; i < len; i++) when iterating in performance-critical paths.
+
+## YYYY-MM-DD - Avoid .closest() with complex selectors in hot paths
+**Learning:** Using `.closest()` with multi-part CSS selectors (e.g., `.closest("tag1, tag2")`) invokes the browser's CSS selector parsing engine, which introduces significant main-thread overhead inside high-frequency contexts like `MutationObserver` loops.
+**Action:** Replace `.closest()` calls that use complex selectors with manual `parentElement` traversal and O(1) `tagName` string equality checks to bypass the CSS parsing engine entirely.

@@ -40,9 +40,14 @@ class YouTubeAdRemover {
             const adItems = document.getElementsByClassName(this.AD_CLASS);
             for (let i = adItems.length - 1; i >= 0; i--) {
                 const adItem = adItems[i];
-                const videoItem = adItem.closest('ytd-rich-item-renderer, ytd-video-renderer');
-                if (videoItem) {
-                    videoItem.remove();
+                let parent = adItem.parentElement;
+                while (parent) {
+                    if (parent.tagName === 'YTD-RICH-ITEM-RENDERER' ||
+                        parent.tagName === 'YTD-VIDEO-RENDERER') {
+                        parent.remove();
+                        break;
+                    }
+                    parent = parent.parentElement;
                 }
             }
         }
@@ -62,9 +67,14 @@ class YouTubeAdRemover {
                         const adItems = element.getElementsByClassName(this.AD_CLASS);
                         for (let i = adItems.length - 1; i >= 0; i--) {
                             const adItem = adItems[i];
-                            const videoItem = adItem.closest('ytd-rich-item-renderer, ytd-video-renderer');
-                            if (videoItem) {
-                                videoItem.remove();
+                            let parent = adItem.parentElement;
+                            while (parent) {
+                                if (parent.tagName === 'YTD-RICH-ITEM-RENDERER' ||
+                                    parent.tagName === 'YTD-VIDEO-RENDERER') {
+                                    parent.remove();
+                                    break;
+                                }
+                                parent = parent.parentElement;
                             }
                         }
                     }

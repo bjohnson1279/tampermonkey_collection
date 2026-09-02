@@ -197,9 +197,15 @@
                         for (let k = adNodes.length - 1; k >= 0; k--) {
                             const adNode = adNodes[k];
                             if (promotedBadgeRegex.test(adNode.textContent || '')) {
-                                adNode
-                                    .closest('ytd-video-renderer,ytd-compact-video-renderer')
-                                    ?.remove();
+                                let parent = adNode.parentElement;
+                                while (parent) {
+                                    if (parent.tagName === 'YTD-VIDEO-RENDERER' ||
+                                        parent.tagName === 'YTD-COMPACT-VIDEO-RENDERER') {
+                                        parent.remove();
+                                        break;
+                                    }
+                                    parent = parent.parentElement;
+                                }
                             }
                         }
                     }
@@ -214,7 +220,15 @@
         for (let i = initialAds.length - 1; i >= 0; i--) {
             const adNode = initialAds[i];
             if (promotedBadgeRegex.test(adNode.textContent || '')) {
-                adNode.closest('ytd-video-renderer,ytd-compact-video-renderer')?.remove();
+                let parent = adNode.parentElement;
+                while (parent) {
+                    if (parent.tagName === 'YTD-VIDEO-RENDERER' ||
+                        parent.tagName === 'YTD-COMPACT-VIDEO-RENDERER') {
+                        parent.remove();
+                        break;
+                    }
+                    parent = parent.parentElement;
+                }
             }
         }
     }
