@@ -43,16 +43,14 @@ interface SearchEngines {
             const hostname: string = window.location.hostname;
             const params: URLSearchParams = new URLSearchParams(window.location.search);
 
-            // ⚡ Bolt: Replace Object.entries().find() with a for...in loop to avoid
-            // O(N) array allocation and callback overhead on every search query.
             let engine: SearchEngineConfig | undefined;
             let matchedDomain: string | undefined;
-            for (const domain in searchEngines) {
-                // 🛡️ Sentinel: Mitigate Prototype Pollution by ensuring we only iterate over own properties of the searchEngines object
-                if (!Object.prototype.hasOwnProperty.call(searchEngines, domain)) continue;
-
+            // 🛡️ Sentinel: Mitigate Prototype Pollution by using Object.entries instead of a for...in loop to restrict enumeration strictly to own properties and prevent Open Redirects
+            const entries = Object.entries(searchEngines);
+            for (let i = 0; i < entries.length; i++) {
+                const [domain, config] = entries[i];
                 if (hostname === domain || hostname.endsWith('.' + domain)) {
-                    engine = searchEngines[domain];
+                    engine = config;
                     matchedDomain = domain;
                     break;
                 }

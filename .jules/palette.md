@@ -185,3 +185,6 @@
 ## YYYY-MM-DD - Windows High Contrast Mode (WHCM) Button Visibility
 **Learning:** Custom UI buttons styled with `border: none` and relying on background colors become invisible or indistinguishable from normal text in Windows High Contrast Mode (and CSS `forced-colors: active`), as the browser strips background colors but retains border logic.
 **Action:** Always use `border: 1px solid transparent` (alongside `box-sizing: border-box`) instead of `border: none` on custom buttons and toasts. In normal modes, the transparent border is invisible. In High Contrast Mode, the browser forces the transparent border to use the system's high-contrast colors, providing a crucial visible boundary.
+## YYYY-MM-DD - Windows High Contrast Mode Button Visibility
+**Learning:** Custom UI buttons or elements styled with `border: none` and relying on background colors become invisible or indistinguishable from normal text in Windows High Contrast Mode (WHCM) and CSS `forced-colors: active`.
+**Action:** To maintain accessibility and a visible boundary, use `border: 1px solid transparent` alongside `box-sizing: border-box` instead of `border: none`.
