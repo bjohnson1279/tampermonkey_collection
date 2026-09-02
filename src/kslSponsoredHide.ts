@@ -70,9 +70,9 @@ interface SponsoredElement extends HTMLElement {
     const handleMutations: MutationCallback = (mutationsList: MutationRecord[]): void => {
         // ⚡ Bolt: Only process added nodes instead of re-querying the entire DOM list on every mutation
         // This avoids O(N²) scaling as more elements are loaded dynamically
-        for (let i = 0; i < mutationsList.length; i++) {
+        for (let i = 0, len = mutationsList.length; i < len; i++) {
             const mutation = mutationsList[i];
-            for (let j = 0; j < mutation.addedNodes.length; j++) {
+            for (let j = 0, nodeLen = mutation.addedNodes.length; j < nodeLen; j++) {
                 const node = mutation.addedNodes[j];
                 if (node.nodeType === Node.ELEMENT_NODE) {
                     processNode(node as HTMLElement);

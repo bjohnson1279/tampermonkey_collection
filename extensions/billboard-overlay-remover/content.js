@@ -9,7 +9,7 @@
         'ad_desktop',
         'ad_clarity',
     ];
-    for (let j = 0; j < adSelectors.length; j++) {
+    for (let j = 0, len = adSelectors.length; j < len; j++) {
         const ads = document.getElementsByClassName(adSelectors[j]);
         for (let i = ads.length - 1; i >= 0; i--) {
             ads[i].remove();
@@ -25,14 +25,14 @@
         subtree: true,
     };
     const handleMutations = (mutationsList) => {
-        for (let i = 0; i < mutationsList.length; i++) {
+        for (let i = 0, len = mutationsList.length; i < len; i++) {
             const mutation = mutationsList[i];
             if (mutation.target instanceof Node) {
                 mutation.target.remove();
             }
         }
         const chartItems = document.getElementsByClassName('chart-list-item');
-        for (let i = 0; i < chartItems.length; i++) {
+        for (let i = 0, len = chartItems.length; i < len; i++) {
             const chartItem = chartItems[i];
             chartItem.visible = true;
             chartItem.height = 102;
