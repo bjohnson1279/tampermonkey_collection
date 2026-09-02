@@ -143,14 +143,11 @@ export function scrapeTVDBData(): Episode[] {
             'title',
             hasData ? 'Copy JSON to clipboard (Shift+C)' : 'No episodes found to copy'
         );
-<<<<<<< HEAD
-=======
         if (hasData) {
             btn.setAttribute('aria-keyshortcuts', 'Shift+C');
         } else {
             btn.removeAttribute('aria-keyshortcuts');
         }
->>>>>>> origin/master
 
         const announcer = document.createElement('div');
         announcer.setAttribute('aria-live', 'polite');
