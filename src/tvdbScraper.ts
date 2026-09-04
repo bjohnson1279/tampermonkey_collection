@@ -34,13 +34,11 @@ export function scrapeTVDBData(): Episode[] {
         const ep = episodes[j] as HTMLElement;
         // ⚡ Bolt: Replace querySelector('.class') with getElementsByClassName('class')[0] for O(1) live collection lookup
         const heading = ep.getElementsByClassName('list-group-item-heading')[0] as
-            | HTMLElement
-            | undefined;
+            HTMLElement | undefined;
         if (!heading) continue;
 
         const epLabelElement = heading.getElementsByClassName('episode-label')[0] as
-            | HTMLElement
-            | undefined;
+            HTMLElement | undefined;
         const epLabel = epLabelElement?.textContent?.trim() || '';
         const matches = epLabel.match(EPISODE_NUM_REGEX) || [];
 
@@ -48,8 +46,7 @@ export function scrapeTVDBData(): Episode[] {
         const epTitle = titleLink?.textContent?.trim() || '';
 
         const itemTextElement = ep.getElementsByClassName('list-group-item-text')[0] as
-            | HTMLElement
-            | undefined;
+            HTMLElement | undefined;
         const itemText = itemTextElement?.textContent?.trim() || '';
 
         let itemDate = '';
@@ -154,6 +151,7 @@ export function scrapeTVDBData(): Episode[] {
 
         const announcer = document.createElement('div');
         announcer.setAttribute('aria-live', 'polite');
+        announcer.setAttribute('aria-atomic', 'true');
         announcer.style.cssText =
             'position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0;';
 
