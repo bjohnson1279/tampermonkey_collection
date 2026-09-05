@@ -192,3 +192,6 @@
 ## 2026-08-28 - Consistent Screen Reader Announcements for Live Regions
 **Learning:** When using `aria-live` regions (like visually hidden announcers or toasts) to provide dynamic feedback to screen readers, simply replacing the text content can sometimes result in partial or confusing announcements depending on the browser and screen reader combination.
 **Action:** Always explicitly set `aria-atomic="true"` on `aria-live` regions to guarantee that assistive technologies announce the entire context of the updated region as a single, cohesive unit.
+## YYYY-MM-DD - Fix aria-live regions without aria-atomic
+**Learning:** When using `aria-live` regions (like visually hidden announcers or toasts) to provide dynamic feedback to screen readers, always explicitly set `aria-atomic="true"`. This ensures assistive technologies announce the entire context of the updated region as a single, cohesive unit when text content is dynamically replaced.
+**Action:** Add `aria-atomic="true"` alongside `aria-live` to ensure the entire message is announced.

@@ -201,6 +201,7 @@ describe('scrapeTVDBData', () => {
         expect(btn.style.backgroundColor).toBe('rgb(176, 42, 55)'); // #b02a37
         expect(btn.getAttribute('title')).toBe('Failed to copy');
         expect(announcer.textContent).toBe('Failed to copy');
+        expect(announcer.getAttribute('aria-atomic')).toBe('true');
         expect(btn.querySelector('kbd')).toBeNull();
     });
 
