@@ -188,3 +188,6 @@
 ## YYYY-MM-DD - Windows High Contrast Mode Button Visibility
 **Learning:** Custom UI buttons or elements styled with `border: none` and relying on background colors become invisible or indistinguishable from normal text in Windows High Contrast Mode (WHCM) and CSS `forced-colors: active`.
 **Action:** To maintain accessibility and a visible boundary, use `border: 1px solid transparent` alongside `box-sizing: border-box` instead of `border: none`.
+## YYYY-MM-DD - Fix aria-live regions without aria-atomic
+**Learning:** When using `aria-live` regions (like visually hidden announcers or toasts) to provide dynamic feedback to screen readers, always explicitly set `aria-atomic="true"`. This ensures assistive technologies announce the entire context of the updated region as a single, cohesive unit when text content is dynamically replaced.
+**Action:** Add `aria-atomic="true"` alongside `aria-live` to ensure the entire message is announced.
