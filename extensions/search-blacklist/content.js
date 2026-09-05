@@ -42,6 +42,7 @@
                         const toast = document.createElement('div');
                         toast.setAttribute('role', 'alert');
                         toast.setAttribute('aria-live', 'assertive');
+                        toast.setAttribute('aria-atomic', 'true');
                         toast.style.cssText = `
                             position: fixed;
                             top: 20px;

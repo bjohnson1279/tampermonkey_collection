@@ -314,6 +314,7 @@
             const announcer = document.createElement('div');
             announcer.id = 'adblock-announcer';
             announcer.setAttribute('aria-live', 'polite');
+            announcer.setAttribute('aria-atomic', 'true');
             announcer.style.cssText = `
                 position: absolute;
                 width: 1px;
