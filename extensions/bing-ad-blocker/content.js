@@ -6,9 +6,13 @@
         const ads = slideContainer.getElementsByClassName('b_adSlug');
         for (let i = ads.length - 1; i >= 0; i--) {
             const ad = ads[i];
-            const box = ad.closest('.tobitem');
-            if (box) {
-                box.remove();
+            let parent = ad.parentElement;
+            while (parent) {
+                if (parent.classList.contains('tobitem')) {
+                    parent.remove();
+                    break;
+                }
+                parent = parent.parentElement;
             }
         }
     }

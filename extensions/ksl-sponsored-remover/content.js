@@ -5,9 +5,14 @@
         const sponsoredElements = document.getElementsByClassName('sponsored');
         for (let i = sponsoredElements.length - 1; i >= 0; i--) {
             const sponsored = sponsoredElements[i];
-            const sponsoredContainer = sponsored.closest('.queue, .queue_story');
-            if (sponsoredContainer) {
-                sponsoredContainer.remove();
+            let parent = sponsored.parentElement;
+            while (parent) {
+                if (parent.classList.contains('queue') ||
+                    parent.classList.contains('queue_story')) {
+                    parent.remove();
+                    break;
+                }
+                parent = parent.parentElement;
             }
         }
     };
@@ -23,18 +28,28 @@
     };
     const processNode = (el) => {
         if (el.classList.contains('sponsored')) {
-            const sponsoredContainer = el.closest('.queue, .queue_story');
-            if (sponsoredContainer) {
-                sponsoredContainer.remove();
+            let parent = el.parentElement;
+            while (parent) {
+                if (parent.classList.contains('queue') ||
+                    parent.classList.contains('queue_story')) {
+                    parent.remove();
+                    break;
+                }
+                parent = parent.parentElement;
             }
         }
         else if (el.firstElementChild) {
             const sponsoredElements = el.getElementsByClassName('sponsored');
             for (let i = sponsoredElements.length - 1; i >= 0; i--) {
                 const sponsored = sponsoredElements[i];
-                const sponsoredContainer = sponsored.closest('.queue, .queue_story');
-                if (sponsoredContainer) {
-                    sponsoredContainer.remove();
+                let parent = sponsored.parentElement;
+                while (parent) {
+                    if (parent.classList.contains('queue') ||
+                        parent.classList.contains('queue_story')) {
+                        parent.remove();
+                        break;
+                    }
+                    parent = parent.parentElement;
                 }
             }
         }

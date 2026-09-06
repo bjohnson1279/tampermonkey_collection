@@ -186,3 +186,6 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## YYYY-MM-DD - Avoid .closest() with complex selectors in hot paths
 **Learning:** Using `.closest()` with multi-part CSS selectors (e.g., `.closest("tag1, tag2")`) invokes the browser's CSS selector parsing engine, which introduces significant main-thread overhead inside high-frequency contexts like `MutationObserver` loops.
 **Action:** Replace `.closest()` calls that use complex selectors with manual `parentElement` traversal and O(1) `tagName` string equality checks to bypass the CSS parsing engine entirely.
+## YYYY-MM-DD - Avoid closest() for DOM traversal
+**Learning:** Using element.closest() with complex CSS selectors (especially in MutationObservers) causes significant CSS parsing overhead.
+**Action:** Replace closest() with manual while (parent) loops checking properties like classList.contains() to leverage O(1) native DOM traversal.

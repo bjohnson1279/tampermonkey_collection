@@ -22,9 +22,14 @@
         const ads = slideContainer.getElementsByClassName('b_adSlug');
         for (let i = ads.length - 1; i >= 0; i--) {
             const ad = ads[i];
-            const box: HTMLElement | null = ad.closest('.tobitem');
-            if (box) {
-                box.remove();
+            // ⚡ Bolt: Replace expensive .closest() with O(1) manual DOM traversal
+            let parent = ad.parentElement;
+            while (parent) {
+                if (parent.classList.contains('tobitem')) {
+                    parent.remove();
+                    break;
+                }
+                parent = parent.parentElement;
             }
         }
     }

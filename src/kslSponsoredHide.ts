@@ -9,10 +9,6 @@
 // @grant        none
 // ==/UserScript==
 
-interface SponsoredElement extends HTMLElement {
-    closest(selectors: string): HTMLElement | null;
-}
-
 (function (): void {
     'use strict';
 
@@ -23,10 +19,17 @@ interface SponsoredElement extends HTMLElement {
         // ⚡ Bolt: Use a backward standard for loop for HTMLCollection to avoid unnecessary Array allocation
         for (let i = sponsoredElements.length - 1; i >= 0; i--) {
             const sponsored = sponsoredElements[i];
-            // Try to find the closest parent container to remove
-            const sponsoredContainer = sponsored.closest('.queue, .queue_story');
-            if (sponsoredContainer) {
-                sponsoredContainer.remove();
+            // ⚡ Bolt: Replace expensive .closest() with O(1) manual DOM traversal
+            let parent = sponsored.parentElement;
+            while (parent) {
+                if (
+                    parent.classList.contains('queue') ||
+                    parent.classList.contains('queue_story')
+                ) {
+                    parent.remove();
+                    break;
+                }
+                parent = parent.parentElement;
             }
         }
     };
@@ -49,9 +52,17 @@ interface SponsoredElement extends HTMLElement {
 
     const processNode = (el: HTMLElement): void => {
         if (el.classList.contains('sponsored')) {
-            const sponsoredContainer = el.closest('.queue, .queue_story');
-            if (sponsoredContainer) {
-                sponsoredContainer.remove();
+            // ⚡ Bolt: Replace expensive .closest() with O(1) manual DOM traversal inside MutationObserver
+            let parent = el.parentElement;
+            while (parent) {
+                if (
+                    parent.classList.contains('queue') ||
+                    parent.classList.contains('queue_story')
+                ) {
+                    parent.remove();
+                    break;
+                }
+                parent = parent.parentElement;
             }
         } else if (el.firstElementChild) {
             // ⚡ Bolt: Fast path for leaf nodes - avoid querySelectorAll parsing overhead if no children exist
@@ -59,9 +70,17 @@ interface SponsoredElement extends HTMLElement {
             // ⚡ Bolt: Use a backward standard for loop for HTMLCollection to avoid unnecessary Array allocation
             for (let i = sponsoredElements.length - 1; i >= 0; i--) {
                 const sponsored = sponsoredElements[i];
-                const sponsoredContainer = sponsored.closest('.queue, .queue_story');
-                if (sponsoredContainer) {
-                    sponsoredContainer.remove();
+                // ⚡ Bolt: Replace expensive .closest() with O(1) manual DOM traversal inside MutationObserver
+                let parent = sponsored.parentElement;
+                while (parent) {
+                    if (
+                        parent.classList.contains('queue') ||
+                        parent.classList.contains('queue_story')
+                    ) {
+                        parent.remove();
+                        break;
+                    }
+                    parent = parent.parentElement;
                 }
             }
         }
