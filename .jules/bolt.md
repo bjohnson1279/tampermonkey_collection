@@ -186,3 +186,15 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## YYYY-MM-DD - Avoid .closest() with complex selectors in hot paths
 **Learning:** Using `.closest()` with multi-part CSS selectors (e.g., `.closest("tag1, tag2")`) invokes the browser's CSS selector parsing engine, which introduces significant main-thread overhead inside high-frequency contexts like `MutationObserver` loops.
 **Action:** Replace `.closest()` calls that use complex selectors with manual `parentElement` traversal and O(1) `tagName` string equality checks to bypass the CSS parsing engine entirely.
+
+## Prevention Directives for Automated Refactoring
+- **Never Overwrite Complete Files**: Always use range-scoped replacement chunks (`StartLine`/`EndLine`) for edits to `schema.prisma`, `index.ts`, `public/index.php`, or DDL SQL scripts.
+- **Do Not Remove Core Declarations**: Do not delete existing route registrations or database DDL tables.
+- **Environment Isolation Compatibility**: When replacing fallback secrets, preserve test environment execution via `!getenv('APP_ENV')` or `getenv('APP_ENV') === 'testing'`.
+- **No Scratch Files**: Never stage or commit `test_*.ts`, `test_*.js`, `test.cjs`, `fix_*.php`, or `test.js` files to git.
+- **No Unresolved Conflict Markers**: Never stage or commit files containing Git merge conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`, `|||||||`). Always resolve conflicts cleanly before committing.
+
+## Hallucinatory Task & Empty PR Directives
+- **Zero-Diff Task Termination**: If the requested optimization, refactor, or fix is ALREADY natively present in the target branch, DO NOT create an empty pull request or commit an acknowledgment PR. Exit the task cleanly without opening a PR.
+- **Stale Suggestion Guard**: Always verify the current code on `main`/`master` before planning changes. If no actionable diff is required, cancel task execution immediately.
+
