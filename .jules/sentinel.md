@@ -125,3 +125,8 @@
 - **Zero-Diff Task Termination**: If the requested optimization, refactor, or fix is ALREADY natively present in the target branch, DO NOT create an empty pull request or commit an acknowledgment PR. Exit the task cleanly without opening a PR.
 - **Stale Suggestion Guard**: Always verify the current code on `main`/`master` before planning changes. If no actionable diff is required, cancel task execution immediately.
 
+
+## 2024-05-18 - [Generic DOMException for Blocked WebSockets]
+**Vulnerability:** The WebSocket interceptor threw a descriptive error ('WebSocket connection blocked by AdBlocker.') when blocking a connection. This exposes the ad blocker's presence to the webpage context and leaks information.
+**Learning:** Security mechanisms like ad blockers or privacy filters should fail securely and silently. Throwing custom descriptive errors allows scripts on the webpage to detect the extension's presence and potentially adapt or send telemetry.
+**Prevention:** When intercepting and blocking native APIs, always simulate standard browser errors (e.g., throwing a generic DOMException for invalid URLs) to obscure the interception and prevent fingerprinting.
