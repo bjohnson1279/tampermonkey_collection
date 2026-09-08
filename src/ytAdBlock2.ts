@@ -230,7 +230,11 @@
 
                 if (urlStr && shouldBlock(urlStr)) {
                     // Blocked connections should fail securely.
-                    throw new Error('WebSocket connection blocked by AdBlocker.');
+                    // 🛡️ Sentinel: Throw generic DOMException instead of exposing the ad blocker's presence and stack trace.
+                    throw new DOMException(
+                        "Failed to construct 'WebSocket': The URL is invalid.",
+                        'SyntaxError'
+                    );
                 }
 
                 return new target(...(args as [string | URL, (string | string[])?]));

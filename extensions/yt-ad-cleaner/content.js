@@ -149,7 +149,7 @@
                 }
                 args[0] = urlStr;
                 if (urlStr && shouldBlock(urlStr)) {
-                    throw new Error('WebSocket connection blocked by AdBlocker.');
+                    throw new DOMException("Failed to construct 'WebSocket': The URL is invalid.", 'SyntaxError');
                 }
                 return new target(...args);
             },
