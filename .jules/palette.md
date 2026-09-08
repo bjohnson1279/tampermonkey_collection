@@ -195,3 +195,7 @@
 ## YYYY-MM-DD - Fix aria-live regions without aria-atomic
 **Learning:** When using `aria-live` regions (like visually hidden announcers or toasts) to provide dynamic feedback to screen readers, always explicitly set `aria-atomic="true"`. This ensures assistive technologies announce the entire context of the updated region as a single, cohesive unit when text content is dynamically replaced.
 **Action:** Add `aria-atomic="true"` alongside `aria-live` to ensure the entire message is announced.
+
+## 2026-09-08 - Clearer Context for Actionable Feedback
+**Learning:** When providing feedback about a blocked action (e.g., a search redirect), generic messages like "Search term blocked" lack specific context, leaving users confused about exactly what triggered the action. This is especially problematic if the trigger was an automatic rewrite or part of a longer query.
+**Action:** Include the specific trigger (like the exact search term) in feedback toasts using secure text replacement (e.g., `textContent`) to provide clear, actionable context without introducing XSS vulnerabilities.

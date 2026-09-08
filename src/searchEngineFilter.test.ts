@@ -153,7 +153,7 @@ describe('searchEngineFilter', () => {
         expect(mockToast.childNodes.length).toBe(2);
         expect(mockToast.childNodes[0].textContent).toBe('🚫');
         expect(mockToast.childNodes[1].textContent).toBe(
-            'Search term blocked. Redirecting to home...'
+            'Search term "hello asdf world" blocked. Redirecting to home...'
         );
 
         expect(global.document.body.appendChild).toHaveBeenCalledWith(mockToast);
