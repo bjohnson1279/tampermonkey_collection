@@ -130,3 +130,8 @@
 **Vulnerability:** The WebSocket interceptor threw a descriptive error ('WebSocket connection blocked by AdBlocker.') when blocking a connection. This exposes the ad blocker's presence to the webpage context and leaks information.
 **Learning:** Security mechanisms like ad blockers or privacy filters should fail securely and silently. Throwing custom descriptive errors allows scripts on the webpage to detect the extension's presence and potentially adapt or send telemetry.
 **Prevention:** When intercepting and blocking native APIs, always simulate standard browser errors (e.g., throwing a generic DOMException for invalid URLs) to obscure the interception and prevent fingerprinting.
+
+## YYYY-MM-DD - [Generic DOMException for Blocked XHR]
+**Vulnerability:** The XMLHttpRequest interceptor explicitly aborted blocked connections by calling `this.abort()`. This exposes the ad blocker's presence because the webpage can listen for the `abort` event on the XHR instance and detect the interception.
+**Learning:** Explicitly aborting requests triggers native events that can be used for fingerprinting. Security mechanisms should fail securely and silently.
+**Prevention:** When intercepting and blocking XHR requests, always simulate standard browser errors (e.g., throwing a generic DOMException for invalid URLs) to obscure the interception and prevent fingerprinting.
