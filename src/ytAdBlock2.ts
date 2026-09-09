@@ -158,8 +158,11 @@
         url = urlStr;
 
         if (urlStr && shouldBlock(urlStr)) {
-            this.abort();
-            return;
+            // 🛡️ Sentinel: Throw generic DOMException instead of calling this.abort() to prevent exposing the ad blocker's presence via abort events.
+            throw new DOMException(
+                "Failed to execute 'open' on 'XMLHttpRequest': Invalid URL",
+                'SyntaxError'
+            );
         }
 
         return origOpen.apply(this, [method, url as any, async ?? true, username, password]);
