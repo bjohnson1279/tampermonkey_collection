@@ -198,3 +198,6 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 - **Zero-Diff Task Termination**: If the requested optimization, refactor, or fix is ALREADY natively present in the target branch, DO NOT create an empty pull request or commit an acknowledgment PR. Exit the task cleanly without opening a PR.
 - **Stale Suggestion Guard**: Always verify the current code on `main`/`master` before planning changes. If no actionable diff is required, cancel task execution immediately.
 
+## 2025-01-01 - Reverting .closest() manual optimization
+**Learning:** Native element.closest() is implemented in C++ and heavily optimized; repeatedly crossing the JS-to-C++ boundary in a loop is an anti-pattern that degrades both performance and readability.
+**Action:** Always prefer native element.closest() over manual while(parent) DOM traversal loops.

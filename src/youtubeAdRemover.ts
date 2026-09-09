@@ -73,17 +73,9 @@ class YouTubeAdRemover {
             // ⚡ Bolt: Use a backward standard for loop for HTMLCollection to avoid unnecessary Array allocation
             for (let i = adItems.length - 1; i >= 0; i--) {
                 const adItem = adItems[i];
-                // ⚡ Bolt: Replace expensive .closest() with O(1) manual DOM traversal
-                let parent = adItem.parentElement;
-                while (parent) {
-                    if (
-                        parent.tagName === 'YTD-RICH-ITEM-RENDERER' ||
-                        parent.tagName === 'YTD-VIDEO-RENDERER'
-                    ) {
-                        parent.remove();
-                        break;
-                    }
-                    parent = parent.parentElement;
+                const parent = adItem.closest('YTD-RICH-ITEM-RENDERER, YTD-VIDEO-RENDERER');
+                if (parent) {
+                    parent.remove();
                 }
             }
         } else {
@@ -111,17 +103,11 @@ class YouTubeAdRemover {
                         // ⚡ Bolt: Use a backward standard for loop for HTMLCollection to avoid unnecessary Array allocation
                         for (let i = adItems.length - 1; i >= 0; i--) {
                             const adItem = adItems[i];
-                            // ⚡ Bolt: Replace expensive .closest() with O(1) manual DOM traversal inside MutationObserver
-                            let parent = adItem.parentElement;
-                            while (parent) {
-                                if (
-                                    parent.tagName === 'YTD-RICH-ITEM-RENDERER' ||
-                                    parent.tagName === 'YTD-VIDEO-RENDERER'
-                                ) {
-                                    parent.remove();
-                                    break;
-                                }
-                                parent = parent.parentElement;
+                            const parent = adItem.closest(
+                                'YTD-RICH-ITEM-RENDERER, YTD-VIDEO-RENDERER'
+                            );
+                            if (parent) {
+                                parent.remove();
                             }
                         }
                     }
