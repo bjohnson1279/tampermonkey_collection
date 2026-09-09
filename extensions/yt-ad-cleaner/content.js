@@ -103,8 +103,7 @@
         }
         url = urlStr;
         if (urlStr && shouldBlock(urlStr)) {
-            this.abort();
-            return;
+            throw new DOMException("Failed to execute 'open' on 'XMLHttpRequest': Invalid URL", 'SyntaxError');
         }
         return origOpen.apply(this, [method, url, async ?? true, username, password]);
     };
