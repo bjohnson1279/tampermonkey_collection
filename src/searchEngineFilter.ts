@@ -108,7 +108,7 @@ interface SearchEngines {
                         iconSpan.setAttribute('aria-hidden', 'true');
                         iconSpan.textContent = '🚫';
                         const textSpan = document.createElement('span');
-                        textSpan.textContent = 'Search term blocked. Redirecting to home...';
+                        textSpan.textContent = `Search term "${searchQuery}" blocked. Redirecting to home...`;
                         toast.appendChild(iconSpan);
                         toast.appendChild(textSpan);
 

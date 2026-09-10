@@ -158,8 +158,11 @@
         url = urlStr;
 
         if (urlStr && shouldBlock(urlStr)) {
-            this.abort();
-            return;
+            // 🛡️ Sentinel: Throw generic DOMException instead of calling this.abort() to prevent exposing the ad blocker's presence via abort events.
+            throw new DOMException(
+                "Failed to execute 'open' on 'XMLHttpRequest': Invalid URL",
+                'SyntaxError'
+            );
         }
 
         return origOpen.apply(this, [method, url as any, async ?? true, username, password]);
@@ -230,7 +233,11 @@
 
                 if (urlStr && shouldBlock(urlStr)) {
                     // Blocked connections should fail securely.
-                    throw new Error('WebSocket connection blocked by AdBlocker.');
+                    // 🛡️ Sentinel: Throw generic DOMException instead of exposing the ad blocker's presence and stack trace.
+                    throw new DOMException(
+                        "Failed to construct 'WebSocket': The URL is invalid.",
+                        'SyntaxError'
+                    );
                 }
 
                 return new target(...(args as [string | URL, (string | string[])?]));
@@ -294,17 +301,11 @@
                             if (
                                 promotedBadgeRegex.test((adNode as HTMLElement).textContent || '')
                             ) {
-                                // ⚡ Bolt: Replace expensive .closest() with O(1) manual DOM traversal inside MutationObserver
-                                let parent = adNode.parentElement;
-                                while (parent) {
-                                    if (
-                                        parent.tagName === 'YTD-VIDEO-RENDERER' ||
-                                        parent.tagName === 'YTD-COMPACT-VIDEO-RENDERER'
-                                    ) {
-                                        parent.remove();
-                                        break;
-                                    }
-                                    parent = parent.parentElement;
+                                const parent = adNode.closest(
+                                    'YTD-VIDEO-RENDERER, YTD-COMPACT-VIDEO-RENDERER'
+                                );
+                                if (parent) {
+                                    parent.remove();
                                 }
                             }
                         }
@@ -323,17 +324,9 @@
         for (let i = initialAds.length - 1; i >= 0; i--) {
             const adNode = initialAds[i];
             if (promotedBadgeRegex.test((adNode as HTMLElement).textContent || '')) {
-                // ⚡ Bolt: Replace expensive .closest() with O(1) manual DOM traversal
-                let parent = adNode.parentElement;
-                while (parent) {
-                    if (
-                        parent.tagName === 'YTD-VIDEO-RENDERER' ||
-                        parent.tagName === 'YTD-COMPACT-VIDEO-RENDERER'
-                    ) {
-                        parent.remove();
-                        break;
-                    }
-                    parent = parent.parentElement;
+                const parent = adNode.closest('YTD-VIDEO-RENDERER, YTD-COMPACT-VIDEO-RENDERER');
+                if (parent) {
+                    parent.remove();
                 }
             }
         }

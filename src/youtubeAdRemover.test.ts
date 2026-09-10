@@ -103,12 +103,11 @@ describe('YouTubeAdRemover', () => {
                 const mockVideoItem1 = {
                     tagName: 'YTD-VIDEO-RENDERER',
                     remove: jest.fn(),
-                    parentElement: null,
                 };
 
                 const mockAdItem1 = {
                     remove: jest.fn(),
-                    parentElement: mockVideoItem1,
+                    closest: jest.fn().mockReturnValue(mockVideoItem1),
                 };
 
                 (global.document.getElementsByClassName as jest.Mock).mockReturnValue([
@@ -185,12 +184,11 @@ describe('YouTubeAdRemover', () => {
                 const mockVideoItem = {
                     tagName: 'YTD-VIDEO-RENDERER',
                     remove: jest.fn(),
-                    parentElement: null,
                 };
 
                 const mockAdItem = {
                     remove: jest.fn(),
-                    parentElement: mockVideoItem,
+                    closest: jest.fn().mockReturnValue(mockVideoItem),
                 };
 
                 const mockContainerNode = {

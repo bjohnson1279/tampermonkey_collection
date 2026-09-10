@@ -116,6 +116,6 @@ describe('ytAdBlock2 Security Fix', () => {
         // This should throw because WebIDL check sees the true href ('https://youtube.com/api/stats/ads') and correctly intercepts it, blocking the connection
         expect(() => {
             new window.WebSocket(nativeUrl);
-        }).toThrow('WebSocket connection blocked by AdBlocker.');
+        }).toThrow("Failed to construct 'WebSocket': The URL is invalid.");
     });
 });
