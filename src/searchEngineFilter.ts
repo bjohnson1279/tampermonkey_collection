@@ -47,7 +47,8 @@ interface SearchEngines {
             let matchedDomain: string | undefined;
             // 🛡️ Sentinel: Mitigate Prototype Pollution by using Object.entries instead of a for...in loop to restrict enumeration strictly to own properties and prevent Open Redirects
             const entries = Object.entries(searchEngines);
-            for (let i = 0; i < entries.length; i++) {
+            // ⚡ Bolt: Cache array length in standard for loop to avoid repeated property lookup overhead
+            for (let i = 0, len = entries.length; i < len; i++) {
                 const [domain, config] = entries[i];
                 if (hostname === domain || hostname.endsWith('.' + domain)) {
                     engine = config;
