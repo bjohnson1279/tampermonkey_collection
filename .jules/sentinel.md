@@ -109,7 +109,7 @@
 **Learning:** Even if an object is defined locally as a static literal, `for...in` traverses the prototype chain. If any untrusted script or query parameter on the page pollutes `Object.prototype`, the loop will process the polluted properties.
 **Prevention:** Always guard `for...in` iterations with `!Object.prototype.hasOwnProperty.call(obj, prop)` or use `Object.keys(obj)` / `Object.entries(obj)` to restrict enumeration strictly to own properties.
 
-## YYYY-MM-DD - [Object.entries Mitigation for Prototype Pollution in Iterators]
+## 2024-10-27 - [Object.entries Mitigation for Prototype Pollution in Iterators]
 **Vulnerability:** Iterating over object properties using a raw `for...in` loop without `hasOwnProperty` checks allows properties injected via Prototype Pollution on `Object.prototype` to be enumerated and executed. In scripts running on arbitrary or broad matches (e.g. search engine interceptors), this can be chained into DOM-based Open Redirects.
 **Learning:** Even if an object is defined locally as a static literal, `for...in` traverses the prototype chain. If any untrusted script or query parameter on the page pollutes `Object.prototype`, the loop will process the polluted properties.
 **Prevention:** To comprehensively mitigate prototype pollution when iterating over configuration objects or maps, avoid using `for...in` loops entirely, even if guarded by `hasOwnProperty`. Instead, use `Object.entries(obj)` or `Object.keys(obj)` which strictly return own enumerable string-keyed properties and eliminate the risk of iterating over maliciously injected prototype properties.
@@ -131,7 +131,7 @@
 **Learning:** Security mechanisms like ad blockers or privacy filters should fail securely and silently. Throwing custom descriptive errors allows scripts on the webpage to detect the extension's presence and potentially adapt or send telemetry.
 **Prevention:** When intercepting and blocking native APIs, always simulate standard browser errors (e.g., throwing a generic DOMException for invalid URLs) to obscure the interception and prevent fingerprinting.
 
-## YYYY-MM-DD - [Generic DOMException for Blocked XHR]
+## 2024-10-27 - [Generic DOMException for Blocked XHR]
 **Vulnerability:** The XMLHttpRequest interceptor explicitly aborted blocked connections by calling `this.abort()`. This exposes the ad blocker's presence because the webpage can listen for the `abort` event on the XHR instance and detect the interception.
 **Learning:** Explicitly aborting requests triggers native events that can be used for fingerprinting. Security mechanisms should fail securely and silently.
 **Prevention:** When intercepting and blocking XHR requests, always simulate standard browser errors (e.g., throwing a generic DOMException for invalid URLs) to obscure the interception and prevent fingerprinting.
@@ -152,3 +152,7 @@
 ## Hallucinatory Task & Empty PR Directives
 - **Zero-Diff Task Termination**: If the requested optimization, refactor, or fix is ALREADY natively present in the target branch, DO NOT create an empty pull request or commit an acknowledgment PR. Exit the task cleanly without opening a PR.
 - **Stale Suggestion Guard**: Always verify the current code on `main`/`master` before planning changes. If no actionable diff is required, cancel task execution immediately.
+## 2024-10-27 - [Simulate native network failures for blocked fetch requests]
+**Vulnerability:** Returning fake successful responses (like 204 No Content) for intercepted asynchronous network APIs like `window.fetch` exposes the interceptor's presence and breaks the asynchronous API contract.
+**Learning:** Security mechanisms that intercept and block native APIs must fail securely by simulating standard browser errors.
+**Prevention:** When intercepting asynchronous network APIs like `window.fetch` to block requests, always simulate native network failures by returning a rejected Promise (e.g., `return Promise.reject(new TypeError('Failed to fetch'));`).
