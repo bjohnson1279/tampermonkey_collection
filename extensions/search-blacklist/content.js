@@ -20,7 +20,7 @@
             let engine;
             let matchedDomain;
             const entries = Object.entries(searchEngines);
-            for (let i = 0; i < entries.length; i++) {
+            for (let i = 0, len = entries.length; i < len; i++) {
                 const [domain, config] = entries[i];
                 if (hostname === domain || hostname.endsWith('.' + domain)) {
                     engine = config;
