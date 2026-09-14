@@ -83,7 +83,7 @@
             args[0] = url;
         }
         if (url !== undefined && shouldBlock(url)) {
-            return new Response('', { status: 204 });
+            return Promise.reject(new TypeError('Failed to fetch'));
         }
         return origFetch(...args);
     });

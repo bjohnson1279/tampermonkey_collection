@@ -122,7 +122,8 @@
         }
 
         if (url !== undefined && shouldBlock(url)) {
-            return new Response('', { status: 204 });
+            // 🛡️ Sentinel: Simulate native network failures instead of returning fake successful responses to prevent exposing the interceptor's presence.
+            return Promise.reject(new TypeError('Failed to fetch'));
         }
         return origFetch(...args);
     }) as typeof window.fetch;
