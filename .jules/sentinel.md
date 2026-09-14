@@ -152,3 +152,8 @@
 ## Hallucinatory Task & Empty PR Directives
 - **Zero-Diff Task Termination**: If the requested optimization, refactor, or fix is ALREADY natively present in the target branch, DO NOT create an empty pull request or commit an acknowledgment PR. Exit the task cleanly without opening a PR.
 - **Stale Suggestion Guard**: Always verify the current code on `main`/`master` before planning changes. If no actionable diff is required, cancel task execution immediately.
+
+## YYYY-MM-DD - [Generic TypeError for Blocked fetch]
+**Vulnerability:** The fetch interceptor returned a dummy 204 response for blocked connections. This exposes the ad blocker's presence because native failed connections or blocked connections by native browser mechanisms reject the promise with a TypeError. Returning 204 allows scripts to detect interception.
+**Learning:** Security mechanisms should fail securely and silently. Returning a 204 response instead of failing the promise allows scripts on the webpage to detect the extension's presence and potentially adapt.
+**Prevention:** When intercepting and blocking fetch requests, always simulate standard browser errors (e.g., return Promise.reject(new TypeError("Failed to fetch"))) to obscure the interception and prevent fingerprinting.

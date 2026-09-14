@@ -122,7 +122,8 @@
         }
 
         if (url !== undefined && shouldBlock(url)) {
-            return new Response('', { status: 204 });
+            // 🛡️ Sentinel: Reject with generic TypeError to simulate native network failure and prevent ad blocker fingerprinting.
+            return Promise.reject(new TypeError('Failed to fetch'));
         }
         return origFetch(...args);
     }) as typeof window.fetch;
