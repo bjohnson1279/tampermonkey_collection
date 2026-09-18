@@ -179,23 +179,27 @@
 ## 2024-08-28 - Hide keyboard shortcuts in disabled states
 **Learning:** The previous UX insight specified removing the <kbd> visual element when keyboard shortcuts are functionally disabled. Keeping the `aria-keyshortcuts` attribute during this time creates mismatched accessibility states and misleads screen readers.
 **Action:** Always conditionally remove `aria-keyshortcuts` when the corresponding visual `<kbd>` shortcut hint is removed to maintain semantic consistency and accessibility.
-## YYYY-MM-DD - Screen Reader Clarity for Inactive Shortcuts
+## 2026-09-18 - Screen Reader Clarity for Inactive Shortcuts
 **Learning:** While hiding <kbd> elements visually removes clutter for disabled/transient buttons, failing to also remove the aria-keyshortcuts attribute causes screen readers to still announce the shortcut as if it were active. This creates a confusing experience for non-visual users who try to use the shortcut and get no response.
 **Action:** Always explicitly remove the aria-keyshortcuts attribute (e.g., btn.removeAttribute("aria-keyshortcuts")) when an interactive element enters a disabled or transient feedback state, and restore it when the element becomes active again.
-## YYYY-MM-DD - Windows High Contrast Mode (WHCM) Button Visibility
+## 2026-09-18 - Windows High Contrast Mode (WHCM) Button Visibility
 **Learning:** Custom UI buttons styled with `border: none` and relying on background colors become invisible or indistinguishable from normal text in Windows High Contrast Mode (and CSS `forced-colors: active`), as the browser strips background colors but retains border logic.
 **Action:** Always use `border: 1px solid transparent` (alongside `box-sizing: border-box`) instead of `border: none` on custom buttons and toasts. In normal modes, the transparent border is invisible. In High Contrast Mode, the browser forces the transparent border to use the system's high-contrast colors, providing a crucial visible boundary.
-## YYYY-MM-DD - Windows High Contrast Mode Button Visibility
+## 2026-09-18 - Windows High Contrast Mode Button Visibility
 **Learning:** Custom UI buttons or elements styled with `border: none` and relying on background colors become invisible or indistinguishable from normal text in Windows High Contrast Mode (WHCM) and CSS `forced-colors: active`.
 **Action:** To maintain accessibility and a visible boundary, use `border: 1px solid transparent` alongside `box-sizing: border-box` instead of `border: none`.
 
 ## 2026-08-28 - Consistent Screen Reader Announcements for Live Regions
 **Learning:** When using `aria-live` regions (like visually hidden announcers or toasts) to provide dynamic feedback to screen readers, simply replacing the text content can sometimes result in partial or confusing announcements depending on the browser and screen reader combination.
 **Action:** Always explicitly set `aria-atomic="true"` on `aria-live` regions to guarantee that assistive technologies announce the entire context of the updated region as a single, cohesive unit.
-## YYYY-MM-DD - Fix aria-live regions without aria-atomic
+## 2026-09-18 - Fix aria-live regions without aria-atomic
 **Learning:** When using `aria-live` regions (like visually hidden announcers or toasts) to provide dynamic feedback to screen readers, always explicitly set `aria-atomic="true"`. This ensures assistive technologies announce the entire context of the updated region as a single, cohesive unit when text content is dynamically replaced.
 **Action:** Add `aria-atomic="true"` alongside `aria-live` to ensure the entire message is announced.
 
 ## 2026-09-08 - Clearer Context for Actionable Feedback
 **Learning:** When providing feedback about a blocked action (e.g., a search redirect), generic messages like "Search term blocked" lack specific context, leaving users confused about exactly what triggered the action. This is especially problematic if the trigger was an automatic rewrite or part of a longer query.
 **Action:** Include the specific trigger (like the exact search term) in feedback toasts using secure text replacement (e.g., `textContent`) to provide clear, actionable context without introducing XSS vulnerabilities.
+
+## 2026-09-18 - Pointer Events on Toasts
+**Learning:** When creating non-interactive overlay elements (like toast notifications), they can block clicks on the underlying interface during their visibility window.
+**Action:** Apply `pointer-events: none;` to non-interactive overlay elements to prevent them from interfering with user interactions.

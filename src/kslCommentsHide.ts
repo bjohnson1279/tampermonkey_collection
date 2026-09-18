@@ -43,8 +43,7 @@ _global.__kslTestExports = _global.__kslTestExports || {};
     const processComment = (comment: HTMLElement): void => {
         // ⚡ Bolt: Replace querySelector('.class') with getElementsByClassName('class')[0] for O(1) live collection lookup instead of O(N) tree traversal inside the MutationObserver
         const usernameElement = comment.getElementsByClassName('CommentsList__userName')[0] as
-            | HTMLElement
-            | undefined;
+            HTMLElement | undefined;
         if (!usernameElement?.textContent) return;
 
         const username = usernameElement.textContent.trim();
@@ -92,8 +91,7 @@ _global.__kslTestExports = _global.__kslTestExports || {};
 
         // Initial check in case comments are already loaded
         const commentsList = container.getElementsByClassName('CommentsList__root')[0] as
-            | HTMLElement
-            | undefined;
+            HTMLElement | undefined;
         if (commentsList) {
             const allComments = commentsList.getElementsByClassName('CommentsList__item');
             // ⚡ Bolt: Use standard for loop instead of Array.from() to prevent O(N) array allocation overhead
