@@ -218,3 +218,7 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## Hallucinatory Task & Empty PR Directives
 - **Zero-Diff Task Termination**: If the requested optimization, refactor, or fix is ALREADY natively present in the target branch, DO NOT create an empty pull request or commit an acknowledgment PR. Exit the task cleanly without opening a PR.
 - **Stale Suggestion Guard**: Always verify the current code on `main`/`master` before planning changes. If no actionable diff is required, cancel task execution immediately.
+
+## 2024-09-19 - Cache Live HTMLCollections outside MutationObservers
+**Learning:** While getElementsByClassName is an O(1) operation returning a live HTMLCollection, calling it inside high-frequency MutationObserver callbacks still incurs function execution overhead on every DOM mutation tick.
+**Action:** Cache the live HTMLCollection globally outside the MutationObserver. Because the collection is live, it automatically reflects dynamic DOM changes without re-querying the DOM.

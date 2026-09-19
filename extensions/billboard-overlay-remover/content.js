@@ -24,6 +24,7 @@
         childList: true,
         subtree: true,
     };
+    const chartItems = document.getElementsByClassName('chart-list-item');
     const handleMutations = (mutationsList) => {
         for (let i = 0, len = mutationsList.length; i < len; i++) {
             const mutation = mutationsList[i];
@@ -31,7 +32,6 @@
                 mutation.target.remove();
             }
         }
-        const chartItems = document.getElementsByClassName('chart-list-item');
         for (let i = 0, len = chartItems.length; i < len; i++) {
             const chartItem = chartItems[i];
             chartItem.visible = true;
