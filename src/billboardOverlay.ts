@@ -52,6 +52,8 @@ interface ExtendedHTMLElement extends HTMLElement {
         subtree: true,
     };
 
+    // ⚡ Bolt: Cache live HTMLCollection outside the MutationObserver to avoid repeated O(1) query function call overhead on every mutation tick
+    const chartItems = document.getElementsByClassName('chart-list-item');
     const handleMutations: MutationCallback = (mutationsList: MutationRecord[]): void => {
         for (let i = 0, len = mutationsList.length; i < len; i++) {
             const mutation = mutationsList[i];
@@ -62,7 +64,6 @@ interface ExtendedHTMLElement extends HTMLElement {
 
         // Update chart items
         // ⚡ Bolt: Replace querySelectorAll('.class') with getElementsByClassName('class') for O(1) live collection lookup instead of O(N) tree traversal inside the MutationObserver
-        const chartItems = document.getElementsByClassName('chart-list-item');
         for (let i = 0, len = chartItems.length; i < len; i++) {
             const chartItem = chartItems[i] as ExtendedHTMLElement;
             chartItem.visible = true;
