@@ -165,11 +165,11 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 **Learning:** Using `element.matches(selector)` with complex, multi-part CSS selectors (e.g. `tag1, tag2, .class1`) inside a high-frequency `MutationObserver` loop forces the browser to heavily engage the CSS selector parsing engine on every DOM node mutation, adding severe main-thread overhead.
 **Action:** Replace `element.matches()` calls inside high-frequency observer paths with direct string equality checks (e.g. `element.tagName === 'TAG'`), or for multiple tags, pre-compile an O(1) `Set` of tag names outside the loop and use `set.has(element.tagName)`.
 
-## YYYY-MM-DD - Cache Live HTMLCollections in Intervals
+## 2026-09-20 - Cache Live HTMLCollections in Intervals
 **Learning:** While getElementsByClassName and getElementsByTagName are O(1) operations that return live HTMLCollections, calling them repeatedly inside high-frequency intervals (like a 500ms setInterval) still incurs function call overhead on every tick.
 **Action:** Cache the live HTMLCollection returned by these methods globally outside the interval. Because the collection is live, it automatically updates when the DOM changes, eliminating all query function calls inside the loop.
 
-## YYYY-MM-DD - Optimize for loop iteration
+## 2026-09-20 - Optimize for loop iteration
 **Learning:** In standard for loops, looking up the length of an array/collection on every iteration (`i < list.length`) adds overhead.
 **Action:** Cache the length (`let len = list.length; for (let i = 0; i < len; i++)`) to avoid the repeated property lookup and slightly improve performance.
 
@@ -183,7 +183,7 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 **Learning:** High-frequency MutationObserver callbacks can suffer from micro-jank if standard for loops do not cache the array/collection length, causing repeated property lookups on every single loop iteration.
 **Action:** Always cache the length in a standard for loop initialization (e.g., let i = 0, len = array.length; i < len; i++) when iterating in performance-critical paths.
 
-## YYYY-MM-DD - Avoid .closest() with complex selectors in hot paths
+## 2026-09-20 - Avoid .closest() with complex selectors in hot paths
 **Learning:** Using `.closest()` with multi-part CSS selectors (e.g., `.closest("tag1, tag2")`) invokes the browser's CSS selector parsing engine, which introduces significant main-thread overhead inside high-frequency contexts like `MutationObserver` loops.
 **Action:** Replace `.closest()` calls that use complex selectors with manual `parentElement` traversal and O(1) `tagName` string equality checks to bypass the CSS parsing engine entirely.
 
@@ -218,3 +218,7 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## Hallucinatory Task & Empty PR Directives
 - **Zero-Diff Task Termination**: If the requested optimization, refactor, or fix is ALREADY natively present in the target branch, DO NOT create an empty pull request or commit an acknowledgment PR. Exit the task cleanly without opening a PR.
 - **Stale Suggestion Guard**: Always verify the current code on `main`/`master` before planning changes. If no actionable diff is required, cancel task execution immediately.
+
+## 2026-09-20 - Cache Live HTMLCollections in MutationObserver
+**Learning:** To optimize high-frequency MutationObserver callbacks, cache live HTMLCollections (e.g., those returned by getElementsByClassName) globally outside the observer. Although querying them is O(1), repeatedly calling the function inside the mutation tick incurs unnecessary execution overhead, whereas the cached live collection automatically reflects DOM changes without requiring re-queries.
+**Action:** Cache the live HTMLCollection globally outside the observer. Because the collection is live, it automatically updates when the DOM changes, eliminating all query function calls inside the loop.
