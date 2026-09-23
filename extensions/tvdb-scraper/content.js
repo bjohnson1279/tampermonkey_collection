@@ -3,42 +3,46 @@ const NETWORK_CLEANUP_REGEX = /ABC|CBS|FOX|NBC|PBS|History|H2|\(US\)|A&E/gi;
 export function scrapeTVDBData() {
     'use strict';
     const episodesData = [];
-    const episodes = document.querySelectorAll('.list-group .list-group-item');
-    for (let j = 0, len = episodes.length; j < len; j++) {
-        const ep = episodes[j];
-        const heading = ep.getElementsByClassName('list-group-item-heading')[0];
-        if (!heading)
-            continue;
-        const epLabelElement = heading.getElementsByClassName('episode-label')[0];
-        const epLabel = epLabelElement?.textContent?.trim() || '';
-        const matches = epLabel.match(EPISODE_NUM_REGEX) || [];
-        const titleLink = heading.getElementsByTagName('a')[0];
-        const epTitle = titleLink?.textContent?.trim() || '';
-        const itemTextElement = ep.getElementsByClassName('list-group-item-text')[0];
-        const itemText = itemTextElement?.textContent?.trim() || '';
-        let itemDate = '';
-        const listInline = ep.getElementsByClassName('list-inline');
-        for (let i = 0, len = listInline.length; i < len; i++) {
-            const listItem = listInline[i];
-            const dateText = listItem.textContent?.replace(NETWORK_CLEANUP_REGEX, '').trim() || '';
-            try {
-                const date = new Date(dateText);
-                if (!isNaN(date.getTime())) {
-                    itemDate = date.toISOString().split('T')[0];
+    const listGroups = document.getElementsByClassName('list-group');
+    for (let g = 0, gLen = listGroups.length; g < gLen; g++) {
+        const group = listGroups[g];
+        const episodes = group.getElementsByClassName('list-group-item');
+        for (let j = 0, len = episodes.length; j < len; j++) {
+            const ep = episodes[j];
+            const heading = ep.getElementsByClassName('list-group-item-heading')[0];
+            if (!heading)
+                continue;
+            const epLabelElement = heading.getElementsByClassName('episode-label')[0];
+            const epLabel = epLabelElement?.textContent?.trim() || '';
+            const matches = epLabel.match(EPISODE_NUM_REGEX) || [];
+            const titleLink = heading.getElementsByTagName('a')[0];
+            const epTitle = titleLink?.textContent?.trim() || '';
+            const itemTextElement = ep.getElementsByClassName('list-group-item-text')[0];
+            const itemText = itemTextElement?.textContent?.trim() || '';
+            let itemDate = '';
+            const listInline = ep.getElementsByClassName('list-inline');
+            for (let i = 0, len = listInline.length; i < len; i++) {
+                const listItem = listInline[i];
+                const dateText = listItem.textContent?.replace(NETWORK_CLEANUP_REGEX, '').trim() || '';
+                try {
+                    const date = new Date(dateText);
+                    if (!isNaN(date.getTime())) {
+                        itemDate = date.toISOString().split('T')[0];
+                    }
+                }
+                catch (e) {
+                    console.error('Error parsing date:', e instanceof Error ? e.message : String(e));
                 }
             }
-            catch (e) {
-                console.error('Error parsing date:', e instanceof Error ? e.message : String(e));
-            }
+            const episode = {
+                season: matches[0] || '',
+                episode: matches[1] || '',
+                title: epTitle,
+                release: itemDate,
+                description: itemText,
+            };
+            episodesData.push(episode);
         }
-        const episode = {
-            season: matches[0] || '',
-            episode: matches[1] || '',
-            title: epTitle,
-            release: itemDate,
-            description: itemText,
-        };
-        episodesData.push(episode);
     }
     if (!document.getElementById('tvdb-copy-json-btn')) {
         const style = document.createElement('style');

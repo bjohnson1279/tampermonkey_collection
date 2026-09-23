@@ -25,58 +25,70 @@ export function scrapeTVDBData(): Episode[] {
     'use strict';
 
     const episodesData: Episode[] = [];
-    // ⚡ Bolt: Replace O(N) independent DOM traversals inside the container loop with a single O(1) pass
-    // using a descendant CSS selector to significantly reduce main thread parsing overhead.
-    const episodes = document.querySelectorAll<HTMLElement>('.list-group .list-group-item');
+    // ⚡ Bolt: Replace descendant CSS selector querySelectorAll('.list-group .list-group-item')
+    // with O(1) getElementsByClassName lookups to avoid expensive query parsing overhead.
+    const listGroups = document.getElementsByClassName('list-group');
 
     // ⚡ Bolt: Cache collection length to prevent repeated property lookups on every loop iteration
-    for (let j = 0, len = episodes.length; j < len; j++) {
-        const ep = episodes[j] as HTMLElement;
-        // ⚡ Bolt: Replace querySelector('.class') with getElementsByClassName('class')[0] for O(1) live collection lookup
-        const heading = ep.getElementsByClassName('list-group-item-heading')[0] as
-            HTMLElement | undefined;
-        if (!heading) continue;
+    for (let g = 0, gLen = listGroups.length; g < gLen; g++) {
+        const group = listGroups[g] as HTMLElement;
+        const episodes = group.getElementsByClassName('list-group-item');
 
-        const epLabelElement = heading.getElementsByClassName('episode-label')[0] as
-            HTMLElement | undefined;
-        const epLabel = epLabelElement?.textContent?.trim() || '';
-        const matches = epLabel.match(EPISODE_NUM_REGEX) || [];
+        for (let j = 0, len = episodes.length; j < len; j++) {
+            const ep = episodes[j] as HTMLElement;
+            // ⚡ Bolt: Replace querySelector('.class') with getElementsByClassName('class')[0] for O(1) live collection lookup
+            const heading = ep.getElementsByClassName('list-group-item-heading')[0] as
+                | HTMLElement
+                | undefined;
+            if (!heading) continue;
 
-        const titleLink = heading.getElementsByTagName('a')[0] as HTMLAnchorElement | undefined;
-        const epTitle = titleLink?.textContent?.trim() || '';
+            const epLabelElement = heading.getElementsByClassName('episode-label')[0] as
+                | HTMLElement
+                | undefined;
+            const epLabel = epLabelElement?.textContent?.trim() || '';
+            const matches = epLabel.match(EPISODE_NUM_REGEX) || [];
 
-        const itemTextElement = ep.getElementsByClassName('list-group-item-text')[0] as
-            HTMLElement | undefined;
-        const itemText = itemTextElement?.textContent?.trim() || '';
+            const titleLink = heading.getElementsByTagName('a')[0] as HTMLAnchorElement | undefined;
+            const epTitle = titleLink?.textContent?.trim() || '';
 
-        let itemDate = '';
-        const listInline = ep.getElementsByClassName('list-inline');
+            const itemTextElement = ep.getElementsByClassName('list-group-item-text')[0] as
+                | HTMLElement
+                | undefined;
+            const itemText = itemTextElement?.textContent?.trim() || '';
 
-        // ⚡ Bolt: Cache collection length to prevent repeated property lookups on every loop iteration
-        for (let i = 0, len = listInline.length; i < len; i++) {
-            const listItem = listInline[i] as HTMLElement;
-            const dateText = listItem.textContent?.replace(NETWORK_CLEANUP_REGEX, '').trim() || '';
+            let itemDate = '';
+            const listInline = ep.getElementsByClassName('list-inline');
 
-            try {
-                const date = new Date(dateText);
-                if (!isNaN(date.getTime())) {
-                    itemDate = date.toISOString().split('T')[0];
+            // ⚡ Bolt: Cache collection length to prevent repeated property lookups on every loop iteration
+            for (let i = 0, len = listInline.length; i < len; i++) {
+                const listItem = listInline[i] as HTMLElement;
+                const dateText =
+                    listItem.textContent?.replace(NETWORK_CLEANUP_REGEX, '').trim() || '';
+
+                try {
+                    const date = new Date(dateText);
+                    if (!isNaN(date.getTime())) {
+                        itemDate = date.toISOString().split('T')[0];
+                    }
+                } catch (e) {
+                    // 🛡️ Sentinel: Removed error object from console.error to prevent stack trace exposure
+                    console.error(
+                        'Error parsing date:',
+                        e instanceof Error ? e.message : String(e)
+                    );
                 }
-            } catch (e) {
-                // 🛡️ Sentinel: Removed error object from console.error to prevent stack trace exposure
-                console.error('Error parsing date:', e instanceof Error ? e.message : String(e));
             }
+
+            const episode: Episode = {
+                season: matches[0] || '',
+                episode: matches[1] || '',
+                title: epTitle,
+                release: itemDate,
+                description: itemText,
+            };
+
+            episodesData.push(episode);
         }
-
-        const episode: Episode = {
-            season: matches[0] || '',
-            episode: matches[1] || '',
-            title: epTitle,
-            release: itemDate,
-            description: itemText,
-        };
-
-        episodesData.push(episode);
     }
 
     if (!document.getElementById('tvdb-copy-json-btn')) {
