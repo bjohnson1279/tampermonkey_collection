@@ -156,3 +156,8 @@
 **Vulnerability:** Returning fake successful responses (like 204 No Content) for intercepted asynchronous network APIs like `window.fetch` exposes the interceptor's presence and breaks the asynchronous API contract.
 **Learning:** Security mechanisms that intercept and block native APIs must fail securely by simulating standard browser errors.
 **Prevention:** When intercepting asynchronous network APIs like `window.fetch` to block requests, always simulate native network failures by returning a rejected Promise (e.g., `return Promise.reject(new TypeError('Failed to fetch'));`).
+
+## 2026-09-28 - [Fake Success Evasion in sendBeacon]
+**Vulnerability:** The `navigator.sendBeacon` interceptor returned `true` (fake success) when blocking a request, exposing the interceptor to scripts that monitor return values.
+**Learning:** Returning fake successful responses (like `true`) for intercepted native APIs like `navigator.sendBeacon` violates the principle of failing securely and exposes the security mechanism.
+**Prevention:** When intercepting `navigator.sendBeacon` to block network egress, always fail securely by returning the native failure indicator (`false`).

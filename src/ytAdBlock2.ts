@@ -198,7 +198,8 @@
             url = urlStr;
 
             if (urlStr && shouldBlock(urlStr)) {
-                return true; // Simulate success to prevent fallback mechanisms
+                // 🛡️ Sentinel: Return native failure indicator (false) instead of fake success to prevent exposing the interceptor's presence.
+                return false;
             }
             // 🛡️ Sentinel: Pass the evaluated URL string to prevent TOCTOU evasion
             return origSendBeacon.apply(this, [url as any, data]);
