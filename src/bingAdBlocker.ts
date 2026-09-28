@@ -14,7 +14,8 @@
 
     // ⚡ Bolt: Replace querySelector('.class') with getElementsByClassName('class')[0] for O(1) live collection lookup instead of O(N) tree traversal
     const slideContainer = document.getElementsByClassName('tob_calcontainer')[0] as
-        HTMLElement | undefined;
+        | HTMLElement
+        | undefined;
 
     if (slideContainer) {
         // ⚡ Bolt: Replace querySelectorAll with getElementsByClassName for O(1) live collection lookup

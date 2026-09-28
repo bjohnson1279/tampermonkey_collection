@@ -17,24 +17,20 @@ interface ExtendedHTMLElement extends HTMLElement {
 (function (): void {
     'use strict';
 
-    // Remove various ad containers
+    // ⚡ Bolt: Replace O(N) DOM mutations with O(1) injected stylesheet
+    // Avoids repeatedly querying the DOM and handles dynamically added ads natively
     const adSelectors = [
-        'ad-container',
-        'ad-holder',
-        'ad_desktop_placeholder',
-        'ad_desktop_wrapper',
-        'ad_desktop',
-        'ad_clarity',
+        '.ad-container',
+        '.ad-holder',
+        '.ad_desktop_placeholder',
+        '.ad_desktop_wrapper',
+        '.ad_desktop',
+        '.ad_clarity',
     ];
 
-    // ⚡ Bolt: Replace O(N) querySelectorAll with O(1) live collection lookups via getElementsByClassName
-    for (let j = 0, len = adSelectors.length; j < len; j++) {
-        const ads = document.getElementsByClassName(adSelectors[j]);
-        // ⚡ Bolt: Use a backward standard for loop for HTMLCollection to avoid unnecessary Array allocation
-        for (let i = ads.length - 1; i >= 0; i--) {
-            ads[i].remove();
-        }
-    }
+    const style = document.createElement('style');
+    style.textContent = `${adSelectors.join(', ')} { display: none !important; }`;
+    (document.head || document.documentElement).appendChild(style);
 
     // Set up mutation observer for the chart overlay
     // ⚡ Bolt: Replace querySelector('.class') with getElementsByClassName('class')[0] for O(1) live collection lookup instead of O(N) tree traversal
