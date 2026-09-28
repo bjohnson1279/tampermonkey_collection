@@ -124,7 +124,7 @@
             }
             url = urlStr;
             if (urlStr && shouldBlock(urlStr)) {
-                return true;
+                return false;
             }
             return origSendBeacon.apply(this, [url, data]);
         };
