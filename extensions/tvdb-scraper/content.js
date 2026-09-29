@@ -3,7 +3,8 @@ const NETWORK_CLEANUP_REGEX = /ABC|CBS|FOX|NBC|PBS|History|H2|\(US\)|A&E/gi;
 export function scrapeTVDBData() {
     'use strict';
     const episodesData = [];
-    const episodes = document.querySelectorAll('.list-group .list-group-item');
+    const listGroup = document.getElementsByClassName('list-group')[0];
+    const episodes = listGroup ? listGroup.getElementsByClassName('list-group-item') : [];
     for (let j = 0, len = episodes.length; j < len; j++) {
         const ep = episodes[j];
         const heading = ep.getElementsByClassName('list-group-item-heading')[0];

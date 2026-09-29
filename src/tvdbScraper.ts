@@ -25,9 +25,9 @@ export function scrapeTVDBData(): Episode[] {
     'use strict';
 
     const episodesData: Episode[] = [];
-    // ⚡ Bolt: Replace O(N) independent DOM traversals inside the container loop with a single O(1) pass
-    // using a descendant CSS selector to significantly reduce main thread parsing overhead.
-    const episodes = document.querySelectorAll<HTMLElement>('.list-group .list-group-item');
+    // ⚡ Bolt: Replace O(N) querySelectorAll with O(1) getElementsByClassName for live collection lookup
+    const listGroup = document.getElementsByClassName('list-group')[0];
+    const episodes = listGroup ? listGroup.getElementsByClassName('list-group-item') : [];
 
     // ⚡ Bolt: Cache collection length to prevent repeated property lookups on every loop iteration
     for (let j = 0, len = episodes.length; j < len; j++) {
