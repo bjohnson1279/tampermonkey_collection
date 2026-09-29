@@ -225,3 +225,7 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2026-09-25 - Optimize O(N) DOM element removal with CSS
 **Learning:** To optimize O(N) DOM traversals for hiding multiple static element classes (e.g., ad blocking), avoid repeatedly using DOM queries in JavaScript loops. Instead, construct a single <style> element containing '{ display: none !important; }' for the combined selectors and inject it once into the document. This leverages the browser's highly optimized native CSS engine to process layout updates instantly.
 **Action:** When hiding multiple elements by class, use a single CSS injection instead of JS loops to eliminate JS-to-C++ crossing overhead and avoid forced layout reflows.
+
+## 2026-09-29 - Eliminate MutationObservers for nested ad removal using CSS :has()
+**Learning:** Using JavaScript MutationObservers to check if dynamically loaded container elements have specific child classes (e.g., ad labels) introduces significant main-thread CPU overhead on infinite-scrolling pages.
+**Action:** Completely eliminate the MutationObserver and JavaScript DOM traversal by injecting a single `<style>` element using the CSS `:has()` pseudo-class (e.g., `.container:has(.ad) { display: none !important; }`). The browser's native CSS engine evaluates this instantly in C++ for both static and dynamically added elements.
