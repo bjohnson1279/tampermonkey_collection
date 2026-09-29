@@ -16,79 +16,10 @@ interface SponsoredElement extends HTMLElement {
 (function (): void {
     'use strict';
 
-    // Function to remove sponsored content globally
-    const removeSponsoredContent = (): void => {
-        const sponsoredElements = document.getElementsByClassName('sponsored');
-
-        // ⚡ Bolt: Use a backward standard for loop for HTMLCollection to avoid unnecessary Array allocation
-        for (let i = sponsoredElements.length - 1; i >= 0; i--) {
-            const sponsored = sponsoredElements[i];
-            // Try to find the closest parent container to remove
-            const sponsoredContainer = sponsored.closest('.queue, .queue_story');
-            if (sponsoredContainer) {
-                sponsoredContainer.remove();
-            }
-        }
-    };
-
-    // Initial removal of sponsored content
-    removeSponsoredContent();
-
-    // Set up mutation observer to handle dynamically loaded content
-    // ⚡ Bolt: Replace querySelector('#id') with getElementById('id') (O(1) hash map lookup) to minimize overhead during initialization
-    const loadMoreContainer = document.getElementById('loadMoreBtnContainer');
-    if (!loadMoreContainer) {
-        return;
-    }
-
-    const config: MutationObserverInit = {
-        attributes: false,
-        childList: true,
-        subtree: true,
-    };
-
-    const processNode = (el: HTMLElement): void => {
-        if (el.classList.contains('sponsored')) {
-            const sponsoredContainer = el.closest('.queue, .queue_story');
-            if (sponsoredContainer) {
-                sponsoredContainer.remove();
-            }
-        } else if (el.firstElementChild) {
-            // ⚡ Bolt: Fast path for leaf nodes - avoid querySelectorAll parsing overhead if no children exist
-            const sponsoredElements = el.getElementsByClassName('sponsored');
-            // ⚡ Bolt: Use a backward standard for loop for HTMLCollection to avoid unnecessary Array allocation
-            for (let i = sponsoredElements.length - 1; i >= 0; i--) {
-                const sponsored = sponsoredElements[i];
-                const sponsoredContainer = sponsored.closest('.queue, .queue_story');
-                if (sponsoredContainer) {
-                    sponsoredContainer.remove();
-                }
-            }
-        }
-    };
-
-    const handleMutations: MutationCallback = (mutationsList: MutationRecord[]): void => {
-        // ⚡ Bolt: Only process added nodes instead of re-querying the entire DOM list on every mutation
-        // This avoids O(N²) scaling as more elements are loaded dynamically
-        for (let i = 0, len = mutationsList.length; i < len; i++) {
-            const mutation = mutationsList[i];
-            for (let j = 0, nodeLen = mutation.addedNodes.length; j < nodeLen; j++) {
-                const node = mutation.addedNodes[j];
-                if (node.nodeType === Node.ELEMENT_NODE) {
-                    processNode(node as HTMLElement);
-                }
-            }
-        }
-    };
-
-    try {
-        const observer = new MutationObserver(handleMutations);
-        observer.observe(loadMoreContainer, config);
-    } catch (error) {
-        // 🛡️ Sentinel: Removed error object from console.error to prevent stack trace exposure
-        console.error(
-            'Error initializing mutation observer:',
-            error instanceof Error ? error.message : String(error)
-        );
-    }
+    // ⚡ Bolt: Replace O(N) MutationObserver DOM traversal with O(1) injected stylesheet using CSS :has()
+    // The browser's native CSS engine evaluates this instantly in C++ for both static and dynamically added elements,
+    // eliminating JS-to-C++ crossing overhead and avoiding forced layout reflows on infinite scroll.
+    const style = document.createElement('style');
+    style.textContent = `.queue:has(.sponsored), .queue_story:has(.sponsored) { display: none !important; }`;
+    (document.head || document.documentElement).appendChild(style);
 })();
