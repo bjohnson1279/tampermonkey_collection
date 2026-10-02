@@ -13,51 +13,24 @@ describe('Bing Ad Blocker', () => {
         }).not.toThrow();
     });
 
-    it('should not remove .tobitem elements if they do not contain .b_adSlug', () => {
-        document.body.innerHTML = `
-            <div class="tob_calcontainer">
-                <div class="tobitem" id="item1">
-                    <div class="content">Valid Content</div>
-                </div>
-                <div class="tobitem" id="item2">
-                    <div class="content">Another Valid Content</div>
-                </div>
-            </div>
-        `;
-
+    it('should inject a style element into the head', () => {
         require('./bingAdBlocker');
-
-        const items = document.querySelectorAll('.tobitem');
-        expect(items.length).toBe(2);
-        expect(document.getElementById('item1')).not.toBeNull();
-        expect(document.getElementById('item2')).not.toBeNull();
+        const styles = Array.from(document.head.getElementsByTagName('style'));
+        const hasAdBlockStyle = styles.some((style) =>
+            style.textContent?.includes('.tobitem:has(.b_adSlug) { display: none !important; }')
+        );
+        expect(hasAdBlockStyle).toBe(true);
     });
 
-    it('should remove .tobitem elements that contain .b_adSlug', () => {
-        document.body.innerHTML = `
-            <div class="tob_calcontainer">
-                <div class="tobitem" id="item1">
-                    <div class="content">Valid Content</div>
-                </div>
-                <div class="tobitem" id="item2">
-                    <div class="b_adSlug">Ad Content</div>
-                </div>
-                <div class="tobitem" id="item3">
-                    <div class="b_adSlug">Another Ad</div>
-                </div>
-                <div class="tobitem" id="item4">
-                    <div class="content">Valid Content 2</div>
-                </div>
-            </div>
-        `;
+    it('should inject a style element into the documentElement if head is missing', () => {
+        // Remove document.head to test fallback
+        Object.defineProperty(document, 'head', { value: null, configurable: true });
 
         require('./bingAdBlocker');
-
-        const items = document.querySelectorAll('.tobitem');
-        expect(items.length).toBe(2);
-        expect(document.getElementById('item1')).not.toBeNull();
-        expect(document.getElementById('item2')).toBeNull();
-        expect(document.getElementById('item3')).toBeNull();
-        expect(document.getElementById('item4')).not.toBeNull();
+        const styles = Array.from(document.documentElement.getElementsByTagName('style'));
+        const hasAdBlockStyle = styles.some((style) =>
+            style.textContent?.includes('.tobitem:has(.b_adSlug) { display: none !important; }')
+        );
+        expect(hasAdBlockStyle).toBe(true);
     });
 });

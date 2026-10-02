@@ -12,20 +12,9 @@
 (function (): void {
     'use strict';
 
-    // ⚡ Bolt: Replace querySelector('.class') with getElementsByClassName('class')[0] for O(1) live collection lookup instead of O(N) tree traversal
-    const slideContainer = document.getElementsByClassName('tob_calcontainer')[0] as
-        HTMLElement | undefined;
-
-    if (slideContainer) {
-        // ⚡ Bolt: Replace querySelectorAll with getElementsByClassName for O(1) live collection lookup
-        // ⚡ Bolt: Use a backward standard for loop for HTMLCollection to avoid unnecessary Array allocation
-        const ads = slideContainer.getElementsByClassName('b_adSlug');
-        for (let i = ads.length - 1; i >= 0; i--) {
-            const ad = ads[i];
-            const box: HTMLElement | null = ad.closest('.tobitem');
-            if (box) {
-                box.remove();
-            }
-        }
-    }
+    // ⚡ Bolt: Replace O(N) DOM traversal and element mutation with O(1) injected stylesheet using CSS :has()
+    // This shifts evaluation entirely to the browser's optimized native C++ CSS engine and handles infinite scroll natively.
+    const style = document.createElement('style');
+    style.textContent = `.tobitem:has(.b_adSlug) { display: none !important; }`;
+    (document.head || document.documentElement).appendChild(style);
 })();
