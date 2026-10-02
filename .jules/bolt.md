@@ -249,3 +249,6 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2026-09-29 - Surgical Optimization Edits and No Scratch Script Commits
 **Learning:** Running whole-file formatters or regenerating entire components while performing performance optimizations introduces massive whitespace/formatting diffs (1,000+ lines), masking the real optimization, invalidating git blame, and causing painful merge conflicts with concurrent PRs. Additionally, committing scratch benchmark or patch scripts (`patch_*.py`, `test.cjs`) pollutes production repositories and triggers CI guardrail failures.
 **Action:** Restrict all algorithmic and performance optimizations to strictly scoped replacement chunks. Diff size must reflect only the functional optimization. Always clean up temporary benchmark or patch scripts with `git rm -f` before committing.
+## 2026-10-02 - CSS :has() for O(1) Ad Blocking
+**Learning:** Repeatedly using DOM queries and element mutations (like .remove()) in JavaScript loops causes JS-to-C++ crossing overhead and forces layout reflows.
+**Action:** Construct a single <style> element containing { display: none !important; } with CSS :has() for combined selectors and inject it once to leverage the native CSS engine.
