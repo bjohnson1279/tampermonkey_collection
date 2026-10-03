@@ -252,3 +252,6 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2026-10-02 - CSS :has() for O(1) Ad Blocking
 **Learning:** Repeatedly using DOM queries and element mutations (like .remove()) in JavaScript loops causes JS-to-C++ crossing overhead and forces layout reflows.
 **Action:** Construct a single <style> element containing { display: none !important; } with CSS :has() for combined selectors and inject it once to leverage the native CSS engine.
+## 2026-10-02 - Eliminate MutationObservers for ad removal using CSS :has()
+**Learning:** Using JavaScript MutationObservers to check if dynamically loaded container elements have specific child classes (e.g., ad slots) introduces significant main-thread CPU overhead on infinite-scrolling pages. Repeatedly querying the DOM and crossing the JS-to-C++ boundary degrades performance.
+**Action:** Completely eliminate the MutationObserver and JavaScript DOM traversal by injecting a single `<style>` element using the CSS `:has()` pseudo-class (e.g., `ytd-rich-item-renderer:has(.ytd-ad-slot-renderer) { display: none !important; }`). The browser native CSS engine evaluates this instantly in C++ for both static and dynamically added elements, ensuring O(1) performance.

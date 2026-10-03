@@ -5,42 +5,29 @@ describe('YouTubeAdRemover', () => {
     let adRemover: any;
 
     beforeEach(() => {
-        // Mock global window and document since jest environment is "node"
-        (global as any).window = {
-            setTimeout: jest.fn(),
-        };
-
+        // Mock global document
         const documentMock = {
             readyState: 'complete',
             addEventListener: jest.fn(),
-            querySelector: jest.fn(),
-            getElementById: jest.fn(),
-            querySelectorAll: jest.fn().mockReturnValue([]),
-            getElementsByClassName: jest.fn().mockReturnValue([]),
-            createElement: jest.fn().mockImplementation((tag) => ({ tag, appendChild: jest.fn() })),
-            body: {
-                innerHTML: '',
+            getElementById: jest.fn().mockReturnValue(null),
+            createElement: jest
+                .fn()
+                .mockImplementation((tag) => ({
+                    tag,
+                    id: '',
+                    textContent: '',
+                    parentNode: { removeChild: jest.fn() },
+                })),
+            head: {
+                appendChild: jest.fn(),
+            },
+            documentElement: {
                 appendChild: jest.fn(),
             },
         };
         (global as any).document = documentMock;
 
         jest.clearAllMocks();
-
-        // Setup global DOM API mocks
-        (global as any).Node = {
-            ELEMENT_NODE: 1,
-            TEXT_NODE: 3,
-        };
-
-        // Mock window.setTimeout to execute synchronously
-        (global.window as any).setTimeout.mockImplementation((callback: Function) => {
-            callback();
-            return 1 as any;
-        });
-
-        // Mock console.error
-        jest.spyOn(console, 'error').mockImplementation(() => {});
     });
 
     afterEach(() => {
@@ -48,194 +35,45 @@ describe('YouTubeAdRemover', () => {
             adRemover.destroy();
         }
         jest.restoreAllMocks();
-        delete (global as any).window;
         delete (global as any).document;
-        delete (global as any).MutationObserver;
     });
 
-    describe('Initialization and Teardown', () => {
-        it('should log error and abort gracefully if target node (#contents) is not found', () => {
-            (global.document.getElementById as jest.Mock).mockReturnValue(null);
-
-            adRemover = new ytModule.YouTubeAdRemover();
-            expect(console.error).toHaveBeenCalledWith('Could not find the target node: #contents');
-            expect((adRemover as any).observer).toBeNull();
-        });
-
-        it('should start MutationObserver on #contents and perform initial check when initialized', () => {
-            const contents = { id: 'contents' };
-            (global.document.getElementById as jest.Mock).mockReturnValue(contents);
-
-            const observeSpy = jest.fn();
-            (global as any).MutationObserver = class {
-                observe = observeSpy;
-                disconnect = jest.fn();
-            };
+    describe('Initialization', () => {
+        it('should inject a style element to hide ads using CSS :has()', () => {
+            const createElementSpy = global.document.createElement as jest.Mock;
+            const appendChildSpy = global.document.head.appendChild;
 
             adRemover = new ytModule.YouTubeAdRemover();
 
-            expect(observeSpy).toHaveBeenCalledWith(contents, {
-                attributes: false,
-                childList: true,
-                subtree: true,
-            });
-            // verify initial check is called
-            expect(global.document.getElementsByClassName).toHaveBeenCalledWith(
-                'ytd-ad-slot-renderer'
+            expect(createElementSpy).toHaveBeenCalledWith('style');
+            const styleElement = createElementSpy.mock.results[0].value;
+            expect(styleElement.id).toBe('yt-ad-remover-styles');
+            expect(styleElement.textContent).toBe(
+                'ytd-rich-item-renderer:has(.ytd-ad-slot-renderer), ytd-video-renderer:has(.ytd-ad-slot-renderer) { display: none !important; }'
             );
+            expect(appendChildSpy).toHaveBeenCalledWith(styleElement);
         });
 
-        describe('Fallback Querying', () => {
-            it('should query ad items and process them when no addedNodes are provided', () => {
-                const contents = { id: 'contents' };
-                (global.document.getElementById as jest.Mock).mockReturnValue(contents);
+        it('should not inject the style element twice if it already exists', () => {
+            const createElementSpy = global.document.createElement;
+            (global.document.getElementById as jest.Mock).mockReturnValue({}); // Mock that it already exists
 
-                (global as any).MutationObserver = class {
-                    observe = jest.fn();
-                    disconnect = jest.fn();
-                };
+            adRemover = new ytModule.YouTubeAdRemover();
 
-                const mockContentDiv1 = {
-                    remove: jest.fn(),
-                    contains: jest.fn().mockReturnValue(true),
-                };
-
-                const mockVideoItem1 = {
-                    tagName: 'YTD-VIDEO-RENDERER',
-                    remove: jest.fn(),
-                };
-
-                const mockAdItem1 = {
-                    remove: jest.fn(),
-                    closest: jest.fn().mockReturnValue(mockVideoItem1),
-                };
-
-                (global.document.getElementsByClassName as jest.Mock).mockReturnValue([
-                    mockAdItem1,
-                ]);
-
-                adRemover = new ytModule.YouTubeAdRemover();
-                // initialize triggers removeAds() internally
-
-                expect(global.document.getElementsByClassName).toHaveBeenCalledWith(
-                    'ytd-ad-slot-renderer'
-                );
-
-                expect(mockAdItem1.remove).not.toHaveBeenCalled();
-                expect(mockContentDiv1.remove).not.toHaveBeenCalled();
-                expect(mockVideoItem1.remove).toHaveBeenCalled();
-            });
+            expect(createElementSpy).not.toHaveBeenCalled();
         });
+    });
 
-        describe('AddedNodes Processing', () => {
-            let observeCallback: MutationCallback;
+    describe('Teardown', () => {
+        it('should remove the style element when destroyed', () => {
+            adRemover = new ytModule.YouTubeAdRemover();
+            const styleElement = (global.document.createElement as jest.Mock).mock.results[0].value;
+            const removeChildSpy = styleElement.parentNode.removeChild;
 
-            beforeEach(() => {
-                const contents = { id: 'contents' };
-                (global.document.getElementById as jest.Mock).mockReturnValue(contents);
+            adRemover.destroy();
 
-                (global as any).MutationObserver = class {
-                    observe = jest.fn();
-                    disconnect = jest.fn();
-                    constructor(callback: MutationCallback) {
-                        observeCallback = callback;
-                    }
-                };
-                adRemover = new ytModule.YouTubeAdRemover();
-            });
-
-            it('should process addedNodes that match the video renderer selectors directly', () => {
-                const mockAdItem = { remove: jest.fn() };
-                const mockContentDiv = {
-                    remove: jest.fn(),
-                    contains: jest.fn().mockReturnValue(true),
-                };
-
-                const mockVideoNode = {
-                    nodeType: (global as any).Node.ELEMENT_NODE,
-                    tagName: 'YTD-RICH-ITEM-RENDERER',
-                    getElementsByClassName: jest.fn().mockImplementation((className) => {
-                        if (className === 'ytd-ad-slot-renderer') return [mockAdItem];
-                        return [];
-                    }),
-                    remove: jest.fn(),
-                };
-
-                // Trigger mutation
-                observeCallback(
-                    [{ type: 'childList', addedNodes: [mockVideoNode as any] }] as any,
-                    {} as any
-                );
-
-                expect(mockVideoNode.getElementsByClassName).toHaveBeenCalledWith(
-                    'ytd-ad-slot-renderer'
-                );
-                expect(mockAdItem.remove).not.toHaveBeenCalled();
-                expect(mockContentDiv.remove).not.toHaveBeenCalled();
-                expect(mockVideoNode.remove).toHaveBeenCalled();
-            });
-
-            it('should process children of addedNodes if they are elements (bolt fast path)', () => {
-                const mockContentDiv = {
-                    remove: jest.fn(),
-                    contains: jest.fn().mockReturnValue(true),
-                };
-
-                const mockVideoItem = {
-                    tagName: 'YTD-VIDEO-RENDERER',
-                    remove: jest.fn(),
-                };
-
-                const mockAdItem = {
-                    remove: jest.fn(),
-                    closest: jest.fn().mockReturnValue(mockVideoItem),
-                };
-
-                const mockContainerNode = {
-                    nodeType: (global as any).Node.ELEMENT_NODE,
-                    matches: jest.fn().mockReturnValue(false),
-                    firstElementChild: true, // Simulate having children
-                    getElementsByClassName: jest.fn().mockReturnValue([mockAdItem]),
-                };
-
-                const mockTextNode = {
-                    nodeType: (global as any).Node.TEXT_NODE,
-                };
-
-                const mockEmptyContainer = {
-                    nodeType: (global as any).Node.ELEMENT_NODE,
-                    matches: jest.fn().mockReturnValue(false),
-                    firstElementChild: null, // Simulate no children
-                    getElementsByClassName: jest.fn(),
-                };
-
-                // Trigger mutation
-                observeCallback(
-                    [
-                        {
-                            type: 'childList',
-                            addedNodes: [
-                                mockContainerNode,
-                                mockTextNode,
-                                mockEmptyContainer,
-                            ] as any,
-                        },
-                    ] as any,
-                    {} as any
-                );
-
-                // Container with children should trigger getElementsByClassName
-                expect(mockContainerNode.getElementsByClassName).toHaveBeenCalledWith(
-                    'ytd-ad-slot-renderer'
-                );
-                expect(mockAdItem.remove).not.toHaveBeenCalled();
-                expect(mockContentDiv.remove).not.toHaveBeenCalled();
-                expect(mockVideoItem.remove).toHaveBeenCalled();
-
-                // Text node is ignored
-                // Empty container avoids parsing call (bolt path)
-                expect(mockEmptyContainer.getElementsByClassName).not.toHaveBeenCalled();
-            });
+            expect(removeChildSpy).toHaveBeenCalledWith(styleElement);
+            expect(adRemover.styleElement).toBeNull();
         });
     });
 });

@@ -1,81 +1,22 @@
 "use strict";
 class YouTubeAdRemover {
     constructor() {
-        this.TARGET_NODE_ID = 'contents';
-        this.AD_CLASS = 'ytd-ad-slot-renderer';
-        this.INITIAL_DELAY_MS = 2000;
-        this.observer = null;
+        this.STYLE_ID = 'yt-ad-remover-styles';
+        this.styleElement = null;
         this.initialize();
     }
     initialize() {
-        this.startWatching();
-    }
-    startWatching() {
-        window.setTimeout(() => {
-            const targetNode = document.getElementById(this.TARGET_NODE_ID);
-            if (!targetNode) {
-                console.error(`Could not find the target node: #${this.TARGET_NODE_ID}`);
-                return;
-            }
-            const callback = (mutationsList) => {
-                for (let i = 0, len = mutationsList.length; i < len; i++) {
-                    const mutation = mutationsList[i];
-                    if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-                        this.removeAds(mutation.addedNodes);
-                    }
-                }
-            };
-            this.observer = new MutationObserver(callback);
-            const config = {
-                attributes: false,
-                childList: true,
-                subtree: true,
-            };
-            this.observer.observe(targetNode, config);
-            this.removeAds();
-        }, this.INITIAL_DELAY_MS);
-    }
-    removeAds(addedNodes) {
-        if (!addedNodes) {
-            const adItems = document.getElementsByClassName(this.AD_CLASS);
-            for (let i = adItems.length - 1; i >= 0; i--) {
-                const adItem = adItems[i];
-                const parent = adItem.closest('YTD-RICH-ITEM-RENDERER, YTD-VIDEO-RENDERER');
-                if (parent) {
-                    parent.remove();
-                }
-            }
-        }
-        else {
-            for (let i = 0, len = addedNodes.length; i < len; i++) {
-                const node = addedNodes[i];
-                if (node.nodeType === Node.ELEMENT_NODE) {
-                    const element = node;
-                    if (element.tagName === 'YTD-RICH-ITEM-RENDERER' ||
-                        element.tagName === 'YTD-VIDEO-RENDERER') {
-                        const adItem = element.getElementsByClassName(this.AD_CLASS)[0];
-                        if (adItem) {
-                            element.remove();
-                        }
-                    }
-                    else if (element.firstElementChild) {
-                        const adItems = element.getElementsByClassName(this.AD_CLASS);
-                        for (let i = adItems.length - 1; i >= 0; i--) {
-                            const adItem = adItems[i];
-                            const parent = adItem.closest('YTD-RICH-ITEM-RENDERER, YTD-VIDEO-RENDERER');
-                            if (parent) {
-                                parent.remove();
-                            }
-                        }
-                    }
-                }
-            }
+        if (!document.getElementById(this.STYLE_ID)) {
+            this.styleElement = document.createElement('style');
+            this.styleElement.id = this.STYLE_ID;
+            this.styleElement.textContent = `ytd-rich-item-renderer:has(.ytd-ad-slot-renderer), ytd-video-renderer:has(.ytd-ad-slot-renderer) { display: none !important; }`;
+            (document.head || document.documentElement).appendChild(this.styleElement);
         }
     }
     destroy() {
-        if (this.observer) {
-            this.observer.disconnect();
-            this.observer = null;
+        if (this.styleElement && this.styleElement.parentNode) {
+            this.styleElement.parentNode.removeChild(this.styleElement);
+            this.styleElement = null;
         }
     }
 }
