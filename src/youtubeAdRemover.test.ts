@@ -10,14 +10,12 @@ describe('YouTubeAdRemover', () => {
             readyState: 'complete',
             addEventListener: jest.fn(),
             getElementById: jest.fn().mockReturnValue(null),
-            createElement: jest
-                .fn()
-                .mockImplementation((tag) => ({
-                    tag,
-                    id: '',
-                    textContent: '',
-                    parentNode: { removeChild: jest.fn() },
-                })),
+            createElement: jest.fn().mockImplementation((tag) => ({
+                tag,
+                id: '',
+                textContent: '',
+                parentNode: { removeChild: jest.fn() },
+            })),
             head: {
                 appendChild: jest.fn(),
             },

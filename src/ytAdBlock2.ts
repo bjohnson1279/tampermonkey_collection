@@ -579,6 +579,7 @@
     // Keyboard shortcut (Shift+A)
     //----------------------------------------
     document.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
         const target = e.target as HTMLElement;
         const isInput =
             target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;

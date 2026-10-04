@@ -421,6 +421,8 @@
         showToast(enabled ? '🛡️' : '⚠️', `AdBlock is now ${enabled ? 'ON' : 'OFF'}`, enabled);
     }
     document.addEventListener('keydown', (e) => {
+        if (e.metaKey || e.ctrlKey || e.altKey)
+            return;
         const target = e.target;
         const isInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
         if (!isInput && e.shiftKey && e.key.toLowerCase() === 'a') {
