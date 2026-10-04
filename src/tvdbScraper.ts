@@ -199,6 +199,7 @@ export function scrapeTVDBData(): Episode[] {
         document.body.append(announcer, btn);
 
         document.addEventListener('keydown', (e: KeyboardEvent) => {
+            if (e.metaKey || e.ctrlKey || e.altKey) return;
             const target = e.target as HTMLElement;
             const isInput =
                 target.tagName === 'INPUT' ||

@@ -149,6 +149,8 @@ export function scrapeTVDBData() {
         });
         document.body.append(announcer, btn);
         document.addEventListener('keydown', (e) => {
+            if (e.metaKey || e.ctrlKey || e.altKey)
+                return;
             const target = e.target;
             const isInput = target.tagName === 'INPUT' ||
                 target.tagName === 'TEXTAREA' ||
