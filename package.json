@@ -11,8 +11,7 @@
     "generate:icons": "node scripts/generate-icons.js",
     "prepare": "husky install",
     "generate:all": "npm run build && npm run generate:extensions && npm run generate:icons",
-    "postinstall": "npm run generate:all",
-    "test": "jest"
+    "postinstall": "npm run generate:all"
   },
   "keywords": [
     "tampermonkey",
@@ -22,22 +21,28 @@
   "author": "Brent Johnson",
   "license": "MIT",
   "devDependencies": {
-    "@types/greasemonkey": "^4.0.5",
+    "@types/greasemonkey": "^4.0.7",
     "@types/jest": "^30.0.0",
-    "@types/node": "^20.11.19",
-    "husky": "^9.0.10",
-    "jest": "^30.5.1",
-    "jest-environment-jsdom": "^30.4.1",
-    "lint-staged": "^15.0.0",
-    "prettier": "^3.0.0",
-    "ts-jest": "^29.4.11",
-    "typescript": "^5.3.3"
+    "@types/node": "^20.19.43",
+    "husky": "^9.1.7",
+    "jest": "^30.5.2",
+    "jest-environment-jsdom": "^30.5.2",
+    "lint-staged": "^15.5.2",
+    "prettier": "^3.9.9",
+    "ts-jest": "^29.4.14",
+    "typescript": "^5.9.3"
   },
   "optionalDependencies": {
-    "canvas": "^3.2.1"
+    "canvas": "^3.2.3"
   },
   "resolutions": {
-    "canvas": "3.2.1"
+    "canvas": "3.2.3"
+  },
+  "overrides": {
+    "handlebars": "4.7.10",
+    "brace-expansion": {
+      "brace-expansion": "$brace-expansion"
+    }
   },
   "config": {
     "optional": "false"
