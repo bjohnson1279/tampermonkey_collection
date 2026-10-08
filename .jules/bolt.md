@@ -255,3 +255,13 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2026-10-02 - Eliminate MutationObservers for ad removal using CSS :has()
 **Learning:** Using JavaScript MutationObservers to check if dynamically loaded container elements have specific child classes (e.g., ad slots) introduces significant main-thread CPU overhead on infinite-scrolling pages. Repeatedly querying the DOM and crossing the JS-to-C++ boundary degrades performance.
 **Action:** Completely eliminate the MutationObserver and JavaScript DOM traversal by injecting a single `<style>` element using the CSS `:has()` pseudo-class (e.g., `ytd-rich-item-renderer:has(.ytd-ad-slot-renderer) { display: none !important; }`). The browser native CSS engine evaluates this instantly in C++ for both static and dynamically added elements, ensuring O(1) performance.
+\n\n## Important Process Rules\n- **Do NOT perform whole-file code formatting.** Only apply necessary changes specifically related to the task. Formatting existing, untouched code creates massive PR diffs that are hard to review.\n- **Only write your journal to your matching file (`.jules/bolt.md`).** Do not edit or create journal files for other personas.\n
+## Additive Documentation & Scratch Cleanliness Directives
+- **Strictly Additive Journal Updates**: When updating `.jules/*.md`, strictly append new dated entries (`## YYYY-MM-DD - Title`). NEVER delete, truncate, or overwrite historical learnings or previous entries.
+- **Substantive Code Diff Requirement**: Pull requests must include substantive code changes in `src/`, `app/`, `lib/`, or `tests/`. Never open PRs that modify only `.jules/*.md` journals or root scratch scripts.
+- **Zero Scratch File Commits**: Never commit `*.diff`, `*.patch`, `test_*.ts`, `test_*.js`, `test.cjs`, `fix_*.php`, or `patch_*.py` files. Always remove temporary debugging or verification scripts prior to committing.
+
+## Scope Quarantine, Journaling & Security Test Invariants
+- **Strictly Append-Only Journaling**: When adding learnings to `.jules/*.md`, append strictly at the end of the file. Do not rewrite, deduplicate, or remove lines beginning with `## YYYY-MM-DD`.
+- **Surgical Scope Quarantine**: Modify only the files directly involved in the issue and their corresponding test fixtures. Do not delete, rename, or perform drive-by cleanups of unrelated root-level scripts or legacy files.
+- **Coupled Test Fixture Awareness for Security Invariants**: When changing fail-open fallback behavior (such as hardening decryption to fail closed), always update upstream test mocks that rely on plaintext credentials or mock values.
