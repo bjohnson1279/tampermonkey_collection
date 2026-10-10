@@ -25,6 +25,9 @@
     function shouldBlock(url) {
         if (!enabled)
             return false;
+        if (url.startsWith('http://') || url.startsWith('https://')) {
+            return blockedPatternRegex.test(url);
+        }
         try {
             const absoluteUrl = new URL(url, window.location.href).href;
             return blockedPatternRegex.test(absoluteUrl);
