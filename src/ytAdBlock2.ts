@@ -51,6 +51,13 @@
 
     function shouldBlock(url: string): boolean {
         if (!enabled) return false;
+
+        // ⚡ Bolt: Avoid slow new URL() parsing for absolute URLs
+        // Fast path for absolute URLs common in network interceptors
+        if (url.startsWith('http://') || url.startsWith('https://')) {
+            return blockedPatternRegex.test(url);
+        }
+
         try {
             // 🛡️ Sentinel: Normalize URL to absolute to prevent relative URL evasion
             const absoluteUrl = new URL(url, window.location.href).href;
