@@ -16,6 +16,13 @@ export interface QueryParams {
  */
 export const getQueryParams = (urlString: string): QueryParams => {
     try {
+        // ⚡ Bolt: Fast-path string check to avoid expensive URLSearchParams parsing and loops for URLs without query parameters.
+        // We still call new URL() to preserve native validation exceptions for invalid URLs (preventing test regressions).
+        if (urlString.indexOf('?') === -1) {
+            new URL(urlString);
+            return Object.create(null);
+        }
+
         const urlObj = new URL(urlString);
         const params = new URLSearchParams(urlObj.search);
         const result: QueryParams = Object.create(null);

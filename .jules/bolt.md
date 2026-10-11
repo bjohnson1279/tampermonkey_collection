@@ -265,3 +265,7 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 - **Strictly Append-Only Journaling**: When adding learnings to `.jules/*.md`, append strictly at the end of the file. Do not rewrite, deduplicate, or remove lines beginning with `## YYYY-MM-DD`.
 - **Surgical Scope Quarantine**: Modify only the files directly involved in the issue and their corresponding test fixtures. Do not delete, rename, or perform drive-by cleanups of unrelated root-level scripts or legacy files.
 - **Coupled Test Fixture Awareness for Security Invariants**: When changing fail-open fallback behavior (such as hardening decryption to fail closed), always update upstream test mocks that rely on plaintext credentials or mock values.
+
+## 2025-02-20 - Fast-pathing URL Parsing
+**Learning:** Checking for the existence of a query string using `indexOf('?')` before initializing and iterating through `URLSearchParams` significantly reduces overhead for URLs without query parameters. However, completely removing `new URL()` bypasses native URL validation, causing test regressions when the application expects invalid URLs to throw.
+**Action:** Use fast-path string methods to bypass expensive parsing logic for empty cases, but retain a bare `new URL(urlString)` call to ensure native validation exceptions are preserved.
