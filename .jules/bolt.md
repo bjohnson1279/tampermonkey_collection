@@ -269,3 +269,7 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2025-02-20 - Fast-pathing URL Parsing
 **Learning:** Checking for the existence of a query string using `indexOf('?')` before initializing and iterating through `URLSearchParams` significantly reduces overhead for URLs without query parameters. However, completely removing `new URL()` bypasses native URL validation, causing test regressions when the application expects invalid URLs to throw.
 **Action:** Use fast-path string methods to bypass expensive parsing logic for empty cases, but retain a bare `new URL(urlString)` call to ensure native validation exceptions are preserved.
+
+## 2026-10-12 - Fast-pathing URLSearchParams
+**Learning:** Checking for the existence of a valid query string using simple string checks (like `!search` or `== '?'`) before initializing and iterating through `URLSearchParams` significantly reduces overhead for URLs without query parameters.
+**Action:** Use fast-path string methods to bypass expensive parsing logic for empty cases.
