@@ -111,6 +111,14 @@ describe('searchEngineFilter', () => {
         expect(window.location.href).toBe('https://www.google.com/?p=hello');
     });
 
+    it('should do nothing and return early if query string is empty', () => {
+        window.location.hostname = 'www.google.com';
+        window.location.search = '';
+        window.location.href = 'https://www.google.com/';
+        require('./searchEngineFilter');
+        expect(window.location.href).toBe('https://www.google.com/');
+    });
+
     it('should do nothing if query is not blacklisted', () => {
         window.location.hostname = 'www.google.com';
         window.location.search = '?q=hello+world';

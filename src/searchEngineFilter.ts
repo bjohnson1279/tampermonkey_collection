@@ -39,6 +39,11 @@ interface SearchEngines {
 
     const processSearch = (): void => {
         try {
+            // ⚡ Bolt: Fast-path string check to avoid expensive URLSearchParams parsing and loops for URLs without query parameters
+            if (!window.location.search || window.location.search === '?') {
+                return;
+            }
+
             // 🛡️ Sentinel: Use hostname instead of href to prevent path/query confusion evasion
             const hostname: string = window.location.hostname;
             const params: URLSearchParams = new URLSearchParams(window.location.search);
