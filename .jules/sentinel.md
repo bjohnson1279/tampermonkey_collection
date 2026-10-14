@@ -191,3 +191,7 @@
 - **Strictly Append-Only Journaling**: When adding learnings to `.jules/*.md`, append strictly at the end of the file. Do not rewrite, deduplicate, or remove lines beginning with `## YYYY-MM-DD`.
 - **Surgical Scope Quarantine**: Modify only the files directly involved in the issue and their corresponding test fixtures. Do not delete, rename, or perform drive-by cleanups of unrelated root-level scripts or legacy files.
 - **Coupled Test Fixture Awareness for Security Invariants**: When changing fail-open fallback behavior (such as hardening decryption to fail closed), always update upstream test mocks that rely on plaintext credentials or mock values.
+## 2026-10-14 - Information Leakage in error handling
+**Vulnerability:** Exposing full error stack traces or objects to the console, specifically in catch blocks (e.g. `console.warn(..., e)`).
+**Learning:** Error objects, especially when logged without parsing, can expose application internals, stack traces, and local environment variables.
+**Prevention:** Only log the message string of the error (e.g. `e instanceof Error ? e.message : String(e)`) rather than the full error object itself to prevent information leakage.

@@ -48,7 +48,10 @@
             console.debug('[YT-AutoSkip] Clicked skip button', btn);
             return true;
         } catch (e) {
-            console.warn('[YT-AutoSkip] Failed to click skip button', e);
+            console.warn(
+                '[YT-AutoSkip] Failed to click skip button',
+                e instanceof Error ? e.message : String(e)
+            );
             return false;
         }
     }
