@@ -273,3 +273,6 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2026-10-12 - Fast-pathing URLSearchParams
 **Learning:** Checking for the existence of a valid query string using simple string checks (like `!search` or `== '?'`) before initializing and iterating through `URLSearchParams` significantly reduces overhead for URLs without query parameters.
 **Action:** Use fast-path string methods to bypass expensive parsing logic for empty cases.
+## 2025-01-20 - Optimize hot path URL extraction
+**Learning:** Relying on try/catch blocks that intentionally throw for common types (like native getters failing on primitive strings) introduces massive overhead in high-frequency network interceptors. Catching native exceptions is significantly slower than simple type checking.
+**Action:** Always include a fast-path type check (e.g., `typeof url === "string"`) before attempting reflective native getter calls in hot paths to bypass exception handling overhead.

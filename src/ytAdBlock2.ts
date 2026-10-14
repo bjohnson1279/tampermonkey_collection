@@ -75,6 +75,14 @@
 
     window.fetch = (async (...args: Parameters<typeof window.fetch>): Promise<Response> => {
         const req = args[0];
+        // ⚡ Bolt: Fast-path string check to avoid expensive native exception handling in hot paths
+        if (typeof req === 'string') {
+            if (shouldBlock(req)) {
+                // 🛡️ Sentinel: Simulate native network failures instead of returning fake successful responses to prevent exposing the interceptor's presence.
+                return Promise.reject(new TypeError('Failed to fetch'));
+            }
+            return origFetch(...args);
+        }
         // 🛡️ Sentinel: Use WebIDL brand checking for Request/URL objects to prevent cross-realm (iframe) adblock evasion
         // and avoid TOCTOU vulnerabilities from malicious POJOs exploiting duck-typing getters.
         let url: string = '';
@@ -145,6 +153,16 @@
         username?: string | null,
         password?: string | null
     ): void {
+        // ⚡ Bolt: Fast-path string check to avoid expensive native exception handling in hot paths
+        if (typeof url === 'string') {
+            if (shouldBlock(url)) {
+                throw new DOMException(
+                    "Failed to execute 'open' on 'XMLHttpRequest': Invalid URL",
+                    'SyntaxError'
+                );
+            }
+            return origOpen.apply(this, [method, url, async ?? true, username, password]);
+        }
         // 🛡️ Sentinel: Use WebIDL brand checking for URL objects to prevent cross-realm adblock evasion
         // and avoid TOCTOU vulnerabilities from malicious POJOs exploiting duck-typing getters.
         let urlStr: string = '';
@@ -184,6 +202,13 @@
             url: string | URL,
             data?: BodyInit | null
         ): boolean {
+            // ⚡ Bolt: Fast-path string check to avoid expensive native exception handling in hot paths
+            if (typeof url === 'string') {
+                if (shouldBlock(url)) {
+                    return false;
+                }
+                return origSendBeacon.apply(this, [url, data]);
+            }
             // 🛡️ Sentinel: Use WebIDL brand checking for URL objects to prevent cross-realm adblock evasion
             // and avoid TOCTOU vulnerabilities from malicious POJOs exploiting duck-typing getters.
             let urlStr: string = '';
@@ -219,6 +244,16 @@
         window.WebSocket = new Proxy(OrigWebSocket, {
             construct(target, args) {
                 let url = args[0];
+                // ⚡ Bolt: Fast-path string check to avoid expensive native exception handling in hot paths
+                if (typeof url === 'string') {
+                    if (shouldBlock(url)) {
+                        throw new DOMException(
+                            "Failed to construct 'WebSocket': The URL '" + url + "' is invalid.",
+                            'SyntaxError'
+                        );
+                    }
+                    return new target(...(args as [string | URL, string | string[] | undefined]));
+                }
                 let urlStr: string = '';
                 let isNative = false;
 
