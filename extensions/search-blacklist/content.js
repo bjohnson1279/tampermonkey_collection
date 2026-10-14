@@ -15,6 +15,9 @@
     };
     const processSearch = () => {
         try {
+            if (!window.location.search || window.location.search === '?') {
+                return;
+            }
             const hostname = window.location.hostname;
             const params = new URLSearchParams(window.location.search);
             let engine;
