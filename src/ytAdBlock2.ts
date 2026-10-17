@@ -418,13 +418,22 @@
         const iconSpan = document.createElement('span');
         iconSpan.setAttribute('aria-hidden', 'true');
         iconSpan.textContent = isEnabled ? '🛡️' : '⚠️';
+
         const textSpan = document.createElement('span');
         textSpan.className = 'adblock-btn-text';
-        textSpan.textContent = `AdBlock: ${isEnabled ? 'ON' : 'OFF'}`;
+        textSpan.textContent = 'AdBlock';
+
+        const stateSpan = document.createElement('span');
+        stateSpan.setAttribute('aria-hidden', 'true');
+        stateSpan.textContent = isEnabled ? ': ON' : ': OFF';
+
+        textSpan.appendChild(stateSpan);
+
         const kbd = document.createElement('kbd');
         kbd.className = 'adblock-btn-shortcut';
         kbd.setAttribute('aria-hidden', 'true');
         kbd.textContent = 'Shift+A';
+
         btn.appendChild(iconSpan);
         btn.appendChild(textSpan);
         btn.appendChild(kbd);
@@ -441,8 +450,6 @@
         btn.id = 'adblock-toggle';
         btn.type = 'button';
         updateButtonContent(btn, enabled);
-        // Palette: Use static aria-label since aria-checked already indicates the current state
-        btn.setAttribute('aria-label', `Toggle AdBlock`);
         btn.setAttribute('role', 'switch');
         btn.setAttribute('aria-checked', enabled.toString());
         btn.setAttribute('title', `${enabled ? 'Disable' : 'Enable'} AdBlock (Shift+A)`);
