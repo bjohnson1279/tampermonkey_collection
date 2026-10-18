@@ -276,3 +276,6 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2025-01-20 - Optimize hot path URL extraction
 **Learning:** Relying on try/catch blocks that intentionally throw for common types (like native getters failing on primitive strings) introduces massive overhead in high-frequency network interceptors. Catching native exceptions is significantly slower than simple type checking.
 **Action:** Always include a fast-path type check (e.g., `typeof url === "string"`) before attempting reflective native getter calls in hot paths to bypass exception handling overhead.
+## 2025-02-23 - Lazy instantiation of URLSearchParams
+**Learning:** Instantiating `URLSearchParams` parses the entire query string into a key-value map. If the application performs early returns based on basic path or hostname matching, allocating and parsing `URLSearchParams` unconditionally before these fast-path checks introduces unnecessary performance overhead for unsupported domains.
+**Action:** Always defer the instantiation of `URLSearchParams` until after all early-return conditions (like hostname verification or cache hits) have been evaluated to prevent wasted CPU cycles on unmatched domains.

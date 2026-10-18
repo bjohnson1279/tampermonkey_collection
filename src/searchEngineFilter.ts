@@ -46,7 +46,6 @@ interface SearchEngines {
 
             // 🛡️ Sentinel: Use hostname instead of href to prevent path/query confusion evasion
             const hostname: string = window.location.hostname;
-            const params: URLSearchParams = new URLSearchParams(window.location.search);
 
             let engine: SearchEngineConfig | undefined;
             let matchedDomain: string | undefined;
@@ -66,6 +65,7 @@ interface SearchEngines {
                 return;
             }
 
+            const params: URLSearchParams = new URLSearchParams(window.location.search);
             const query: string | null = params.get(engine.queryParam);
 
             if (query) {
