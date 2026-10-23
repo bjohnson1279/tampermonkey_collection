@@ -57,14 +57,20 @@ export function scrapeTVDBData(): Episode[] {
             const listItem = listInline[i] as HTMLElement;
             const dateText = listItem.textContent?.replace(NETWORK_CLEANUP_REGEX, '').trim() || '';
 
-            try {
-                const date = new Date(dateText);
-                if (!isNaN(date.getTime())) {
-                    itemDate = date.toISOString().split('T')[0];
+            // ⚡ Bolt: Fast-path string check to avoid expensive new Date() parsing and native object allocation for empty strings, preventing O(N) allocation overhead inside the loop
+            if (dateText) {
+                try {
+                    const date = new Date(dateText);
+                    if (!isNaN(date.getTime())) {
+                        itemDate = date.toISOString().split('T')[0];
+                    }
+                } catch (e) {
+                    // 🛡️ Sentinel: Removed error object from console.error to prevent stack trace exposure
+                    console.error(
+                        'Error parsing date:',
+                        e instanceof Error ? e.message : String(e)
+                    );
                 }
-            } catch (e) {
-                // 🛡️ Sentinel: Removed error object from console.error to prevent stack trace exposure
-                console.error('Error parsing date:', e instanceof Error ? e.message : String(e));
             }
         }
 
