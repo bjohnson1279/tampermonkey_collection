@@ -279,3 +279,6 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2025-02-23 - Lazy instantiation of URLSearchParams
 **Learning:** Instantiating `URLSearchParams` parses the entire query string into a key-value map. If the application performs early returns based on basic path or hostname matching, allocating and parsing `URLSearchParams` unconditionally before these fast-path checks introduces unnecessary performance overhead for unsupported domains.
 **Action:** Always defer the instantiation of `URLSearchParams` until after all early-return conditions (like hostname verification or cache hits) have been evaluated to prevent wasted CPU cycles on unmatched domains.
+## 2026-10-24 - Fast-path check for new Date()
+**Learning:** Instantiating `new Date()` inside a loop is computationally expensive. If the parsed string is known to follow a certain format or might be empty, adding a fast-path string check (e.g. `if (dateText) { ... }`) bypasses the overhead for empty values while preserving correct application logic.
+**Action:** Add a fast-path string check before invoking `new Date()` in loops, avoiding `continue` if subsequent logic is needed.
