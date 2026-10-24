@@ -19,7 +19,6 @@
                 return;
             }
             const hostname = window.location.hostname;
-            const params = new URLSearchParams(window.location.search);
             let engine;
             let matchedDomain;
             const entries = Object.entries(searchEngines);
@@ -34,6 +33,7 @@
             if (!engine || !matchedDomain) {
                 return;
             }
+            const params = new URLSearchParams(window.location.search);
             const query = params.get(engine.queryParam);
             if (query) {
                 const searchQuery = query.replace(/\+/g, ' ');

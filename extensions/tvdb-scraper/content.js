@@ -22,14 +22,16 @@ export function scrapeTVDBData() {
         for (let i = 0, len = listInline.length; i < len; i++) {
             const listItem = listInline[i];
             const dateText = listItem.textContent?.replace(NETWORK_CLEANUP_REGEX, '').trim() || '';
-            try {
-                const date = new Date(dateText);
-                if (!isNaN(date.getTime())) {
-                    itemDate = date.toISOString().split('T')[0];
+            if (dateText) {
+                try {
+                    const date = new Date(dateText);
+                    if (!isNaN(date.getTime())) {
+                        itemDate = date.toISOString().split('T')[0];
+                    }
                 }
-            }
-            catch (e) {
-                console.error('Error parsing date:', e instanceof Error ? e.message : String(e));
+                catch (e) {
+                    console.error('Error parsing date:', e instanceof Error ? e.message : String(e));
+                }
             }
         }
         const episode = {

@@ -41,6 +41,12 @@
     const nativeUrlHrefGetter = Object.getOwnPropertyDescriptor(URL.prototype, 'href')?.get;
     window.fetch = (async (...args) => {
         const req = args[0];
+        if (typeof req === 'string') {
+            if (shouldBlock(req)) {
+                return Promise.reject(new TypeError('Failed to fetch'));
+            }
+            return origFetch(...args);
+        }
         let url = '';
         let isNative = false;
         try {
@@ -92,6 +98,12 @@
     });
     const origOpen = XMLHttpRequest.prototype.open;
     XMLHttpRequest.prototype.open = function (method, url, async, username, password) {
+        if (typeof url === 'string') {
+            if (shouldBlock(url)) {
+                throw new DOMException("Failed to execute 'open' on 'XMLHttpRequest': Invalid URL", 'SyntaxError');
+            }
+            return origOpen.apply(this, [method, url, async ?? true, username, password]);
+        }
         let urlStr = '';
         let isNative = false;
         try {
@@ -113,6 +125,12 @@
     const origSendBeacon = navigator.sendBeacon;
     if (origSendBeacon) {
         navigator.sendBeacon = function (url, data) {
+            if (typeof url === 'string') {
+                if (shouldBlock(url)) {
+                    return false;
+                }
+                return origSendBeacon.apply(this, [url, data]);
+            }
             let urlStr = '';
             let isNative = false;
             try {
@@ -137,6 +155,12 @@
         window.WebSocket = new Proxy(OrigWebSocket, {
             construct(target, args) {
                 let url = args[0];
+                if (typeof url === 'string') {
+                    if (shouldBlock(url)) {
+                        throw new DOMException("Failed to construct 'WebSocket': The URL '" + url + "' is invalid.", 'SyntaxError');
+                    }
+                    return new target(...args);
+                }
                 let urlStr = '';
                 let isNative = false;
                 try {
@@ -253,7 +277,11 @@
         iconSpan.textContent = isEnabled ? '🛡️' : '⚠️';
         const textSpan = document.createElement('span');
         textSpan.className = 'adblock-btn-text';
-        textSpan.textContent = `AdBlock: ${isEnabled ? 'ON' : 'OFF'}`;
+        textSpan.textContent = 'AdBlock';
+        const stateSpan = document.createElement('span');
+        stateSpan.setAttribute('aria-hidden', 'true');
+        stateSpan.textContent = isEnabled ? ': ON' : ': OFF';
+        textSpan.appendChild(stateSpan);
         const kbd = document.createElement('kbd');
         kbd.className = 'adblock-btn-shortcut';
         kbd.setAttribute('aria-hidden', 'true');
@@ -272,7 +300,6 @@
         btn.id = 'adblock-toggle';
         btn.type = 'button';
         updateButtonContent(btn, enabled);
-        btn.setAttribute('aria-label', `Toggle AdBlock`);
         btn.setAttribute('role', 'switch');
         btn.setAttribute('aria-checked', enabled.toString());
         btn.setAttribute('title', `${enabled ? 'Disable' : 'Enable'} AdBlock (Shift+A)`);
