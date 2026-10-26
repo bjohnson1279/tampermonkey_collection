@@ -395,6 +395,9 @@
     function skipVideoAds(): void {
         if (!enabled) return;
 
+        // ⚡ Bolt: Fast-path early return to avoid unnecessary property accesses when no ad is showing (the 99% case).
+        if (adShowingElements.length === 0 && skipBtnElements.length === 0) return;
+
         const video: HTMLVideoElement | null = videoElements[0] ?? null;
         if (!video) return;
 
