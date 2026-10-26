@@ -283,3 +283,7 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2026-10-23 - Fast-pathing Date parsing inside loops
 **Learning:** Instantiating `new Date()` with an empty or invalid string introduces expensive native object allocation and processing overhead, especially inside loops. Using early returns or `continue` to bypass this can inadvertently skip subsequent loop logic and drop data.
 **Action:** Always wrap expensive `new Date()` instantiations inside localized conditional blocks (e.g., `if (isValid) { ... }`) to fast-path empty cases without prematurely aborting the loop iteration.
+
+## 2025-02-23 - Avoid unnecessary DOM property lookups in high-frequency loops
+**Learning:** High-frequency `setInterval` loops that poll for DOM elements (like ads) often execute when the target state is absent. Unconditionally accessing properties like `dom.elements[0]` adds unnecessary overhead.
+**Action:** Use fast-path early returns checking live `HTMLCollection.length === 0` to immediately skip processing when the target state is absent.
