@@ -258,6 +258,8 @@
     function skipVideoAds() {
         if (!enabled)
             return;
+        if (adShowingElements.length === 0 && skipBtnElements.length === 0)
+            return;
         const video = videoElements[0] ?? null;
         if (!video)
             return;
