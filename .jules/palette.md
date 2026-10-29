@@ -255,3 +255,6 @@
 ## 2026-10-17 - Avoid Redundant State in Accessible Names
 **Learning:** When using ARIA roles like `switch` and state attributes like `aria-checked`, explicitly naming the button (via `aria-label`) or keeping state words (like "ON/OFF") in the visible accessible name causes screen readers to redundantly announce the state (e.g., "AdBlock: ON, switch, checked").
 **Action:** Wrap the visible state text (e.g., ": ON") in an `aria-hidden="true"` span so the accessible name remains a clean noun (e.g., "AdBlock"), and rely entirely on `aria-checked` to convey the state context natively.
+## 2026-10-29 - Better contrast on keyboard shortcut hints
+**Learning:** The light transparent background on `<kbd>` elements (`rgba(255, 255, 255, 0.2)`) doesn't provide enough contrast on light backgrounds (like the blue button in `tvdbScraper`) and can be hard to read. Using a dark transparent background (`rgba(0, 0, 0, 0.2)`) with a light text/border provides much better universal contrast on colored buttons.
+**Action:** Use `rgba(0, 0, 0, 0.2)` for `<kbd>` backgrounds on colored buttons to ensure adequate contrast.
