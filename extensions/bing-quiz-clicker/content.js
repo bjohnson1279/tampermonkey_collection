@@ -62,6 +62,8 @@ class BingQuizClicker {
         }
     }
     checkAndClick() {
+        if (this.gotThisRightElements.length === 0 && this.nextButtonElements.length === 0)
+            return;
         const elements = this.getQuizElements();
         this.handleQuizElements(elements);
     }

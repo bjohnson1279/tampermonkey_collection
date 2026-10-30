@@ -101,6 +101,9 @@ class BingQuizClicker {
     }
 
     private checkAndClick(): void {
+        // ⚡ Bolt: Fast-path early return to avoid unnecessary property accesses and allocations when elements are missing.
+        if (this.gotThisRightElements.length === 0 && this.nextButtonElements.length === 0) return;
+
         const elements = this.getQuizElements();
         this.handleQuizElements(elements);
     }
