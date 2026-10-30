@@ -287,3 +287,6 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2025-02-23 - Avoid unnecessary DOM property lookups in high-frequency loops
 **Learning:** High-frequency `setInterval` loops that poll for DOM elements (like ads) often execute when the target state is absent. Unconditionally accessing properties like `dom.elements[0]` adds unnecessary overhead.
 **Action:** Use fast-path early returns checking live `HTMLCollection.length === 0` to immediately skip processing when the target state is absent.
+## 2026-10-30 - Fast-path early return checking HTMLCollection.length
+**Learning:** High-frequency `setInterval` loops that poll for DOM elements (like ads or quiz elements) often execute when the target state is absent. Unconditionally accessing properties like `dom.elements[0]` or making unnecessary function calls adds unnecessary overhead.
+**Action:** Use fast-path early returns checking live `HTMLCollection.length === 0` to immediately skip processing when the target state is absent, avoiding unnecessary property accesses and function calls.
