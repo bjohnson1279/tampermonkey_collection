@@ -5,25 +5,29 @@ This repository contains TypeScript-based Tampermonkey userscripts and browser e
 ## Getting Started
 
 1. Install dependencies:
-   ```bash
-   pnpm install
-   ```
+
+    ```bash
+    pnpm install
+    ```
 
 2. Build all scripts and browser extensions:
-   ```bash
-   pnpm run generate:all
-   ```
-   This will compile TypeScript source files into `dist/` and build unpacked browser extensions into `extensions/`.
+
+    ```bash
+    pnpm run generate:all
+    ```
+
+    This will compile TypeScript source files into `dist/` and build unpacked browser extensions into `extensions/`.
 
 3. For development with auto-rebuild:
-   ```bash
-   pnpm run build:watch
-   ```
+
+    ```bash
+    pnpm run build:watch
+    ```
 
 4. Run unit tests:
-   ```bash
-   pnpm test
-   ```
+    ```bash
+    pnpm test
+    ```
 
 ## Available Scripts
 
@@ -38,7 +42,7 @@ This repository contains TypeScript-based Tampermonkey userscripts and browser e
 
 - `src/` - TypeScript source files for userscripts and unit tests.
 - `dist/` - Compiled JavaScript outputs (auto-generated).
-- `extensions/` - Unpacked Chrome/Edge extension directories generated from `dist/` scripts.
+- `extensions/` - Unpacked Chrome/Edge extension directories generated from `dist/` scripts (see [extensions/README.md](extensions/README.md)).
 - `scripts/` - Build and generator scripts (`generate-extensions.js`, `generate-icons.js`).
 - `tsconfig.json` - TypeScript configuration.
 - `package.json` - Project dependencies, metadata, and script definitions.
