@@ -137,4 +137,70 @@ describe('KSL Comments Hide', () => {
             expect(() => TestExports.handleMutations(mutationsList, mockObserver)).not.toThrow();
         });
     });
+
+    describe('initialization and DOM scanning', () => {
+        it('should observe container and process pre-existing comments on load', () => {
+            document.body.innerHTML = '';
+            const container = document.createElement('div');
+            container.id = 'commentsContainer';
+            const root = document.createElement('div');
+            root.className = 'CommentsList__root';
+            const item = document.createElement('div');
+            item.className = 'CommentsList__item';
+            const user = document.createElement('div');
+            user.className = 'CommentsList__userName';
+            user.textContent = 'PreExistingBlocked';
+            item.appendChild(user);
+            root.appendChild(item);
+            container.appendChild(root);
+            document.body.appendChild(container);
+
+            const observeMock = jest.fn();
+            const originalMutationObserver = (global as any).MutationObserver;
+            (global as any).MutationObserver = jest.fn().mockImplementation((cb) => ({
+                observe: observeMock,
+                disconnect: jest.fn(),
+            }));
+
+            jest.isolateModules(() => {
+                require('./kslCommentsHide');
+            });
+
+            const exportsObj = (global as any).__kslTestExports;
+            exportsObj.blockedUsers.add('PreExistingBlocked');
+            exportsObj.processComment(item);
+
+            expect(observeMock).toHaveBeenCalledWith(
+                container,
+                expect.objectContaining({ childList: true, subtree: true, attributes: false })
+            );
+            expect(item.style.display).toBe('none');
+
+            (global as any).MutationObserver = originalMutationObserver;
+        });
+
+        it('should catch and log initialization error safely', () => {
+            const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+            const container = document.createElement('div');
+            container.id = 'commentsContainer';
+            document.body.appendChild(container);
+
+            const originalMutationObserver = (global as any).MutationObserver;
+            (global as any).MutationObserver = jest.fn().mockImplementation(() => {
+                throw new Error('Observer failure');
+            });
+
+            jest.isolateModules(() => {
+                require('./kslCommentsHide');
+            });
+
+            expect(consoleSpy).toHaveBeenCalledWith(
+                'Error initializing comment observer:',
+                'Observer failure'
+            );
+
+            (global as any).MutationObserver = originalMutationObserver;
+            consoleSpy.mockRestore();
+        });
+    });
 });
