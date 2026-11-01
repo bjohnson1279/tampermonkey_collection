@@ -60,6 +60,17 @@ describe('YouTubeAdRemover', () => {
 
             expect(createElementSpy).not.toHaveBeenCalled();
         });
+
+        it('should fallback to documentElement if document.head is falsy', () => {
+            (global as any).document.head = null;
+            const appendChildSpy = (global as any).document.documentElement.appendChild;
+
+            adRemover = new ytModule.YouTubeAdRemover();
+
+            const createElementSpy = global.document.createElement as jest.Mock;
+            const styleElement = createElementSpy.mock.results[0].value;
+            expect(appendChildSpy).toHaveBeenCalledWith(styleElement);
+        });
     });
 
     describe('Teardown', () => {
@@ -72,6 +83,56 @@ describe('YouTubeAdRemover', () => {
 
             expect(removeChildSpy).toHaveBeenCalledWith(styleElement);
             expect(adRemover.styleElement).toBeNull();
+        });
+
+        it('should handle destroy safely when styleElement has no parentNode', () => {
+            adRemover = new ytModule.YouTubeAdRemover();
+            const styleElement = (global.document.createElement as jest.Mock).mock.results[0].value;
+            styleElement.parentNode = null;
+
+            expect(() => adRemover.destroy()).not.toThrow();
+        });
+
+        it('should handle multiple destroy calls safely', () => {
+            adRemover = new ytModule.YouTubeAdRemover();
+            adRemover.destroy();
+            expect(() => adRemover.destroy()).not.toThrow();
+        });
+    });
+
+    describe('initAdRemover', () => {
+        it('should instantiate immediately when document.readyState is not loading', () => {
+            (global as any).document.readyState = 'interactive';
+            const createElementSpy = global.document.createElement as jest.Mock;
+
+            ytModule.initAdRemover();
+
+            expect(createElementSpy).toHaveBeenCalledWith('style');
+        });
+
+        it('should listen for DOMContentLoaded when document.readyState is loading and instantiate when event fires', () => {
+            (global as any).document.readyState = 'loading';
+            let eventHandler: (() => void) | undefined;
+            (global as any).document.addEventListener.mockImplementation(
+                (event: string, handler: () => void) => {
+                    if (event === 'DOMContentLoaded') {
+                        eventHandler = handler;
+                    }
+                }
+            );
+
+            ytModule.initAdRemover();
+
+            expect(global.document.addEventListener).toHaveBeenCalledWith(
+                'DOMContentLoaded',
+                expect.any(Function)
+            );
+            expect(global.document.createElement).not.toHaveBeenCalled();
+
+            expect(eventHandler).toBeDefined();
+            eventHandler!();
+
+            expect(global.document.createElement).toHaveBeenCalledWith('style');
         });
     });
 });
