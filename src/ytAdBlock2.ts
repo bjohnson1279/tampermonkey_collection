@@ -345,9 +345,15 @@
                             if (
                                 promotedBadgeRegex.test((adNode as HTMLElement).textContent || '')
                             ) {
-                                const parent = adNode.closest(
-                                    'YTD-VIDEO-RENDERER, YTD-COMPACT-VIDEO-RENDERER'
-                                );
+                                // ⚡ Bolt: Replace expensive .closest() with a fast-path .parentElement loop to avoid CSS selector evaluation overhead
+                                let parent = adNode.parentElement;
+                                while (
+                                    parent &&
+                                    parent.tagName !== 'YTD-VIDEO-RENDERER' &&
+                                    parent.tagName !== 'YTD-COMPACT-VIDEO-RENDERER'
+                                ) {
+                                    parent = parent.parentElement;
+                                }
                                 if (parent) {
                                     parent.remove();
                                 }
@@ -368,7 +374,15 @@
         for (let i = initialAds.length - 1; i >= 0; i--) {
             const adNode = initialAds[i];
             if (promotedBadgeRegex.test((adNode as HTMLElement).textContent || '')) {
-                const parent = adNode.closest('YTD-VIDEO-RENDERER, YTD-COMPACT-VIDEO-RENDERER');
+                // ⚡ Bolt: Replace expensive .closest() with a fast-path .parentElement loop to avoid CSS selector evaluation overhead
+                let parent = adNode.parentElement;
+                while (
+                    parent &&
+                    parent.tagName !== 'YTD-VIDEO-RENDERER' &&
+                    parent.tagName !== 'YTD-COMPACT-VIDEO-RENDERER'
+                ) {
+                    parent = parent.parentElement;
+                }
                 if (parent) {
                     parent.remove();
                 }

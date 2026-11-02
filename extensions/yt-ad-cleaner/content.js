@@ -223,7 +223,10 @@
                         for (let k = adNodes.length - 1; k >= 0; k--) {
                             const adNode = adNodes[k];
                             if (promotedBadgeRegex.test(adNode.textContent || '')) {
-                                const parent = adNode.closest('YTD-VIDEO-RENDERER, YTD-COMPACT-VIDEO-RENDERER');
+                                let parent = adNode.parentElement;
+                                while (parent && parent.tagName !== 'YTD-VIDEO-RENDERER' && parent.tagName !== 'YTD-COMPACT-VIDEO-RENDERER') {
+                                    parent = parent.parentElement;
+                                }
                                 if (parent) {
                                     parent.remove();
                                 }
@@ -241,7 +244,10 @@
         for (let i = initialAds.length - 1; i >= 0; i--) {
             const adNode = initialAds[i];
             if (promotedBadgeRegex.test(adNode.textContent || '')) {
-                const parent = adNode.closest('YTD-VIDEO-RENDERER, YTD-COMPACT-VIDEO-RENDERER');
+                let parent = adNode.parentElement;
+                while (parent && parent.tagName !== 'YTD-VIDEO-RENDERER' && parent.tagName !== 'YTD-COMPACT-VIDEO-RENDERER') {
+                    parent = parent.parentElement;
+                }
                 if (parent) {
                     parent.remove();
                 }
