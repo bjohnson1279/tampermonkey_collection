@@ -224,7 +224,9 @@
                             const adNode = adNodes[k];
                             if (promotedBadgeRegex.test(adNode.textContent || '')) {
                                 let parent = adNode.parentElement;
-                                while (parent && parent.tagName !== 'YTD-VIDEO-RENDERER' && parent.tagName !== 'YTD-COMPACT-VIDEO-RENDERER') {
+                                while (parent &&
+                                    parent.tagName !== 'YTD-VIDEO-RENDERER' &&
+                                    parent.tagName !== 'YTD-COMPACT-VIDEO-RENDERER') {
                                     parent = parent.parentElement;
                                 }
                                 if (parent) {
@@ -245,7 +247,9 @@
             const adNode = initialAds[i];
             if (promotedBadgeRegex.test(adNode.textContent || '')) {
                 let parent = adNode.parentElement;
-                while (parent && parent.tagName !== 'YTD-VIDEO-RENDERER' && parent.tagName !== 'YTD-COMPACT-VIDEO-RENDERER') {
+                while (parent &&
+                    parent.tagName !== 'YTD-VIDEO-RENDERER' &&
+                    parent.tagName !== 'YTD-COMPACT-VIDEO-RENDERER') {
                     parent = parent.parentElement;
                 }
                 if (parent) {
@@ -266,11 +270,9 @@
             return;
         if (adShowingElements.length === 0 && skipBtnElements.length === 0)
             return;
-        const video = videoElements[0] ?? null;
-        if (!video)
-            return;
         if (adShowingElements.length > 0) {
-            if (Number.isFinite(video.duration)) {
+            const video = videoElements[0] ?? null;
+            if (video && Number.isFinite(video.duration)) {
                 video.currentTime = video.duration;
             }
         }
