@@ -290,3 +290,7 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 ## 2026-10-30 - Fast-path early return checking HTMLCollection.length
 **Learning:** High-frequency `setInterval` loops that poll for DOM elements (like ads or quiz elements) often execute when the target state is absent. Unconditionally accessing properties like `dom.elements[0]` or making unnecessary function calls adds unnecessary overhead.
 **Action:** Use fast-path early returns checking live `HTMLCollection.length === 0` to immediately skip processing when the target state is absent, avoiding unnecessary property accesses and function calls.
+
+## 2024-11-01 - Replace .closest() with .parentElement traversal in high-frequency MutationObserver
+**Learning:** Checking DOM elements with `element.closest()` evaluates CSS selectors (like `'YTD-VIDEO-RENDERER, YTD-COMPACT-VIDEO-RENDERER'`) and initiates tree traversals, which becomes expensive (up to 8x slower) in high-frequency functions like `MutationObserver` callbacks.
+**Action:** When manually traversing DOM elements upward in a hot path or loop, prefer a fast-path `while` loop using native `element.parentElement` alongside simple property checks (`tagName`, `classList`) to prevent the overhead of `closest` and CSS evaluation.
