@@ -1,193 +1,247 @@
 ## 2024-06-27 - Unnecessary Attribute Observation in MutationObservers
+
 **Learning:** Using `attributes: true` in `MutationObserver` configurations when the callback only processes `childList` additions causes significant performance degradation on highly dynamic pages (like YouTube) due to firing on every attribute change (e.g., hover states, dynamic inline styles).
 **Action:** Always verify if `attributes: true` is strictly necessary. If only watching for new nodes, set `attributes: false` to prevent the browser from queuing thousands of useless macrotasks.
 
 ## 2026-06-27 - [Removed TVDB Scraper debug output]\n\nRemoved heavy console.log(JSON.stringify(...)) logic in tvdbScraper.js/ts to avoid large overhead from JSON serialization and console output for large TV series datasets.
 
 ## 2024-06-27 - Performance impact of .innerText in MutationObservers
+
 **Learning:** Using `.innerText` inside high-frequency `MutationObserver` callbacks or `setInterval`s causes layout thrashing because it calculates CSS styling and visibility, forcing the browser to compute a synchronous reflow. In a highly dynamic page like YouTube, this freezes the main thread.
 **Action:** Use `.textContent` instead of `.innerText` whenever just looking for string presence or basic values. `.textContent` simply reads the DOM nodes without triggering a reflow.
 
 ## 2024-07-27 - querySelectorAll on leaf nodes in MutationObserver
+
 **Learning:** Calling `.querySelectorAll()` on every added node inside a high-frequency `MutationObserver` (e.g., YouTube ad blockers) introduces significant parsing and setup overhead. If a node is just an empty leaf node (which many added nodes are), `querySelectorAll` does a lot of work for nothing.
 **Action:** Always check `if (node.firstElementChild)` before running `querySelectorAll` on deeply nested selectors within `MutationObserver` childList loops. This single check avoids massive CPU overhead by early-returning on leaf nodes.
 
 ## 2024-05-24 - Avoid redundant string allocations in iterators
+
 **Learning:** Placing `.toLowerCase()` operations on both the target and the iterated items inside `.some()` or `.filter()` causes unnecessary string allocations and processing on every iteration, leading to O(N) redundant allocations.
 **Action:** Pre-compute static collections into their desired format globally, and extract loop-invariant operations (like transforming the search query) outside the iterator function.
 
 ## 2024-07-28 - Regex matching vs Array.some + includes for URL interception
+
 **Learning:** Intercepting high-volume network events (like replacing `fetch` and `XMLHttpRequest`) requires extremely fast checks to avoid blocking the main thread during heavy page loads. Using an array of patterns and executing `Array.some(p => url.includes(p))` is O(N) strings checked per URL and is noticeably slower (roughly ~5x based on profiling) than testing against a single compiled Regular Expression.
 **Action:** When evaluating URLs against a static list of strings/patterns in high-frequency network intercepts, concatenate them into a single Regular Expression pattern and use `regex.test(url)` for significantly improved performance.
 
 ## 2024-07-28 - Regex matching vs .toLowerCase().includes() for text checks
+
 **Learning:** Checking for string presence via `.toLowerCase().includes()` inside high-frequency `MutationObserver` callbacks (like checking DOM text nodes) causes unnecessary string allocations and is noticeably slower than a pre-compiled regex check (e.g. `/pattern/i.test(text)`). In performance testing, a regex check is about ~6x faster than `toLowerCase().includes()`.
 **Action:** Always use pre-compiled regex with the `i` flag instead of calling `.toLowerCase().includes()` when evaluating text content inside `MutationObserver` or `setInterval` loops.
 
 ## 2024-07-28 - Extract array allocations and use O(1) Sets in high-frequency loops
+
 **Learning:** Initializing arrays and using `.includes()` inside `.forEach()` loops or `MutationObserver` callbacks causes O(N) memory allocations per mutation and O(M) lookup times for every iterated element, which can degrade performance significantly on dynamic pages where many elements are added.
 **Action:** Always extract configuration arrays (like blacklists) globally outside of observer callbacks, and convert them to `Set` objects for O(1) `.has()` lookups to prevent redundant allocations and speed up presence checks.
 
 ## 2024-11-20 - Set over Array for O(1) lookups in high-frequency callbacks
+
 **Learning:** Initializing an array inside a high-frequency `MutationObserver` callback or loop causes redundant O(N) memory allocations every time the callback fires. Furthermore, using `Array.includes()` inside the loop means O(N) lookups per element evaluated.
 **Action:** Always extract loop-invariant structures outside the observer callback. Use `Set` instead of `Array` to achieve O(1) lookups with `Set.has()`, significantly reducing overhead and garbage collection.
 
 ## 2024-11-20 - Prevent O(N²) scaling inside MutationObservers with full-tree queries
+
 **Learning:** Querying the entire DOM tree (e.g. `querySelectorAll('.CommentsList__item')`) inside a `MutationObserver` on every `childList` mutation causes O(N²) behavior, re-evaluating existing nodes exponentially as the container grows.
 **Action:** Always iterate through `mutation.addedNodes` exclusively in `MutationObserver` callbacks instead of re-querying the whole container. Combined with leaf node checks (`firstElementChild`), this scales gracefully at O(1) relative to total container size.
 
 ## 2024-11-20 - Batch DOM queries for performance
+
 **Learning:** Executing `querySelectorAll()` inside a loop or multiple times in sequence forces the browser to perform O(N) full DOM traversals.
 **Action:** Combine selectors with a comma string `selectors.join(',')` to reduce it to a single O(1) traversal, drastically improving performance when querying multiple classes or tags at once.
 
 ## 2024-11-20 - Combine DOM traversals with comma-separated selectors
+
 **Learning:** Performing multiple sequential `querySelector` or `querySelectorAll` operations on the DOM tree creates multiple O(N) traversal passes, which is inefficient.
 **Action:** Combine multiple distinct CSS selectors into a single comma-separated string (e.g., `document.querySelectorAll('.a, .b, .c')`) to perform a single O(1) pass through the DOM, significantly improving performance when extracting multiple disparate elements.
 
 ## 2024-07-10 - [Avoid N+1 DOM Queries]
+
 When filtering nodes, avoid querying the DOM inside a loop (N+1 queries). Instead, use a single composite selector (e.g. `querySelectorAll('.parent .child')`) to fetch target elements in one pass.
 
 ## 2024-07-10 - O(1) Style Injection vs O(N) DOM Loops
+
 When replacing default browser behaviors or hiding elements on page load, avoid iterating over collections returned by `querySelectorAll()` and applying inline styles (`el.style.display = 'block'`). This triggers synchronous layout calculation and O(N) overhead. Instead, create a single `<style>` element, inject the necessary CSS rules (using `!important` to override inline styles if necessary), and append it to `document.head || document.documentElement`. This turns an O(N) DOM modification into an O(1) operation and prevents forced reflows.
 
 ## 2024-11-20 - Empty Regex Pattern Danger
-**Learning:** When replacing an `Array.some(str => target.includes(str))` pattern with a dynamically generated Regular Expression (e.g., `new RegExp(array.join('|'))`) for performance, an empty array (`[]`) evaluates to an empty regex pattern (`/(?:)/`). This empty pattern matches *everything* (returns `true` for all `.test()` calls), whereas `[].some(...)` returns `false`. This causes catastrophic false positives if the array can be emptied by configuration.
+
+**Learning:** When replacing an `Array.some(str => target.includes(str))` pattern with a dynamically generated Regular Expression (e.g., `new RegExp(array.join('|'))`) for performance, an empty array (`[]`) evaluates to an empty regex pattern (`/(?:)/`). This empty pattern matches _everything_ (returns `true` for all `.test()` calls), whereas `[].some(...)` returns `false`. This causes catastrophic false positives if the array can be emptied by configuration.
 **Action:** Always check the array length before generating dynamic RegExps from configuration variables, or provide a safe fallback (like `null` or a never-matching pattern) when the array is empty.
 
 ## 2024-07-28 - O(N) loop queries vs Single O(1) descendant CSS selector
+
 **Learning:** Selecting all container nodes and executing `.querySelector()` on each of them in a loop (e.g., `containers.forEach(c => c.querySelector('.ad'))`) causes N independent DOM traversals, which scales poorly and blocks the main thread.
 **Action:** Use a single descendant CSS selector (e.g., `document.querySelectorAll('.container .ad')`) and step up the DOM tree via `.closest('.container')`. This reduces N traversals into a single O(1) pass and is significantly faster.
 
 ## 2024-07-28 - O(N) loop queries vs Single O(1) descendant CSS selector
+
 **Learning:** Selecting all container nodes and executing `.querySelector()` on each of them in a loop (e.g., `containers.forEach(c => c.querySelector('.ad'))`) causes N independent DOM traversals, which scales poorly and blocks the main thread.
 **Action:** Use a single descendant CSS selector (e.g., `document.querySelectorAll('.container .ad')`) and step up the DOM tree via `.closest('.container')`. This reduces N traversals into a single O(1) pass and is significantly faster.
 
 ## 2024-07-28 - O(N) loop queries vs Single O(1) descendant CSS selector (Nested Queries)
+
 **Learning:** In `tvdbScraper.ts`, there was a nested loop querying `.list-group` and then `.list-group-item` inside. This is effectively the same anti-pattern as above but with an extra loop level, causing even more unnecessary parsing overhead.
 **Action:** Use a single descendant CSS selector (e.g., `document.querySelectorAll('.list-group .list-group-item')`) to significantly reduce main thread parsing overhead and loop complexity.
 
 ## 2024-07-29 - Use injected stylesheet to prevent reflow in setInterval
+
 **Learning:** Modifying inline styles (`element.style.visibility = 'visible'`, `parent.style.color = 'green'`) inside a loop executing repeatedly (like in a `setInterval` checking for DOM changes) causes continuous, expensive layout calculation and synchronous reflows, freezing the main thread.
 **Action:** When handling styles for repeated or dynamic elements, inject a static `<style>` block once globally to offload the styling work to the browser's native CSS engine in O(1) time, avoiding O(N) JavaScript style assignments per tick.
 
 ## 2024-05-13 - [Cache reflection getters in hot paths]
+
 **Learning:** Using `Object.getOwnPropertyDescriptor` inside a high-frequency function like a network fetch interceptor causes a significant performance penalty (e.g. 5-6x slower).
 **Action:** Always cache reflection results or descriptor getters outside of the hot path for reuse.
 
 ## 2024-05-24 - Hoist static RegExp objects outside of loops
+
 **Learning:** Instantiating `RegExp` literals (like `/\d+/g`) inside a loop causes memory allocation and subsequent garbage collection overhead on every iteration.
 **Action:** Extract literal RegExp objects to module-level constants. Methods like `String.prototype.match()` and `String.prototype.replace()` are safe to use with global hoisted regexes because they do not rely on or mutate the regex's `.lastIndex` property (unlike `RegExp.prototype.exec()` and `RegExp.prototype.test()`).
 
 ## 2024-11-20 - Replace querySelector with getElementById/getElementsByClassName
+
 **Learning:** `querySelector` is very flexible but much slower than dedicated lookup methods like `getElementById` and `getElementsByClassName` because it requires the browser to parse a CSS selector string and traverse the DOM tree (O(N)). `getElementById` uses a highly optimized internal hash map (O(1)). `getElementsByClassName` returns a live HTMLCollection which is also often O(1) or highly optimized compared to full query traversal. In high frequency code paths, like a 500ms `setInterval` checking for YouTube ads in a very large DOM tree, `querySelector` introduces significant overhead and CPU usage. Benchmark shows `querySelectorAll` is ~209ms while `getElementById`+`getElementsByClassName` is ~8ms for 10000 iterations.
 **Action:** When querying the DOM for a single ID or a single class name inside high-frequency loops (`setInterval`, `requestAnimationFrame`, `MutationObserver`), replace `querySelector('#id')` with `getElementById('id')` and `querySelector('.class')` with `getElementsByClassName('class')[0]`.
 
 ## 2024-07-29 - Avoid broad tag queries like "div" in performance-sensitive intervals
+
 **Learning:** Querying extremely common elements like `div` using `document.querySelectorAll('button,div')` inside a frequent interval (e.g., a 500ms fallback check) causes a massive performance penalty on large, complex pages like YouTube, because it must match and return thousands of nodes.
 **Action:** Replace broad, generic tag selectors with more specific targeted selectors (like `[class*="skip" i], [id*="skip" i]`) to dramatically reduce the number of nodes evaluated, avoiding unnecessary O(N) DOM traversal and array filtering.
 
 ## 2026-07-17 - Hoist RegExp Constants from Loops
+
 **Learning:** Instantiating static `RegExp` objects inside high-frequency loops (e.g. `forEach` iteration) forces JavaScript engines to allocate, parse, compile, and garbage-collect the regex repeatedly, reducing performance.
 **Action:** Extracted static inline `RegExp` expressions and hoisted them into constant variables at the file or module scope (e.g., `NETWORK_CLEANUP_REGEX`) outside of the execution block to achieve a 10.38% improvement in regex matching loops.
 
 ## 2024-07-20 - Avoid array allocation and callback overhead in search engine check
+
 **Learning:** Replaced `Object.entries(searchEngines).find(...)` with a simple `for...in` loop. This avoids O(N) array allocation from `Object.entries` and the overhead of a callback function inside `.find(...)`, making the domain check faster by approximately 55%.
 **Action:** Changed the implementation in `src/searchEngineFilter.ts`.
 
 ## 2026-07-18 - Replace querySelector with getElementById/getElementsByClassName
+
 **Learning:** `querySelector` is very flexible but much slower than dedicated lookup methods like `getElementById` and `getElementsByClassName` because it requires the browser to parse a CSS selector string and traverse the DOM tree (O(N)). `getElementById` uses a highly optimized internal hash map (O(1)). `getElementsByClassName` returns a live HTMLCollection which is also often O(1) or highly optimized compared to full query traversal. In high frequency code paths, like a 500ms `setInterval` checking for DOM nodes in a large DOM tree, `querySelector` introduces significant overhead and CPU usage.
 **Action:** When querying the DOM for a single ID or a single class name inside high-frequency loops (`setInterval`, `requestAnimationFrame`, `MutationObserver`), replace `querySelector('#id')` with `getElementById('id')` and `querySelector('.class')` with `getElementsByClassName('class')[0]`.
 
 ## 2024-07-19 - Fast DOM querying in MutationObservers
+
 **Learning:** Using `document.querySelectorAll` inside high-frequency callbacks like `MutationObserver` or `setInterval` triggers expensive O(N) DOM parsing on every call.
 **Action:** Always replace `querySelectorAll('.class')` with `getElementsByClassName('class')` in frequent update loops to utilize O(1) live collection lookups and significantly reduce main-thread CPU overhead.
 
 ## 2024-07-28 - Replace querySelector with getElementsByClassName/TagName in loops
+
 **Learning:** Calling `.querySelector` and `.querySelectorAll` inside a loop evaluating multiple nodes forces the browser to re-parse the CSS selector string and traverse the DOM subtree O(N) times. This is significantly slower than using dedicated methods like `getElementsByClassName` or `getElementsByTagName`, which perform O(1) live collection lookups or highly optimized tree walks.
 **Action:** Always replace `.querySelector('.class')` with `.getElementsByClassName('class')[0]` and `.querySelector('tag')` with `.getElementsByTagName('tag')[0]` when iterating over a list of elements to reduce CPU overhead and parsing time.
+
 ## 2024-05-24 - [Optimize DOM Queries]
+
 **Learning:** querySelectorAll can cause significant performance penalties when used within high-frequency operations like MutationObserver.
 **Action:** Replaced querySelectorAll with getElementsByClassName to leverage optimized native lookups for DOM elements.
 
 ## 2024-07-29 - Replace querySelector with getElementsByClassName/TagName in polling intervals
+
 **Learning:** Calling `document.querySelector` inside a high-frequency polling interval (like `setInterval`) to find elements by a single class name forces the browser to re-parse the CSS selector string and traverse the DOM tree O(N) times. This is significantly slower than using dedicated methods like `getElementsByClassName`, which perform O(1) live collection lookups.
 **Action:** When searching for an element by class name in a polling interval, replace `document.querySelector('.class')` with `document.getElementsByClassName('class')[0]` to reduce main thread CPU overhead.
 
 ## 2024-12-05 - HTMLCollection does not support .forEach
+
 **Learning:** When refactoring DOM queries to replace `querySelectorAll` (returns a `NodeList`) with `getElementsByClassName` or `getElementsByTagName` (returns an `HTMLCollection`) for performance, `HTMLCollection` does not natively support the `.forEach()` method.
 **Action:** When converting `querySelectorAll` to `getElementsByClassName`, you must update the associated iteration logic to convert the collection to an array (e.g., `Array.from(collection).forEach(...)`) or use a standard `for` loop to prevent runtime type errors.
 
 ## 2024-07-27 - Reduce O(N) DOM Traversals in Hot Paths
+
 **Learning:** Native `querySelectorAll` operations perform tree traversals that block the main thread. While CSS selector parsing is extremely fast in native browsers, parsing the DOM tree is O(N). Doing `document.querySelectorAll('a'); document.querySelectorAll('b')` does two full tree walks, whereas `document.querySelectorAll('a,b')` walks the tree just once.
 **Action:** Combined multiple string selectors into a single selector using commas (`a,b`) to halve the tree traversal overhead during high-frequency execution in MutationObserver loops.
+
 ## 2024-07-27 - Avoid Array Allocations in Intervals
+
 **Learning:** High-frequency intervals (like `setInterval` running every 1000ms) should avoid operations that allocate new memory on every tick, such as `Array.from()`. This causes unnecessary garbage collection overhead and can lead to jank.
 **Action:** Replaced `Array.from(document.getElementsByClassName(...))` with a raw `HTMLCollectionOf<Element>` return type, and iterated using a standard `for` loop instead of `.forEach()`.
 
 ## 2023-10-27 - Avoid Array.from() inside MutationObserver callbacks
+
 **Learning:** Wrapping a live `HTMLCollection` returned by `getElementsByClassName` with `Array.from()` to use `.forEach()` creates unnecessary O(N) array allocation. Inside high-frequency contexts like `MutationObserver` callbacks, this can lead to excessive garbage collection overhead and potential UI jank.
 **Action:** Use a standard `for` loop to iterate directly over `HTMLCollection` objects in performance-critical paths instead of converting them to static arrays via `Array.from()`. Note: Be careful with live collections if elements are being removed or their classes are mutating, as this can shift indices during iteration.
+
 ## 2026-07-29 - O(1) DOM Queries in MutationObservers
+
 **Learning:** In high-frequency contexts like `MutationObserver` loops or polling `setInterval`s, using `querySelectorAll()` (even with simple selectors) incurs significant O(N) DOM traversal and parsing overhead. Additionally, methods returning live `HTMLCollections` (like `getElementsByClassName`) cannot be iterated over safely using forward `for` loops or `.forEach()` (after `Array.from()`) if the loop's body removes those elements from the DOM, as indices dynamically shift.
 **Action:** Always replace `querySelectorAll` with `getElementsByClassName` or `getElementById` inside loops and observers when possible. To safely process and remove elements from a live `HTMLCollection`, avoid allocating a new array and instead use a backward `for` loop (e.g., `for (let i = collection.length - 1; i >= 0; i--)`).
 
 ## 2024-08-04 - Optimize MutationObserver Loops
+
 **Learning:** In high-frequency contexts like \`MutationObserver\` callbacks, using \`.forEach()\` creates closure allocations on every tick, which leads to unnecessary garbage collection overhead and potential jank.
 **Action:** Always prefer standard \`for\` loops over \`.forEach()\` when iterating through mutation lists or added nodes in high-frequency contexts.
 
 ## 2024-08-05 - return vs continue when replacing forEach
+
 **Learning:** When refactoring `.forEach()` loops into standard `for` loops (e.g., for performance optimization), strictly ensure that any `return` statements inside the original `.forEach()` callback are converted to `continue` statements in the standard `for` loop. Leaving them as `return` will prematurely exit the entire enclosing function rather than just skipping the current iteration.
 **Action:** Always manually review and convert early returns inside former `.forEach()` callbacks to `continue` when migrating to standard loops.
+
 ## 2024-08-06 - Consolidate Multiple QuerySelectorAll Traversals
+
 **Learning:** Performing multiple independent `querySelectorAll` calls within a high-frequency loop (like a `MutationObserver` processing added nodes) causes redundant O(N) DOM tree traversals. While combining CSS selectors with a comma (e.g., `querySelectorAll('a, b')`) solves the traversal issue, it groups distinct elements together.
 **Action:** Combine selectors into a single comma-separated string for `querySelectorAll` to minimize DOM traversals. Inside the loop, differentiate the returned nodes by evaluating their `tagName` property (which is always uppercase for HTML tags) to safely execute type-specific logic while maintaining O(1) traversal benefits.
 
 ## 2024-08-07 - Avoid for...of loops in MutationObserver callbacks
+
 **Learning:** Using `for...of` loops in high-frequency execution paths (like `MutationObserver` callbacks) creates unnecessary iterator allocation overhead on every tick. This forces the garbage collector to work harder to clean up the allocated iterators, which can lead to UI jank.
 **Action:** Always prefer standard `for` loops (e.g., `for (let i = 0; i < list.length; i++)`) over `for...of` loops when iterating through collections (like `mutationsList` or `addedNodes`) in performance-critical or high-frequency code paths.
 
 ## 2024-08-15 - Redundant descendant removal in DOM manipulation
+
 **Learning:** When removing a parent DOM element, explicit queries and explicit removals of its child elements are redundant and waste CPU cycles, as removing the ancestor implicitly removes its entire subtree from the document, saving O(N) DOM traversal and reducing layout thrashing.
 **Action:** When refactoring element removal logic, identify and eliminate redundant `querySelector` and `remove()` calls on descendants prior to removing their parent container. Ensure test assertions for those redundant actions are also removed or set to `not.toHaveBeenCalled()`.
+
 ## 2024-08-16 - Replace querySelector with getElementById for ID selectors
+
 **Learning:** `querySelector('#id')` uses the generic CSS selector parser which is flexible but slower (O(N) traversal overhead in some engines) compared to `getElementById('id')`, which performs a direct O(1) hash map lookup.
 **Action:** When searching for an element by its ID, always replace `querySelector('#id')` with `getElementById('id')` to optimize initialization or lookup speed, especially in performance-critical code paths.
 
 ## 2024-08-18 - Avoid O(N) Traversal for Element Initialization
+
 **Learning:** Initializing element references at the top level of scripts via `querySelector('#id')` or `querySelector('.class')` forces the browser to unnecessarily parse CSS selectors and traverse the DOM tree (O(N) operations), which slightly degrades performance on initial load compared to dedicated hash map or live collection lookups.
 **Action:** When finding a single element by its ID or class to initialize an observer or handle static assignments outside of loops, always use `document.getElementById('id')` for O(1) hash map lookup, or `document.getElementsByClassName('class')[0]` for O(1) live collection lookups, over generic `querySelector` calls.
 
 ## 2024-08-20 - Replace O(N) querySelectorAll with O(1) getElementsByClassName for class lists
+
 **Learning:** When removing a list of elements based on a list of class selectors, using a combined `querySelectorAll('.class1, .class2')` forces the browser to parse the selector and traverse the entire DOM tree (O(N) traversal).
 **Action:** Replace `querySelectorAll` with a loop over the class names, calling `document.getElementsByClassName('class')` for each. Since `getElementsByClassName` performs an O(1) live collection lookup, this is significantly faster. Crucially, because `getElementsByClassName` returns a live `HTMLCollection`, iterate through it using a backward `for` loop (e.g., `for (let i = collection.length - 1; i >= 0; i--)`) to safely remove elements without causing index shifting bugs.
 
 ## 2024-08-21 - [Avoid .matches() with complex selectors in hot paths]
+
 **Learning:** Using `element.matches(selector)` with complex, multi-part CSS selectors (e.g. `tag1, tag2, .class1`) inside a high-frequency `MutationObserver` loop forces the browser to heavily engage the CSS selector parsing engine on every DOM node mutation, adding severe main-thread overhead.
 **Action:** Replace `element.matches()` calls inside high-frequency observer paths with direct string equality checks (e.g. `element.tagName === 'TAG'`), or for multiple tags, pre-compile an O(1) `Set` of tag names outside the loop and use `set.has(element.tagName)`.
 
 ## 2026-09-20 - Cache Live HTMLCollections in Intervals
+
 **Learning:** While getElementsByClassName and getElementsByTagName are O(1) operations that return live HTMLCollections, calling them repeatedly inside high-frequency intervals (like a 500ms setInterval) still incurs function call overhead on every tick.
 **Action:** Cache the live HTMLCollection returned by these methods globally outside the interval. Because the collection is live, it automatically updates when the DOM changes, eliminating all query function calls inside the loop.
 
 ## 2026-09-20 - Optimize for loop iteration
+
 **Learning:** In standard for loops, looking up the length of an array/collection on every iteration (`i < list.length`) adds overhead.
 **Action:** Cache the length (`let len = list.length; for (let i = 0; i < len; i++)`) to avoid the repeated property lookup and slightly improve performance.
 
 ## 2024-11-20 - O(1) CSS Injection vs querySelectorAll for static elements
+
 **Learning:** To optimize O(N) DOM traversals for hiding multiple static element classes or IDs (e.g., ad blocking), avoid repeatedly using `querySelectorAll` in JavaScript loops or high-frequency MutationObserver callbacks.
 **Action:** Construct a single `<style>` element containing `{ display: none !important; }` for the combined selectors and inject it once into the document. This leverages the browser's highly optimized native CSS engine to process layout updates instantly.
 
 ## 2024-11-20 - Cache live HTMLCollections to avoid polling overhead
+
 **Learning:** In polling loops like `setInterval`, repeatedly calling `document.getElementsByClassName` performs redundant DOM lookups on every tick, even though the returned `HTMLCollection` is live.
 **Action:** Initialize the live `HTMLCollection`s once as class properties or global variables outside the interval. Return these cached live collections from getter methods to eliminate O(1) query function call overhead on every tick while still automatically reflecting dynamic DOM changes.
 **Learning:** High-frequency MutationObserver callbacks can suffer from micro-jank if standard for loops do not cache the array/collection length, causing repeated property lookups on every single loop iteration.
 **Action:** Always cache the length in a standard for loop initialization (e.g., let i = 0, len = array.length; i < len; i++) when iterating in performance-critical paths.
 
 ## 2026-09-20 - Avoid .closest() with complex selectors in hot paths
+
 **Learning:** Using `.closest()` with multi-part CSS selectors (e.g., `.closest("tag1, tag2")`) invokes the browser's CSS selector parsing engine, which introduces significant main-thread overhead inside high-frequency contexts like `MutationObserver` loops.
 **Action:** Replace `.closest()` calls that use complex selectors with manual `parentElement` traversal and O(1) `tagName` string equality checks to bypass the CSS parsing engine entirely.
 
 ## Prevention Directives for Automated Refactoring
+
 - **Never Overwrite Complete Files**: Always use range-scoped replacement chunks (`StartLine`/`EndLine`) for edits to `schema.prisma`, `index.ts`, `public/index.php`, or DDL SQL scripts.
 - **Do Not Remove Core Declarations**: Do not delete existing route registrations or database DDL tables.
 - **Environment Isolation Compatibility**: When replacing fallback secrets, preserve test environment execution via `!getenv('APP_ENV')` or `getenv('APP_ENV') === 'testing'`.
@@ -195,14 +249,17 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 - **No Unresolved Conflict Markers**: Never stage or commit files containing Git merge conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`, `|||||||`). Always resolve conflicts cleanly before committing.
 
 ## Hallucinatory Task & Empty PR Directives
+
 - **Zero-Diff Task Termination**: If the requested optimization, refactor, or fix is ALREADY natively present in the target branch, DO NOT create an empty pull request or commit an acknowledgment PR. Exit the task cleanly without opening a PR.
 - **Stale Suggestion Guard**: Always verify the current code on `main`/`master` before planning changes. If no actionable diff is required, cancel task execution immediately.
 
 ## 2025-01-01 - Reverting .closest() manual optimization
+
 **Learning:** Native element.closest() is implemented in C++ and heavily optimized; repeatedly crossing the JS-to-C++ boundary in a loop is an anti-pattern that degrades both performance and readability.
 **Action:** Always prefer native element.closest() over manual while(parent) DOM traversal loops.
 
 ## Prevention Directives for Automated Refactoring
+
 - **Never Overwrite Complete Files**: Always use range-scoped replacement chunks for edits to `schema.prisma`, `index.ts`, `public/index.php`, `db/schema.rb`, or DDL SQL scripts.
 - **Do Not Remove Core Declarations**: Do not delete existing route registrations or database DDL tables.
 - **Environment Isolation Compatibility**: When replacing fallback secrets, preserve test environment execution via `!getenv('APP_ENV')` or `getenv('APP_ENV') === 'testing'`.
@@ -210,36 +267,44 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 - **No Unresolved Conflict Markers**: Never stage or commit files containing Git merge conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`, `|||||||`). Always resolve conflicts cleanly before committing.
 
 ## Completeness & Verification Directives
+
 - **Explicit Parameter & Contract Validation**: When creating or modifying API endpoints (Express, Fastify, Rails, Laravel), always implement explicit parameter and request body validation schemas (e.g. `z.string().uuid()`) to prevent unhandled 404/500 fallthroughs.
 - **Database Indexing for Queries**: When addressing query bottlenecks or adding query lookup filters, always implement native database index migrations rather than loading collections into memory and performing array filtering (`.filter()`, `.select`).
 - **Co-Occurring Dependency Auditing**: When bumping any dependency version, verify that other transitive dependencies do not carry high/critical security advisories (e.g. run `bundler-audit`, `npm audit`). Never introduce a version bump that breaks underlying framework APIs.
 - **Self-Verification Before Commit**: Always run syntax checks (`bash -n` for shell scripts, `tsc --noEmit` for TypeScript, linter checks) and targeted test runners locally before opening or updating a PR.
 
 ## Hallucinatory Task & Empty PR Directives
+
 - **Zero-Diff Task Termination**: If the requested optimization, refactor, or fix is ALREADY natively present in the target branch, DO NOT create an empty pull request or commit an acknowledgment PR. Exit the task cleanly without opening a PR.
 - **Stale Suggestion Guard**: Always verify the current code on `main`/`master` before planning changes. If no actionable diff is required, cancel task execution immediately.
 
 ## 2026-09-20 - Cache Live HTMLCollections in MutationObserver
+
 **Learning:** To optimize high-frequency MutationObserver callbacks, cache live HTMLCollections (e.g., those returned by getElementsByClassName) globally outside the observer. Although querying them is O(1), repeatedly calling the function inside the mutation tick incurs unnecessary execution overhead, whereas the cached live collection automatically reflects DOM changes without requiring re-queries.
 **Action:** Cache the live HTMLCollection globally outside the observer. Because the collection is live, it automatically updates when the DOM changes, eliminating all query function calls inside the loop.
+
 ## 2026-09-25 - Optimize O(N) DOM element removal with CSS
+
 **Learning:** To optimize O(N) DOM traversals for hiding multiple static element classes (e.g., ad blocking), avoid repeatedly using DOM queries in JavaScript loops. Instead, construct a single <style> element containing '{ display: none !important; }' for the combined selectors and inject it once into the document. This leverages the browser's highly optimized native CSS engine to process layout updates instantly.
 **Action:** When hiding multiple elements by class, use a single CSS injection instead of JS loops to eliminate JS-to-C++ crossing overhead and avoid forced layout reflows.
 
 ## 2026-09-29 - Eliminate MutationObservers for nested ad removal using CSS :has()
+
 **Learning:** Using JavaScript MutationObservers to check if dynamically loaded container elements have specific child classes (e.g., ad labels) introduces significant main-thread CPU overhead on infinite-scrolling pages.
 **Action:** Completely eliminate the MutationObserver and JavaScript DOM traversal by injecting a single `<style>` element using the CSS `:has()` pseudo-class (e.g., `.container:has(.ad) { display: none !important; }`). The browser's native CSS engine evaluates this instantly in C++ for both static and dynamically added elements.
 
 ## Assertiveness, Decisive PR Execution & Comparative Recommendations
+
 - **Proactive & Decisive PR Submission**: Do NOT repeatedly pause to ask permission to open a pull request (e.g., avoid "Would you like me to open a PR for this?", "Can I submit the PR?", "Should I go ahead and create the PR?"). When an optimization, fix, or feature satisfies requirements, passes local test runners/linters, and preserves architectural invariants, proceed decisively to create and submit the Pull Request with a clear, structured summary and rationale.
 - **Explicit Recommendations on Options**: When presenting multiple implementation strategies or architecture options (e.g., Option A vs. Option B), NEVER leave the choice open-ended or passive. Always make an explicit, reasoned recommendation (prefixed with `(Recommended)`) based on **overall technical effectiveness**:
-  1. *Algorithmic & Complexity Gains*: Time and space complexity impact (O(N*M) -> O(N+M), reduction of nested scans).
-  2. *Resource Overhead*: Heap allocations, memory pressure, and GC pause reduction.
-  3. *Domain & Architecture Invariants*: Strict backward compatibility, contract stability, and prevention of regression risks.
-  4. *Security & Reliability*: Input validation, cryptographic safety, and concurrency safety.
+    1. _Algorithmic & Complexity Gains_: Time and space complexity impact (O(N\*M) -> O(N+M), reduction of nested scans).
+    2. _Resource Overhead_: Heap allocations, memory pressure, and GC pause reduction.
+    3. _Domain & Architecture Invariants_: Strict backward compatibility, contract stability, and prevention of regression risks.
+    4. _Security & Reliability_: Input validation, cryptographic safety, and concurrency safety.
 - **Lead with Recommended Path**: State clearly why the recommended solution delivers the highest net value and immediately execute or propose it as the primary course of action rather than asking open-ended questions.
 
 ## Scope Verification, Minimal Churn & CI Protection Directives
+
 - **Scope Verification Before Variable Binding**: When adding interactive states or accessibility attributes (e.g. `disabled={loading}`, `aria-busy={loading}`, `isSubmitting`), NEVER assume a variable identifier exists. Always inspect component props, local state hooks (`useState`), or declaration scope first. If not defined, declare the state hook or reuse an existing scope variable. Never introduce TS2304 / TS2552 ("Cannot find name") compile errors.
 - **Surgical Edits Only (No Whole-File Formatting)**: Never run whole-file code formatters (Prettier, Black, Pint, rustfmt) across unmodified lines. Changes must be strictly range-scoped and limited to the minimal AST block needed. Avoid noisy quote/whitespace churn that masks real logic changes and causes merge conflicts. Verify with `git diff -w` that non-functional churn is zero.
 - **Zero Scratch File Commits**: Never stage or commit ad-hoc verification, patch, or debug scripts (`test.cjs`, `fix_*.cjs`, `fix_*.php`, `patch_*.py`, `patch_*.sh`, `scratch_*`). Execute checks via the project's native test commands (`npm test`, `pytest`, `phpunit`, etc.) and delete temporary scripts before creating git commits.
@@ -247,50 +312,74 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 - **Explicit Parameter & Variable Types**: In TypeScript files, avoid implicit `any` by always providing explicit types on functions, parameters, and arrow callbacks (e.g. `(id: string) => ...`). Verify zero type errors with `tsc --noEmit` before committing.
 
 ## 2026-09-29 - Surgical Optimization Edits and No Scratch Script Commits
+
 **Learning:** Running whole-file formatters or regenerating entire components while performing performance optimizations introduces massive whitespace/formatting diffs (1,000+ lines), masking the real optimization, invalidating git blame, and causing painful merge conflicts with concurrent PRs. Additionally, committing scratch benchmark or patch scripts (`patch_*.py`, `test.cjs`) pollutes production repositories and triggers CI guardrail failures.
 **Action:** Restrict all algorithmic and performance optimizations to strictly scoped replacement chunks. Diff size must reflect only the functional optimization. Always clean up temporary benchmark or patch scripts with `git rm -f` before committing.
+
 ## 2026-10-02 - CSS :has() for O(1) Ad Blocking
+
 **Learning:** Repeatedly using DOM queries and element mutations (like .remove()) in JavaScript loops causes JS-to-C++ crossing overhead and forces layout reflows.
 **Action:** Construct a single <style> element containing { display: none !important; } with CSS :has() for combined selectors and inject it once to leverage the native CSS engine.
+
 ## 2026-10-02 - Eliminate MutationObservers for ad removal using CSS :has()
+
 **Learning:** Using JavaScript MutationObservers to check if dynamically loaded container elements have specific child classes (e.g., ad slots) introduces significant main-thread CPU overhead on infinite-scrolling pages. Repeatedly querying the DOM and crossing the JS-to-C++ boundary degrades performance.
 **Action:** Completely eliminate the MutationObserver and JavaScript DOM traversal by injecting a single `<style>` element using the CSS `:has()` pseudo-class (e.g., `ytd-rich-item-renderer:has(.ytd-ad-slot-renderer) { display: none !important; }`). The browser native CSS engine evaluates this instantly in C++ for both static and dynamically added elements, ensuring O(1) performance.
 \n\n## Important Process Rules\n- **Do NOT perform whole-file code formatting.** Only apply necessary changes specifically related to the task. Formatting existing, untouched code creates massive PR diffs that are hard to review.\n- **Only write your journal to your matching file (`.jules/bolt.md`).** Do not edit or create journal files for other personas.\n
+
 ## Additive Documentation & Scratch Cleanliness Directives
+
 - **Strictly Additive Journal Updates**: When updating `.jules/*.md`, strictly append new dated entries (`## YYYY-MM-DD - Title`). NEVER delete, truncate, or overwrite historical learnings or previous entries.
 - **Substantive Code Diff Requirement**: Pull requests must include substantive code changes in `src/`, `app/`, `lib/`, or `tests/`. Never open PRs that modify only `.jules/*.md` journals or root scratch scripts.
 - **Zero Scratch File Commits**: Never commit `*.diff`, `*.patch`, `test_*.ts`, `test_*.js`, `test.cjs`, `fix_*.php`, or `patch_*.py` files. Always remove temporary debugging or verification scripts prior to committing.
 
 ## Scope Quarantine, Journaling & Security Test Invariants
+
 - **Strictly Append-Only Journaling**: When adding learnings to `.jules/*.md`, append strictly at the end of the file. Do not rewrite, deduplicate, or remove lines beginning with `## YYYY-MM-DD`.
 - **Surgical Scope Quarantine**: Modify only the files directly involved in the issue and their corresponding test fixtures. Do not delete, rename, or perform drive-by cleanups of unrelated root-level scripts or legacy files.
 - **Coupled Test Fixture Awareness for Security Invariants**: When changing fail-open fallback behavior (such as hardening decryption to fail closed), always update upstream test mocks that rely on plaintext credentials or mock values.
 
 ## 2025-02-20 - Fast-pathing URL Parsing
+
 **Learning:** Checking for the existence of a query string using `indexOf('?')` before initializing and iterating through `URLSearchParams` significantly reduces overhead for URLs without query parameters. However, completely removing `new URL()` bypasses native URL validation, causing test regressions when the application expects invalid URLs to throw.
 **Action:** Use fast-path string methods to bypass expensive parsing logic for empty cases, but retain a bare `new URL(urlString)` call to ensure native validation exceptions are preserved.
 
 ## 2026-10-12 - Fast-pathing URLSearchParams
+
 **Learning:** Checking for the existence of a valid query string using simple string checks (like `!search` or `== '?'`) before initializing and iterating through `URLSearchParams` significantly reduces overhead for URLs without query parameters.
 **Action:** Use fast-path string methods to bypass expensive parsing logic for empty cases.
+
 ## 2025-01-20 - Optimize hot path URL extraction
+
 **Learning:** Relying on try/catch blocks that intentionally throw for common types (like native getters failing on primitive strings) introduces massive overhead in high-frequency network interceptors. Catching native exceptions is significantly slower than simple type checking.
 **Action:** Always include a fast-path type check (e.g., `typeof url === "string"`) before attempting reflective native getter calls in hot paths to bypass exception handling overhead.
+
 ## 2025-02-23 - Lazy instantiation of URLSearchParams
+
 **Learning:** Instantiating `URLSearchParams` parses the entire query string into a key-value map. If the application performs early returns based on basic path or hostname matching, allocating and parsing `URLSearchParams` unconditionally before these fast-path checks introduces unnecessary performance overhead for unsupported domains.
 **Action:** Always defer the instantiation of `URLSearchParams` until after all early-return conditions (like hostname verification or cache hits) have been evaluated to prevent wasted CPU cycles on unmatched domains.
 
 ## 2026-10-23 - Fast-pathing Date parsing inside loops
+
 **Learning:** Instantiating `new Date()` with an empty or invalid string introduces expensive native object allocation and processing overhead, especially inside loops. Using early returns or `continue` to bypass this can inadvertently skip subsequent loop logic and drop data.
 **Action:** Always wrap expensive `new Date()` instantiations inside localized conditional blocks (e.g., `if (isValid) { ... }`) to fast-path empty cases without prematurely aborting the loop iteration.
 
 ## 2025-02-23 - Avoid unnecessary DOM property lookups in high-frequency loops
+
 **Learning:** High-frequency `setInterval` loops that poll for DOM elements (like ads) often execute when the target state is absent. Unconditionally accessing properties like `dom.elements[0]` adds unnecessary overhead.
 **Action:** Use fast-path early returns checking live `HTMLCollection.length === 0` to immediately skip processing when the target state is absent.
+
 ## 2026-10-30 - Fast-path early return checking HTMLCollection.length
+
 **Learning:** High-frequency `setInterval` loops that poll for DOM elements (like ads or quiz elements) often execute when the target state is absent. Unconditionally accessing properties like `dom.elements[0]` or making unnecessary function calls adds unnecessary overhead.
 **Action:** Use fast-path early returns checking live `HTMLCollection.length === 0` to immediately skip processing when the target state is absent, avoiding unnecessary property accesses and function calls.
 
 ## 2024-11-01 - Replace .closest() with .parentElement traversal in high-frequency MutationObserver
+
 **Learning:** Checking DOM elements with `element.closest()` evaluates CSS selectors (like `'YTD-VIDEO-RENDERER, YTD-COMPACT-VIDEO-RENDERER'`) and initiates tree traversals, which becomes expensive (up to 8x slower) in high-frequency functions like `MutationObserver` callbacks.
 **Action:** When manually traversing DOM elements upward in a hot path or loop, prefer a fast-path `while` loop using native `element.parentElement` alongside simple property checks (`tagName`, `classList`) to prevent the overhead of `closest` and CSS evaluation.
+
+## 2026-11-02 - Fast-pathing property access in loops
+
+**Learning:** In high-frequency loops like setInterval, allocating and referencing elements conditionally based on state (e.g. ad showing) avoids unnecessary property lookups.
+**Action:** Use fast-path early returns to skip elements and conditionally access object properties when their usage is not needed.

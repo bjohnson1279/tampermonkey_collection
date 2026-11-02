@@ -412,11 +412,9 @@
         // ⚡ Bolt: Fast-path early return to avoid unnecessary property accesses when no ad is showing (the 99% case).
         if (adShowingElements.length === 0 && skipBtnElements.length === 0) return;
 
-        const video: HTMLVideoElement | null = videoElements[0] ?? null;
-        if (!video) return;
-
         if (adShowingElements.length > 0) {
-            if (Number.isFinite(video.duration)) {
+            const video: HTMLVideoElement | null = videoElements[0] ?? null;
+            if (video && Number.isFinite(video.duration)) {
                 video.currentTime = video.duration;
             }
         }
