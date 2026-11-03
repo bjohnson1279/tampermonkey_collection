@@ -64,3 +64,4 @@ This repository contains TypeScript-based Tampermonkey userscripts and browser e
 ## License
 
 MIT
+<!-- Minor update -->
