@@ -258,3 +258,7 @@
 ## 2026-10-29 - Better contrast on keyboard shortcut hints
 **Learning:** The light transparent background on `<kbd>` elements (`rgba(255, 255, 255, 0.2)`) doesn't provide enough contrast on light backgrounds (like the blue button in `tvdbScraper`) and can be hard to read. Using a dark transparent background (`rgba(0, 0, 0, 0.2)`) with a light text/border provides much better universal contrast on colored buttons.
 **Action:** Use `rgba(0, 0, 0, 0.2)` for `<kbd>` backgrounds on colored buttons to ensure adequate contrast.
+
+## YYYY-MM-DD - Avoid Double Screen Reader Announcements
+**Learning:** Updating an `aria-live` region at the same time an `aria-checked` attribute changes on a focused element causes screen readers to announce the state change twice.
+**Action:** When a button toggles state, only update the associated live region if the button does not currently have focus (e.g. when toggled via a global keyboard shortcut), relying on the native `aria-checked` announcement when focused.

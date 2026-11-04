@@ -629,8 +629,9 @@
         }
 
         const announcer: HTMLElement | null = document.getElementById('adblock-announcer');
-        if (announcer) {
-            // Update announcer text to ensure screen readers read the new state, especially useful when toggled via hotkey
+        // Only update announcer if the button itself doesn't have focus, to avoid double-announcing
+        // since screen readers already announce changes to aria-checked on focused elements natively.
+        if (announcer && document.activeElement !== btn) {
             announcer.textContent = `AdBlock is now ${enabled ? 'ON' : 'OFF'}`;
         }
 
