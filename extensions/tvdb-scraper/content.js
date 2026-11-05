@@ -158,6 +158,7 @@ export function scrapeTVDBData() {
                 target.tagName === 'TEXTAREA' ||
                 target.isContentEditable;
             if (!isInput && e.shiftKey && e.key.toLowerCase() === 'c') {
+                e.preventDefault();
                 btn.click();
             }
         });
