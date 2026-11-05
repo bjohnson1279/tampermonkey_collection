@@ -271,12 +271,12 @@
         if (adShowingElements.length === 0 && skipBtnElements.length === 0)
             return;
         if (adShowingElements.length > 0) {
-            const video = videoElements[0] ?? null;
+            const video = videoElements.length > 0 ? (videoElements[0] ?? null) : null;
             if (video && Number.isFinite(video.duration)) {
                 video.currentTime = video.duration;
             }
         }
-        const skipBtn = skipBtnElements[0];
+        const skipBtn = skipBtnElements.length > 0 ? skipBtnElements[0] : undefined;
         if (skipBtn)
             skipBtn.click();
     }

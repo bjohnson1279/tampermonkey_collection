@@ -413,13 +413,13 @@
         if (adShowingElements.length === 0 && skipBtnElements.length === 0) return;
 
         if (adShowingElements.length > 0) {
-            const video: HTMLVideoElement | null = videoElements[0] ?? null;
+            const video: HTMLVideoElement | null = videoElements.length > 0 ? (videoElements[0] ?? null) : null;
             if (video && Number.isFinite(video.duration)) {
                 video.currentTime = video.duration;
             }
         }
 
-        const skipBtn = skipBtnElements[0] as HTMLElement | undefined;
+        const skipBtn = skipBtnElements.length > 0 ? (skipBtnElements[0] as HTMLElement | undefined) : undefined;
         if (skipBtn) skipBtn.click();
     }
 
