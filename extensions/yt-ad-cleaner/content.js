@@ -455,7 +455,7 @@
             styleButtonDynamic(btn);
         }
         const announcer = document.getElementById('adblock-announcer');
-        if (announcer) {
+        if (announcer && document.activeElement !== btn) {
             announcer.textContent = `AdBlock is now ${enabled ? 'ON' : 'OFF'}`;
         }
         showToast(enabled ? '🛡️' : '⚠️', `AdBlock is now ${enabled ? 'ON' : 'OFF'}`, enabled);
@@ -466,6 +466,7 @@
         const target = e.target;
         const isInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
         if (!isInput && e.shiftKey && e.key.toLowerCase() === 'a') {
+            e.preventDefault();
             toggleAdblock();
         }
     });

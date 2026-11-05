@@ -262,3 +262,6 @@
 ## YYYY-MM-DD - Avoid Double Screen Reader Announcements
 **Learning:** Updating an `aria-live` region at the same time an `aria-checked` attribute changes on a focused element causes screen readers to announce the state change twice.
 **Action:** When a button toggles state, only update the associated live region if the button does not currently have focus (e.g. when toggled via a global keyboard shortcut), relying on the native `aria-checked` announcement when focused.
+## 2024-11-05 - Prevent default browser behavior on custom shortcuts
+**Learning:** Custom keyboard shortcuts inside web pages (like `Shift+A` or `Shift+C`) should call `e.preventDefault()` to stop the browser from triggering its default shortcut actions unexpectedly.
+**Action:** When adding keyboard shortcuts globally via `document.addEventListener("keydown")`, ensure that `e.preventDefault()` is invoked before executing the script logic.

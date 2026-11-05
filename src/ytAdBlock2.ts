@@ -650,6 +650,7 @@
             target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
 
         if (!isInput && e.shiftKey && e.key.toLowerCase() === 'a') {
+            e.preventDefault();
             toggleAdblock();
         }
     });
