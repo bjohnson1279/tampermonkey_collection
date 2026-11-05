@@ -383,3 +383,8 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 
 **Learning:** In high-frequency loops like setInterval, allocating and referencing elements conditionally based on state (e.g. ad showing) avoids unnecessary property lookups.
 **Action:** Use fast-path early returns to skip elements and conditionally access object properties when their usage is not needed.
+
+## 2026-11-02 - Fast-path property access for live HTMLCollections
+
+**Learning:** Accessing an index on a live `HTMLCollection` when it's empty can trigger a JS-to-C++ boundary crossing and force an unnecessary tree traversal or evaluation.
+**Action:** Always check the `.length` property first to fast-path early returns and avoid index property access on empty collections.
