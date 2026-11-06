@@ -242,4 +242,269 @@ describe('scrapeTVDBData', () => {
             configurable: true,
         });
     });
+
+    it('should handle successful copy interaction and update UI accordingly', async () => {
+        jest.useFakeTimers();
+
+        const originalClipboard = navigator.clipboard;
+        const writeTextMock = jest.fn().mockResolvedValue(undefined);
+        Object.defineProperty(navigator, 'clipboard', {
+            value: {
+                writeText: writeTextMock,
+            },
+            configurable: true,
+        });
+
+        document.body.innerHTML = `
+            <div class="list-group">
+                <div class="list-group-item">
+                    <div class="list-group-item-heading">
+                        <span class="episode-label">S01E01</span>
+                        <a href="/some/link">Pilot</a>
+                    </div>
+                </div>
+                <div class="list-group-item">
+                    <div class="list-group-item-heading">
+                        <span class="episode-label">S01E02</span>
+                        <a href="/some/link2">Second</a>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        scrapeTVDBData();
+        const btn = document.getElementById('tvdb-copy-json-btn') as HTMLButtonElement;
+        const announcer = document.querySelector('[aria-live="polite"]') as HTMLDivElement;
+
+        expect(btn.textContent).toContain('Copy JSON (2 episodes)');
+
+        btn.click();
+        expect(btn.textContent).toContain('Copying...');
+        expect(announcer.textContent).toBe('Copying to clipboard...');
+
+        await Promise.resolve();
+
+        expect(writeTextMock).toHaveBeenCalledTimes(1);
+        expect(btn.textContent).toContain('✅');
+        expect(btn.textContent).toContain('Copied!');
+        expect(btn.style.backgroundColor).toBe('rgb(20, 108, 67)'); // #146c43
+        expect(btn.getAttribute('title')).toBe('Successfully copied');
+        expect(announcer.textContent).toBe('Copied to clipboard');
+
+        jest.advanceTimersByTime(2000);
+
+        expect(btn.textContent).toContain('Copy JSON (2 episodes)');
+        expect(btn.style.backgroundColor).toBe('rgb(0, 86, 179)'); // #0056b3
+        expect(btn.getAttribute('title')).toBe('Copy JSON to clipboard (Shift+C)');
+        expect(btn.getAttribute('aria-keyshortcuts')).toBe('Shift+C');
+        expect(announcer.textContent).toBe('');
+        expect(btn.getAttribute('aria-disabled')).toBeNull();
+
+        jest.useRealTimers();
+        Object.defineProperty(navigator, 'clipboard', {
+            value: originalClipboard,
+            configurable: true,
+        });
+    });
+
+    it('should not initiate copy if button has aria-disabled="true"', () => {
+        document.body.innerHTML = '<div class="list-group"></div>';
+
+        const writeTextMock = jest.fn();
+        Object.assign(navigator, {
+            clipboard: {
+                writeText: writeTextMock,
+            },
+        });
+
+        scrapeTVDBData();
+        const btn = document.getElementById('tvdb-copy-json-btn') as HTMLButtonElement;
+        expect(btn.getAttribute('aria-disabled')).toBe('true');
+
+        btn.click();
+
+        expect(writeTextMock).not.toHaveBeenCalled();
+        expect(btn.textContent).toContain('No Data');
+    });
+
+    it('should trigger button click via Shift+C keyboard shortcut when not typing in inputs', () => {
+        document.body.innerHTML = `
+            <div class="list-group">
+                <div class="list-group-item">
+                    <div class="list-group-item-heading">
+                        <span class="episode-label">S01E01</span>
+                        <a href="/some/link">Pilot</a>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        scrapeTVDBData();
+        const btn = document.getElementById('tvdb-copy-json-btn') as HTMLButtonElement;
+        const clickSpy = jest.spyOn(btn, 'click');
+
+        // Normal Shift+c
+        const eventLower = new KeyboardEvent('keydown', {
+            key: 'c',
+            shiftKey: true,
+            bubbles: true,
+            cancelable: true,
+        });
+        document.dispatchEvent(eventLower);
+        expect(clickSpy).toHaveBeenCalledTimes(1);
+
+        // Shift+C uppercase
+        const eventUpper = new KeyboardEvent('keydown', {
+            key: 'C',
+            shiftKey: true,
+            bubbles: true,
+            cancelable: true,
+        });
+        document.dispatchEvent(eventUpper);
+        expect(clickSpy).toHaveBeenCalledTimes(2);
+
+        // Should ignore if modifiers are pressed
+        const ctrlEvent = new KeyboardEvent('keydown', {
+            key: 'c',
+            shiftKey: true,
+            ctrlKey: true,
+            bubbles: true,
+        });
+        document.dispatchEvent(ctrlEvent);
+        expect(clickSpy).toHaveBeenCalledTimes(2);
+
+        const metaEvent = new KeyboardEvent('keydown', {
+            key: 'c',
+            shiftKey: true,
+            metaKey: true,
+            bubbles: true,
+        });
+        document.dispatchEvent(metaEvent);
+        expect(clickSpy).toHaveBeenCalledTimes(2);
+
+        const altEvent = new KeyboardEvent('keydown', {
+            key: 'c',
+            shiftKey: true,
+            altKey: true,
+            bubbles: true,
+        });
+        document.dispatchEvent(altEvent);
+        expect(clickSpy).toHaveBeenCalledTimes(2);
+
+        // Should ignore if different key is pressed
+        const otherKeyEvent = new KeyboardEvent('keydown', {
+            key: 'x',
+            shiftKey: true,
+            bubbles: true,
+        });
+        document.dispatchEvent(otherKeyEvent);
+        expect(clickSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it('should ignore Shift+C keyboard shortcut when typing inside input, textarea, or contentEditable', () => {
+        document.body.innerHTML = `
+            <div class="list-group">
+                <div class="list-group-item">
+                    <div class="list-group-item-heading">
+                        <span class="episode-label">S01E01</span>
+                        <a href="/some/link">Pilot</a>
+                    </div>
+                </div>
+            </div>
+            <input id="test-input" type="text" />
+            <textarea id="test-textarea"></textarea>
+            <div id="test-editable" contenteditable="true"></div>
+        `;
+
+        scrapeTVDBData();
+        const btn = document.getElementById('tvdb-copy-json-btn') as HTMLButtonElement;
+        const clickSpy = jest.spyOn(btn, 'click');
+
+        const input = document.getElementById('test-input') as HTMLInputElement;
+        const textarea = document.getElementById('test-textarea') as HTMLTextAreaElement;
+        const editable = document.getElementById('test-editable') as HTMLDivElement;
+        // In JSDOM, contentEditable attribute doesn't automatically reflect isContentEditable property
+        Object.defineProperty(editable, 'isContentEditable', { value: true, configurable: true });
+
+        input.dispatchEvent(
+            new KeyboardEvent('keydown', {
+                key: 'c',
+                shiftKey: true,
+                bubbles: true,
+            })
+        );
+        expect(clickSpy).not.toHaveBeenCalled();
+
+        textarea.dispatchEvent(
+            new KeyboardEvent('keydown', {
+                key: 'c',
+                shiftKey: true,
+                bubbles: true,
+            })
+        );
+        expect(clickSpy).not.toHaveBeenCalled();
+
+        editable.dispatchEvent(
+            new KeyboardEvent('keydown', {
+                key: 'c',
+                shiftKey: true,
+                bubbles: true,
+            })
+        );
+        expect(clickSpy).not.toHaveBeenCalled();
+    });
+
+    it('should handle invalid date string gracefully', () => {
+        document.body.innerHTML = `
+            <div class="list-group">
+                <div class="list-group-item">
+                    <div class="list-group-item-heading">
+                        <span class="episode-label">S01E01</span>
+                    </div>
+                    <ul class="list-inline">
+                        <li>Invalid Date String</li>
+                    </ul>
+                </div>
+            </div>
+        `;
+
+        const episodes = scrapeTVDBData();
+        expect(episodes[0].release).toBe('');
+    });
+
+    it('should catch and log error if date parsing throws an exception', () => {
+        const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+        document.body.innerHTML = `
+            <div class="list-group">
+                <div class="list-group-item">
+                    <div class="list-group-item-heading">
+                        <span class="episode-label">S01E01</span>
+                    </div>
+                    <ul class="list-inline">
+                        <li>October 1, 2023</li>
+                    </ul>
+                </div>
+            </div>
+        `;
+
+        const originalDate = global.Date;
+        // Mock Date constructor to throw
+        const mockDate = function (dateString?: string) {
+            if (dateString) {
+                throw new Error('Date parsing failed');
+            }
+            return new originalDate();
+        } as unknown as DateConstructor;
+        mockDate.prototype = originalDate.prototype;
+        global.Date = mockDate;
+
+        const episodes = scrapeTVDBData();
+
+        expect(episodes[0].release).toBe('');
+        expect(consoleSpy).toHaveBeenCalledWith('Error parsing date:', 'Date parsing failed');
+
+        global.Date = originalDate;
+        consoleSpy.mockRestore();
+    });
 });
