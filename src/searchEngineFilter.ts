@@ -65,8 +65,11 @@ interface SearchEngines {
                 return;
             }
 
-            const params: URLSearchParams = new URLSearchParams(window.location.search);
-            const query: string | null = params.get(engine.queryParam);
+            // ⚡ Bolt: Fast-path query extraction with Regex to avoid O(N) allocation and parsing overhead of URLSearchParams
+            const queryMatch = window.location.search.match(
+                new RegExp(`[?&]${engine.queryParam}=([^&]+)`)
+            );
+            const query: string | null = queryMatch ? decodeURIComponent(queryMatch[1]) : null;
 
             if (query) {
                 const searchQuery: string = query.replace(/\+/g, ' ');
