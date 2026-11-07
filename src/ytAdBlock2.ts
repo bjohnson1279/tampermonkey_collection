@@ -413,13 +413,17 @@
         if (adShowingElements.length === 0 && skipBtnElements.length === 0) return;
 
         if (adShowingElements.length > 0) {
-            const video: HTMLVideoElement | null = videoElements.length > 0 ? (videoElements[0] ?? null) : null;
+            const video: HTMLVideoElement | null =
+                videoElements.length > 0 ? (videoElements[0] ?? null) : null;
             if (video && Number.isFinite(video.duration)) {
                 video.currentTime = video.duration;
             }
         }
 
-        const skipBtn = skipBtnElements.length > 0 ? (skipBtnElements[0] as HTMLElement | undefined) : undefined;
+        const skipBtn =
+            skipBtnElements.length > 0
+                ? (skipBtnElements[0] as HTMLElement | undefined)
+                : undefined;
         if (skipBtn) skipBtn.click();
     }
 
@@ -467,6 +471,7 @@
         updateButtonContent(btn, enabled);
         btn.setAttribute('role', 'switch');
         btn.setAttribute('aria-checked', enabled.toString());
+        btn.setAttribute('aria-label', 'AdBlock');
         btn.setAttribute('title', `${enabled ? 'Disable' : 'Enable'} AdBlock (Shift+A)`);
         btn.setAttribute('aria-keyshortcuts', 'Shift+A');
         styleButtonStatic(btn);
@@ -624,6 +629,7 @@
         if (btn) {
             updateButtonContent(btn, enabled);
             btn.setAttribute('aria-checked', enabled.toString());
+            btn.setAttribute('aria-label', 'AdBlock');
             btn.setAttribute('title', `${enabled ? 'Disable' : 'Enable'} AdBlock (Shift+A)`);
             styleButtonDynamic(btn as HTMLButtonElement);
         }
