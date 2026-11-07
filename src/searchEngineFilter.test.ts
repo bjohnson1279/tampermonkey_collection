@@ -61,9 +61,10 @@ describe('searchEngineFilter', () => {
 
     it('should catch and log errors during processSearch', () => {
         // Mock URLSearchParams to throw an error
-        const OriginalURLSearchParams = global.URLSearchParams;
-        global.URLSearchParams = jest.fn().mockImplementation(() => {
-            throw new Error('Simulated URLSearchParams error');
+        // Mock match to throw an error
+        const originalMatch = String.prototype.match;
+        String.prototype.match = jest.fn().mockImplementation(() => {
+            throw new Error('Simulated regex match error');
         });
 
         // Require the file so the IIFE executes
@@ -73,10 +74,10 @@ describe('searchEngineFilter', () => {
             'Error processing search:',
             expect.any(String)
         );
-        expect(consoleErrorSpy.mock.calls[0][1]).toBe('Simulated URLSearchParams error');
+        expect(consoleErrorSpy.mock.calls[0][1]).toBe('Simulated regex match error');
 
-        // Restore URLSearchParams
-        global.URLSearchParams = OriginalURLSearchParams;
+        // Restore match
+        String.prototype.match = originalMatch;
     });
 
     it('should do nothing if hostname does not match a search engine', () => {

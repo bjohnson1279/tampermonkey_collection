@@ -388,3 +388,8 @@ When replacing default browser behaviors or hiding elements on page load, avoid 
 
 **Learning:** Accessing an index on a live `HTMLCollection` when it's empty can trigger a JS-to-C++ boundary crossing and force an unnecessary tree traversal or evaluation.
 **Action:** Always check the `.length` property first to fast-path early returns and avoid index property access on empty collections.
+
+## 2026-11-12 - Fast-pathing single query parameter extraction
+
+**Learning:** Instantiating `URLSearchParams` parses the entire query string into a key-value map. If an application only needs to extract a single known query parameter (like a search query 'q' or 'p'), unconditional allocation and parsing of all parameters introduces unnecessary overhead.
+**Action:** Use a fast-path regular expression (e.g., `window.location.search.match(new RegExp('[?&]' + paramName + '=([^&]+)'))`) to extract the single value directly from the query string without instantiating `URLSearchParams`.
