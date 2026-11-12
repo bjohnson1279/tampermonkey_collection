@@ -496,7 +496,7 @@ describe('scrapeTVDBData', () => {
             }
             return new originalDate();
         } as unknown as DateConstructor;
-        mockDate.prototype = originalDate.prototype;
+        (mockDate as any).prototype = originalDate.prototype;
         global.Date = mockDate;
 
         const episodes = scrapeTVDBData();
@@ -506,5 +506,77 @@ describe('scrapeTVDBData', () => {
 
         global.Date = originalDate;
         consoleSpy.mockRestore();
+    });
+
+    it('should handle edge cases in date extraction: empty text, network-only text, and multiple date items', () => {
+        document.body.innerHTML = `
+            <div class="list-group">
+                <!-- Episode 1: list item has only network name which gets stripped to empty -->
+                <div class="list-group-item">
+                    <div class="list-group-item-heading">
+                        <span class="episode-label">S01E01</span>
+                        <a href="/ep1">Ep 1</a>
+                    </div>
+                    <ul class="list-inline">
+                        <li>ABC</li>
+                    </ul>
+                </div>
+                <!-- Episode 2: empty list item text -->
+                <div class="list-group-item">
+                    <div class="list-group-item-heading">
+                        <span class="episode-label">S01E02</span>
+                        <a href="/ep2">Ep 2</a>
+                    </div>
+                    <ul class="list-inline">
+                        <li>   </li>
+                    </ul>
+                </div>
+                <!-- Episode 3: multiple list-inline elements where subsequent element updates release -->
+                <div class="list-group-item">
+                    <div class="list-group-item-heading">
+                        <span class="episode-label">S01E03</span>
+                        <a href="/ep3">Ep 3</a>
+                    </div>
+                    <ul class="list-inline">
+                        <li>October 1, 2023</li>
+                    </ul>
+                    <ul class="list-inline">
+                        <li>November 5, 2023</li>
+                    </ul>
+                </div>
+            </div>
+        `;
+
+        const episodes = scrapeTVDBData();
+        expect(episodes).toHaveLength(3);
+        expect(episodes[0].release).toBe('');
+        expect(episodes[1].release).toBe('');
+        expect(episodes[2].release).toBe('2023-11-05');
+    });
+
+    it('should handle whitespace-only fields and missing episode numbers correctly', () => {
+        document.body.innerHTML = `
+            <div class="list-group">
+                <div class="list-group-item">
+                    <div class="list-group-item-heading">
+                        <span class="episode-label">Special Episode</span>
+                        <a href="/special">   </a>
+                    </div>
+                    <div class="list-group-item-text">
+                        \t \n
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const episodes = scrapeTVDBData();
+        expect(episodes).toHaveLength(1);
+        expect(episodes[0]).toEqual({
+            season: '',
+            episode: '',
+            title: '',
+            release: '',
+            description: '',
+        });
     });
 });
